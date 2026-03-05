@@ -85,6 +85,17 @@ PureJPEG.encode(source,
 
 See [CREATIVE.md](CREATIVE.md) for detailed examples of the creative encoding options.
 
+<table>
+<tr>
+<td align="center"><strong>Normal (q20)</strong></td>
+<td align="center"><strong>Scrambled quantization (q20)</strong></td>
+</tr>
+<tr>
+<td><img src="examples/peppers.jpg" width="360"></td>
+<td><img src="examples/peppers-funky.jpg" width="360"></td>
+</tr>
+</table>
+
 Each stage of the JPEG pipeline is a separate module, so individual components (DCT, quantization, Huffman coding) can be replaced or extended independently which is kinda my plan here as I made this to play around with effects.
 
 ## Decoding (reading JPEGs!)
