@@ -2,6 +2,9 @@
 
 Pure Ruby JPEG encoder and decoder. Implements baseline JPEG (DCT, Huffman, 4:2:0 chroma subsampling) and exposes a variety of encoding options to adjust parts of the JPEG pipeline not normally available (I needed this to recreate the JPEG compression styles of older digital cameras - don't ask..)
 
+> [!NOTE]
+> Rubyists might find the [AI Disclosure](#ai-disclosure) section below of interest.
+
 ## Installation
 
 You know the drill: 
@@ -14,7 +17,7 @@ gem "pure_jpeg"
 gem install pure_jpeg
 ```
 
-There are no runtime dependencies. [ChunkyPNG](https://github.com/wvanbergen/chunky_png) is optional and for if you want to use `from_chunky_png`. I have a pure PNG encoder/decoder not far behind this that will ultimately plug in nicely too to get pure Ruby graphical bliss ;-)
+There are no runtime dependencies. [ChunkyPNG](https://github.com/wvanbergen/chunky_png) is optional (though quite useful) if you want to use `from_chunky_png`. I have a pure PNG encoder/decoder not far behind this that will ultimately plug in nicely too to get 100% pure Ruby graphical bliss ;-)
 
 `examples/` contains some useful example scripts for basic JPEG to PNG and PNG to JPEG conversion if you want to do some quick tests without writing code.
 
@@ -167,13 +170,19 @@ rake profile     # CPU profile with StackProf (requires the stackprof gem)
 
 ## AI Disclosure
 
-Claude Code did the majority of the work. However, it did require a lot of guidance as it was quite naive in its approach at first with its JPEG outputs looking very akin to those of my Kodak digital camera from 2001! It turns out it got something wrong which, amusingly, it seems devices of those era also got wrong (specifically not using the zigzag approach during quanitization).
-
-The initial implementation was also VERY SLOW. It took about 15 seconds just to turn a 1024x1024 PNG into a JPEG, so some profiling was necessary which ended up finding a lot of possible optimizations to make it about 6x faster.
-
-The tests were also a bit superficial, so I worked on getting them beefed up to tackle a variety of edge cases, although they could still be better. It also didn't do RDoc comments, use Minitest, and a variety of other things I had to coerce it into finishing.
+Claude Code did the majority of the work because the math of JPEG encoding/decoding is beyond me.
 
 I have read all of the code produced. A lot of the internals are above my paygrade but I'm generally OK with what has been produced and fixed a variety of stylistic things along the way.
+
+Now for the problems.
+
+CC required a lot of guidance as it was quite naive in its approach with its initial JPEG outputs looking akin to those of my Kodak digital camera from 2001! It turns out it got something wrong which, amusingly, many devices of that era also got wrong (specifically not using the zigzag approach during quanitization). Luckily, I wanted this aesthetic, but felt we should made it correct for, y'know, normal users who expect things to work.
+
+The initial implementation was also INCREDIBLY SLOW. It took about 15 seconds just to turn a 1024x1024 PNG into a JPEG, so profiling was necessary which ended up finding a lot of possible optimizations to make it about 6x faster. In my experience, CC is quite poor at considering the role of Ruby's GC when implementing low level algorithms and needs some prodding to make the correct optimizations.
+
+The CC-created tests were superficial, so I worked on getting them beefed up to tackle a variety of edge cases. They could still get better. It also didn't do RDoc comments, use Minitest, and a variety of other things I coerced it into working on.
+
+The overall experience was positive, but CC does still require an experienced developer to keep it on the rails IMHO and to not end up with a bunch of buggy half-working crap.
 
 ## License
 
