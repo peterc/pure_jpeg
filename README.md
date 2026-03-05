@@ -218,6 +218,8 @@ The CC-created tests were superficial, so I worked on getting them beefed up to 
 
 The overall experience was positive, but CC does still require an experienced developer to keep it on the rails IMHO and to not end up with a bunch of buggy half-working crap.
 
+BTW, I didn't bother setting up a git repo until the whole thing worked. Sadly it did not take a mere 19 minutes to produce.. :-D
+
 ## License
 
 MIT
