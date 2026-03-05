@@ -85,10 +85,12 @@ PureJPEG.encode(source,
 
 See [CREATIVE.md](CREATIVE.md) for detailed examples of the creative encoding options.
 
+Here's a quick example of sort of the "old digital camera" effect I was looking for though:
+
 <table>
 <tr>
-<td align="center"><strong>Normal (q20)</strong></td>
-<td align="center"><strong>Scrambled quantization (q20)</strong></td>
+<td align="center"><strong>Normal</strong></td>
+<td align="center"><strong>Scrambled quantization</strong></td>
 </tr>
 <tr>
 <td><img src="examples/peppers.jpg" width="360"></td>
