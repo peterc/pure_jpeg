@@ -98,6 +98,19 @@ Here's a quick example of sort of the "old digital camera" effect I was looking 
 </tr>
 </table>
 
+And here's what happens when you convert a PNG with transparency — JPEG doesn't support alpha, so the hidden RGB data behind transparent pixels bleeds through:
+
+<table>
+<tr>
+<td align="center"><strong>PNG with transparency</strong></td>
+<td align="center"><strong>Converted to JPEG</strong></td>
+</tr>
+<tr>
+<td><img src="examples/dice.png" width="360"></td>
+<td><img src="examples/dice.jpg" width="360"></td>
+</tr>
+</table>
+
 Each stage of the JPEG pipeline is a separate module, so individual components (DCT, quantization, Huffman coding) can be replaced or extended independently which is kinda my plan here as I made this to play around with effects.
 
 ## Decoding (reading JPEGs!)
