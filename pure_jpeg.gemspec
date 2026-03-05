@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
     "changelog_uri"   => "https://github.com/peterc/pure_jpeg/blob/main/CHANGELOG.md",
   }
 
-  spec.required_ruby_version = ">= 2.7.0"
+  spec.required_ruby_version = ">= 3.0.0"
 
   spec.files = Dir["lib/**/*.rb", "LICENSE", "README.md", "CHANGELOG.md"]
   spec.require_paths = ["lib"]
