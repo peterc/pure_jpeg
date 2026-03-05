@@ -111,7 +111,9 @@ And here's what happens when you convert a PNG with transparency — JPEG doesn'
 </tr>
 </table>
 
-Each stage of the JPEG pipeline is a separate module, so individual components (DCT, quantization, Huffman coding) can be replaced or extended independently which is kinda my plan here as I made this to play around with effects.
+I consider this a feature but you may consider it a deficiency and that a default background of white should be applied. This may be something I'll add if anyone wants it!
+
+Note that each stage of the JPEG pipeline is a separate module, so individual components (DCT, quantization, Huffman coding) can be replaced or extended independently which is kinda my plan here as I made this to play around with effects.
 
 ## Decoding (reading JPEGs!)
 
