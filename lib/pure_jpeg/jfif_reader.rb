@@ -1,0 +1,173 @@
+# frozen_string_literal: true
+
+module PureJPEG
+  class JFIFReader
+    attr_reader :width, :height, :components, :quant_tables, :huffman_tables,
+                :scan_components, :scan_data, :restart_interval
+
+    Component = Struct.new(:id, :h_sampling, :v_sampling, :qt_id)
+    ScanComponent = Struct.new(:id, :dc_table_id, :ac_table_id)
+
+    def initialize(data)
+      @data = data.b
+      @pos = 0
+      @quant_tables = {}
+      @huffman_tables = {}
+      @components = []
+      @scan_components = []
+      @restart_interval = 0
+      parse
+    end
+
+    private
+
+    def parse
+      expect_marker(0xD8) # SOI
+
+      loop do
+        marker = read_marker
+        case marker
+        when 0xE0..0xEF # APP0-APP15
+          skip_segment
+        when 0xDB # DQT
+          parse_dqt
+        when 0xC4 # DHT
+          parse_dht
+        when 0xC0 # SOF0 (baseline)
+          parse_sof0
+        when 0xDA # SOS
+          parse_sos
+          extract_scan_data
+          return
+        when 0xFE # COM (comment)
+          skip_segment
+        when 0xDD # DRI (restart interval)
+          parse_dri
+        else
+          skip_segment
+        end
+      end
+    end
+
+    def read_byte
+      byte = @data.getbyte(@pos)
+      @pos += 1
+      byte
+    end
+
+    def read_u16
+      (read_byte << 8) | read_byte
+    end
+
+    def read_marker
+      byte = read_byte
+      raise "Expected 0xFF, got 0x#{byte.to_s(16)}" unless byte == 0xFF
+      # Skip padding 0xFF bytes
+      code = read_byte
+      code = read_byte while code == 0xFF
+      code
+    end
+
+    def expect_marker(expected)
+      marker = read_marker
+      raise "Expected marker 0x#{expected.to_s(16)}, got 0x#{marker.to_s(16)}" unless marker == expected
+    end
+
+    def skip_segment
+      length = read_u16
+      @pos += length - 2
+    end
+
+    def parse_dqt
+      length = read_u16
+      end_pos = @pos + length - 2
+
+      while @pos < end_pos
+        info = read_byte
+        precision = (info >> 4) & 0x0F  # 0 = 8-bit, 1 = 16-bit
+        table_id = info & 0x0F
+
+        zigzag_table = Array.new(64)
+        64.times do |i|
+          zigzag_table[i] = precision == 0 ? read_byte : read_u16
+        end
+        # DQT stores values in zigzag order; convert to raster order
+        table = Array.new(64)
+        64.times { |i| table[Zigzag::ORDER[i]] = zigzag_table[i] }
+        @quant_tables[table_id] = table
+      end
+    end
+
+    def parse_dht
+      length = read_u16
+      end_pos = @pos + length - 2
+
+      while @pos < end_pos
+        info = read_byte
+        table_class = (info >> 4) & 0x0F  # 0 = DC, 1 = AC
+        table_id = info & 0x0F
+
+        bits = Array.new(16) { read_byte }
+        total = bits.sum
+        values = Array.new(total) { read_byte }
+
+        @huffman_tables[[table_class, table_id]] = { bits: bits, values: values }
+      end
+    end
+
+    def parse_sof0
+      read_u16 # length
+      read_byte # precision (always 8 for baseline)
+      @height = read_u16
+      @width = read_u16
+      num_components = read_byte
+
+      @components = Array.new(num_components) do
+        id = read_byte
+        sampling = read_byte
+        h = (sampling >> 4) & 0x0F
+        v = sampling & 0x0F
+        qt_id = read_byte
+        Component.new(id, h, v, qt_id)
+      end
+    end
+
+    def parse_sos
+      read_u16 # length
+      num_components = read_byte
+
+      @scan_components = Array.new(num_components) do
+        id = read_byte
+        tables = read_byte
+        dc_id = (tables >> 4) & 0x0F
+        ac_id = tables & 0x0F
+        ScanComponent.new(id, dc_id, ac_id)
+      end
+
+      # Spectral selection and approximation (ignored for baseline)
+      3.times { read_byte }
+    end
+
+    def parse_dri
+      read_u16 # length
+      @restart_interval = read_u16
+    end
+
+    # Extract entropy-coded scan data (everything from current position to EOI marker).
+    def extract_scan_data
+      start = @pos
+      # Scan forward looking for a marker that isn't a stuffing byte or restart
+      while @pos < @data.bytesize - 1
+        if @data.getbyte(@pos) == 0xFF
+          next_byte = @data.getbyte(@pos + 1)
+          # 0x00 is byte stuffing, 0xD0-0xD7 are restart markers — all part of scan data
+          if next_byte != 0x00 && !(next_byte >= 0xD0 && next_byte <= 0xD7) && next_byte != 0xFF
+            break
+          end
+        end
+        @pos += 1
+      end
+      @scan_data = @data[start...@pos]
+    end
+  end
+end
