@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="purejpeg.jpg" width="480" alt="PureJPEG">
+</p>
+
 # PureJPEG
 
 Pure Ruby JPEG encoder and decoder. Implements baseline JPEG (DCT, Huffman, 4:2:0 chroma subsampling) and exposes a variety of encoding options to adjust parts of the JPEG pipeline not normally available (I needed this to recreate the JPEG compression styles of older digital cameras - don't ask..)
