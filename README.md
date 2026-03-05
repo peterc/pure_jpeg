@@ -2,9 +2,9 @@
   <img src="purejpeg.jpg" width="480" alt="PureJPEG">
 </p>
 
-# PureJPEG
+# PureJPEG - Pure Ruby JPEG encoder and decoder library
 
-Pure Ruby JPEG encoder and decoder. Implements baseline JPEG (DCT, Huffman, 4:2:0 chroma subsampling) and exposes a variety of encoding options to adjust parts of the JPEG pipeline not normally available (I needed this to recreate the JPEG compression styles of older digital cameras - don't ask..)
+Convert PNG or other pixel data to JPEG. Or the other way! Implements baseline JPEG (DCT, Huffman, 4:2:0 chroma subsampling) and exposes a variety of encoding options to adjust parts of the JPEG pipeline not normally available (I needed this to recreate the JPEG compression styles of older digital cameras - don't ask..)
 
 It works on CRuby 3.0+, TruffleRuby 33.0, and JRuby 10.0.
 
