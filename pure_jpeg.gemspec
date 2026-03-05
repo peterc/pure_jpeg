@@ -3,7 +3,8 @@ require_relative "lib/pure_jpeg/version"
 Gem::Specification.new do |spec|
   spec.name    = "pure_jpeg"
   spec.version = PureJPEG::VERSION
-  spec.authors = ["Peter"]
+  spec.authors = ["Peter Cooper"]
+  spec.email   = ["git@peterc.org"]
   spec.summary = "Pure Ruby JPEG encoder and decoder"
   spec.description = "A pure Ruby baseline JPEG encoder and decoder with no native dependencies."
   spec.license = "MIT"
