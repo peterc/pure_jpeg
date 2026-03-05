@@ -180,7 +180,7 @@ Decoding:
 - Any chroma subsampling factor (4:4:4, 4:2:2, 4:2:0, etc.)
 - Restart markers (DRI/RST)
 
-Not supported: progressive JPEG (SOF2), arithmetic coding, 12-bit precision, multi-scan, EXIF/ICC profile preservation. Largely because I don't need these, but they are all do-able, especially with how loosely coupled this library is internally. Raise an issue if you really care about them!
+Not supported: progressive JPEG (SOF2), arithmetic coding, 12-bit precision, multi-scan, EXIF/ICC profile preservation, adding a default background for transparent sources (see what happens above!). Largely because I don't need these, but they are all do-able, especially with how loosely coupled this library is internally. Raise an issue if you really care about them!
 
 ## Performance
 
