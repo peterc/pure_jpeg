@@ -216,6 +216,8 @@ rake profile     # CPU profile with StackProf (requires the stackprof gem)
 
 **The overall experience was good.** I enjoyed this project, but CC clearly requires an experienced developer to keep it on the rails and to not end up with a bunch of buggy half-working crap. Getting to the basic 'turn a PNG into a JPEG' took only twenty minutes, but the rest of making it actually widely useful took several hours more.
 
+**The final 10% still takes 90% of the time.** As mentioned above, the first run was quick, but getting things right has taken much longer. v0.1->0.2 has taken longer than 0.1 did! But we now have progressive JPEG support, even more optimizations, better tests, etc. etc.
+
 ## License
 
 MIT
