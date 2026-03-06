@@ -156,16 +156,18 @@ module PureJPEG
     # Extract entropy-coded scan data (everything from current position to EOI marker).
     def extract_scan_data
       start = @pos
+      len = @data.bytesize
       # Scan forward looking for a marker that isn't a stuffing byte or restart
-      while @pos < @data.bytesize - 1
-        if @data.getbyte(@pos) == 0xFF
-          next_byte = @data.getbyte(@pos + 1)
-          # 0x00 is byte stuffing, 0xD0-0xD7 are restart markers — all part of scan data
-          if next_byte != 0x00 && !(next_byte >= 0xD0 && next_byte <= 0xD7) && next_byte != 0xFF
-            break
-          end
+      while @pos < len - 1
+        found = @data.index("\xFF".b, @pos)
+        break unless found && found < len - 1
+        @pos = found
+        next_byte = @data.getbyte(@pos + 1)
+        # 0x00 is byte stuffing, 0xD0-0xD7 are restart markers, 0xFF is padding — all part of scan data
+        if next_byte != 0x00 && !(next_byte >= 0xD0 && next_byte <= 0xD7) && next_byte != 0xFF
+          break
         end
-        @pos += 1
+        @pos += 2
       end
       @scan_data = @data[start...@pos]
     end
