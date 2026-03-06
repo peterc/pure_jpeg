@@ -144,6 +144,34 @@ class TestDecode < Minitest::Test
     assert_valid_pixel(image2[512, 512])
   end
 
+  # --- Progressive JPEG tests ---
+
+  def test_decode_progressive_jpeg
+    path = File.expand_path("../examples/a-progressive.jpg", __dir__)
+    image = PureJPEG.read(path)
+
+    assert_equal 1024, image.width
+    assert_equal 1024, image.height
+
+    [[0, 0], [512, 512], [1023, 1023]].each do |x, y|
+      assert_valid_pixel(image[x, y])
+    end
+  end
+
+  def test_re_encode_progressive_jpeg
+    path = File.expand_path("../examples/a-progressive.jpg", __dir__)
+    image = PureJPEG.read(path)
+
+    re_encoded = PureJPEG.encode(image, quality: 75).to_bytes
+    assert re_encoded.start_with?("\xFF\xD8".b)
+    assert re_encoded.end_with?("\xFF\xD9".b)
+
+    image2 = PureJPEG.read(re_encoded)
+    assert_equal 1024, image2.width
+    assert_equal 1024, image2.height
+    assert_valid_pixel(image2[512, 512])
+  end
+
   # --- Malformed input tests ---
 
   def test_garbage_data_raises_decode_error

@@ -27,6 +27,8 @@ module PureJPEG
 
     def decode
       jfif = JFIFReader.new(@data)
+      return decode_progressive(jfif) if jfif.progressive
+
       width = jfif.width
       height = jfif.height
 
@@ -126,6 +128,290 @@ module PureJPEG
     end
 
     private
+
+    # --- Progressive JPEG decoding ---
+
+    def decode_progressive(jfif)
+      width = jfif.width
+      height = jfif.height
+
+      comp_info = {}
+      jfif.components.each { |c| comp_info[c.id] = c }
+
+      max_h = jfif.components.map(&:h_sampling).max
+      max_v = jfif.components.map(&:v_sampling).max
+
+      mcu_px_w = max_h * 8
+      mcu_px_h = max_v * 8
+      mcus_x = (width + mcu_px_w - 1) / mcu_px_w
+      mcus_y = (height + mcu_px_h - 1) / mcu_px_h
+
+      # Coefficient buffers per component (zigzag order, pre-dequantization)
+      coeffs = {}
+      comp_blocks = {}
+      jfif.components.each do |c|
+        bx = mcus_x * c.h_sampling
+        by = mcus_y * c.v_sampling
+        coeffs[c.id] = Array.new(bx * by * 64, 0)
+        comp_blocks[c.id] = [bx, by]
+      end
+
+      restart_interval = jfif.restart_interval
+
+      jfif.scans.each do |scan|
+        # Build Huffman tables from this scan's snapshot (tables change between scans)
+        dc_tables = {}
+        ac_tables = {}
+        scan.huffman_tables.each do |(table_class, table_id), info|
+          table = Huffman::DecodeTable.new(info[:bits], info[:values])
+          if table_class == 0
+            dc_tables[table_id] = table
+          else
+            ac_tables[table_id] = table
+          end
+        end
+
+        reader = BitReader.new(scan.data)
+        ss = scan.spectral_start
+        se = scan.spectral_end
+        ah = scan.successive_high
+        al = scan.successive_low
+
+        if scan.components.length == 1
+          prog_scan_non_interleaved(reader, scan, comp_info, dc_tables, ac_tables,
+                                    coeffs, comp_blocks, restart_interval, ss, se, ah, al)
+        else
+          prog_scan_interleaved(reader, scan, comp_info, dc_tables, ac_tables,
+                                coeffs, comp_blocks, mcus_x, mcus_y, restart_interval, ss, se, ah, al)
+        end
+      end
+
+      # Reconstruct: unzigzag, dequantize, IDCT, write to channel buffers
+      padded_w = mcus_x * mcu_px_w
+      padded_h = mcus_y * mcu_px_h
+      channels = {}
+      jfif.components.each do |c|
+        ch_w = (padded_w * c.h_sampling) / max_h
+        ch_h = (padded_h * c.v_sampling) / max_v
+        channels[c.id] = { data: Array.new(ch_w * ch_h, 0), width: ch_w, height: ch_h }
+      end
+
+      zigzag = Array.new(64, 0)
+      raster = Array.new(64, 0.0)
+      dequant = Array.new(64, 0.0)
+      temp = Array.new(64, 0.0)
+      spatial = Array.new(64, 0.0)
+
+      jfif.components.each do |c|
+        qt = jfif.quant_tables[c.qt_id]
+        ch = channels[c.id]
+        coeff_buf = coeffs[c.id]
+        bx_count, by_count = comp_blocks[c.id]
+
+        by_count.times do |block_y|
+          bx_count.times do |block_x|
+            offset = (block_y * bx_count + block_x) * 64
+            64.times { |i| zigzag[i] = coeff_buf[offset + i] }
+
+            Zigzag.unreorder!(zigzag, raster)
+            Quantization.dequantize!(raster, qt, dequant)
+            DCT.inverse!(dequant, temp, spatial)
+            write_block(spatial, ch[:data], ch[:width], block_x * 8, block_y * 8)
+          end
+        end
+      end
+
+      num_components = jfif.components.length
+      if num_components == 1
+        assemble_grayscale(width, height, channels, jfif.components[0])
+      else
+        assemble_color(width, height, channels, jfif.components, max_h, max_v)
+      end
+    end
+
+    def prog_scan_non_interleaved(reader, scan, comp_info, dc_tables, ac_tables,
+                                  coeffs, comp_blocks, restart_interval, ss, se, ah, al)
+      sc = scan.components[0]
+      comp = comp_info[sc.id]
+      dc_tab = dc_tables[sc.dc_table_id]
+      ac_tab = ac_tables[sc.ac_table_id]
+      coeff_buf = coeffs[comp.id]
+      bx_count, by_count = comp_blocks[comp.id]
+
+      prev_dc = 0
+      eobrun = 0
+      mcu_count = 0
+
+      by_count.times do |block_y|
+        bx_count.times do |block_x|
+          if restart_interval > 0 && mcu_count > 0 && (mcu_count % restart_interval) == 0
+            reader.reset
+            prev_dc = 0
+            eobrun = 0
+          end
+
+          offset = (block_y * bx_count + block_x) * 64
+
+          if ss == 0
+            if ah == 0
+              prev_dc = prog_dc_first(reader, dc_tab, prev_dc, coeff_buf, offset, al)
+            else
+              prog_dc_refine(reader, coeff_buf, offset, al)
+            end
+          else
+            if ah == 0
+              eobrun = prog_ac_first(reader, ac_tab, coeff_buf, offset, ss, se, al, eobrun)
+            else
+              eobrun = prog_ac_refine(reader, ac_tab, coeff_buf, offset, ss, se, al, eobrun)
+            end
+          end
+
+          mcu_count += 1
+        end
+      end
+    end
+
+    def prog_scan_interleaved(reader, scan, comp_info, dc_tables, ac_tables,
+                              coeffs, comp_blocks, mcus_x, mcus_y, restart_interval, ss, se, ah, al)
+      prev_dc = Hash.new(0)
+      mcu_count = 0
+
+      mcus_y.times do |mcu_row|
+        mcus_x.times do |mcu_col|
+          if restart_interval > 0 && mcu_count > 0 && (mcu_count % restart_interval) == 0
+            reader.reset
+            prev_dc.clear
+          end
+
+          scan.components.each do |sc|
+            comp = comp_info[sc.id]
+            dc_tab = dc_tables[sc.dc_table_id]
+            coeff_buf = coeffs[comp.id]
+            bx_count = comp_blocks[comp.id][0]
+
+            comp.v_sampling.times do |bv|
+              comp.h_sampling.times do |bh|
+                block_x = mcu_col * comp.h_sampling + bh
+                block_y = mcu_row * comp.v_sampling + bv
+                offset = (block_y * bx_count + block_x) * 64
+
+                if ah == 0
+                  prev_dc[sc.id] = prog_dc_first(reader, dc_tab, prev_dc[sc.id], coeff_buf, offset, al)
+                else
+                  prog_dc_refine(reader, coeff_buf, offset, al)
+                end
+              end
+            end
+          end
+
+          mcu_count += 1
+        end
+      end
+    end
+
+    def prog_dc_first(reader, dc_tab, prev_dc, coeff_buf, offset, al)
+      cat = dc_tab.decode(reader)
+      diff = reader.receive_extend(cat)
+      dc_val = prev_dc + diff
+      coeff_buf[offset] = dc_val << al
+      dc_val
+    end
+
+    def prog_dc_refine(reader, coeff_buf, offset, al)
+      coeff_buf[offset] |= (reader.read_bit << al)
+    end
+
+    def prog_ac_first(reader, ac_tab, coeff_buf, offset, ss, se, al, eobrun)
+      return eobrun - 1 if eobrun > 0
+
+      k = ss
+      while k <= se
+        symbol = ac_tab.decode(reader)
+        run = (symbol >> 4) & 0x0F
+        size = symbol & 0x0F
+
+        if size == 0
+          if run == 15
+            k += 16
+          else
+            # EOBn
+            eobrun = (1 << run)
+            eobrun += reader.read_bits(run) if run > 0
+            return eobrun - 1
+          end
+        else
+          k += run
+          coeff_buf[offset + k] = reader.receive_extend(size) << al
+          k += 1
+        end
+      end
+
+      0
+    end
+
+    def prog_ac_refine(reader, ac_tab, coeff_buf, offset, ss, se, al, eobrun)
+      p1 = 1 << al
+      m1 = -(1 << al)
+
+      if eobrun > 0
+        ss.upto(se) do |k|
+          prog_refine_bit(reader, coeff_buf, offset + k, p1, m1) if coeff_buf[offset + k] != 0
+        end
+        return eobrun - 1
+      end
+
+      k = ss
+      while k <= se
+        symbol = ac_tab.decode(reader)
+        r = (symbol >> 4) & 0x0F
+        s = symbol & 0x0F
+
+        # Read the new coefficient value before processing the run
+        # (the value bits come before refinement bits in the bitstream)
+        new_value = nil
+        if s != 0
+          new_value = reader.receive_extend(s) << al
+        elsif r != 15
+          # EOBn: refine remaining nonzero coefficients in this block
+          eobrun = (1 << r)
+          eobrun += reader.read_bits(r) if r > 0
+          while k <= se
+            prog_refine_bit(reader, coeff_buf, offset + k, p1, m1) if coeff_buf[offset + k] != 0
+            k += 1
+          end
+          return eobrun - 1
+        end
+
+        # Advance through the band: refine nonzero coefficients, count zeros for run.
+        # Break when we've skipped `r` zeros and found the target zero position.
+        while k <= se
+          if coeff_buf[offset + k] != 0
+            prog_refine_bit(reader, coeff_buf, offset + k, p1, m1)
+          elsif r == 0
+            break
+          else
+            r -= 1
+          end
+          k += 1
+        end
+
+        # Place new coefficient at the target zero position
+        if new_value && k <= se
+          coeff_buf[offset + k] = new_value
+        end
+        k += 1
+      end
+
+      0
+    end
+
+    def prog_refine_bit(reader, coeff_buf, idx, p1, m1)
+      if reader.read_bit == 1
+        coeff_buf[idx] += coeff_buf[idx] > 0 ? p1 : m1
+      end
+    end
+
+    # --- Baseline decoding helpers ---
 
     def decode_block(reader, dc_tab, ac_tab, prev_dc, comp_id, out)
       # DC coefficient

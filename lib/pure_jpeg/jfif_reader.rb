@@ -3,10 +3,11 @@
 module PureJPEG
   class JFIFReader
     attr_reader :width, :height, :components, :quant_tables, :huffman_tables,
-                :scan_components, :scan_data, :restart_interval
+                :restart_interval, :progressive, :scans
 
     Component = Struct.new(:id, :h_sampling, :v_sampling, :qt_id)
     ScanComponent = Struct.new(:id, :dc_table_id, :ac_table_id)
+    Scan = Struct.new(:components, :spectral_start, :spectral_end, :successive_high, :successive_low, :data, :huffman_tables)
 
     def initialize(data)
       @data = data.b
@@ -14,9 +15,18 @@ module PureJPEG
       @quant_tables = {}
       @huffman_tables = {}
       @components = []
-      @scan_components = []
       @restart_interval = 0
+      @progressive = false
+      @scans = []
       parse
+    end
+
+    def scan_components
+      @scans.first&.components || []
+    end
+
+    def scan_data
+      @scans.first&.data || "".b
     end
 
     private
@@ -35,14 +45,21 @@ module PureJPEG
           parse_dht
         when 0xC0 # SOF0 (baseline)
           parse_sof0
+        when 0xC2 # SOF2 (progressive)
+          parse_sof0
+          @progressive = true
         when 0xDA # SOS
-          parse_sos
-          extract_scan_data
-          return
+          scan = parse_sos
+          scan.data = extract_scan_data
+          scan.huffman_tables = @huffman_tables.dup
+          @scans << scan
+          return unless @progressive
         when 0xFE # COM (comment)
           skip_segment
         when 0xDD # DRI (restart interval)
           parse_dri
+        when 0xD9 # EOI
+          return
         else
           skip_segment
         end
@@ -137,7 +154,7 @@ module PureJPEG
       read_u16 # length
       num_components = read_byte
 
-      @scan_components = Array.new(num_components) do
+      components = Array.new(num_components) do
         id = read_byte
         tables = read_byte
         dc_id = (tables >> 4) & 0x0F
@@ -145,8 +162,12 @@ module PureJPEG
         ScanComponent.new(id, dc_id, ac_id)
       end
 
-      # Spectral selection and approximation (ignored for baseline)
-      3.times { read_byte }
+      ss = read_byte  # spectral selection start
+      se = read_byte  # spectral selection end
+      ahl = read_byte # successive approximation
+      ah = (ahl >> 4) & 0x0F
+      al = ahl & 0x0F
+      Scan.new(components, ss, se, ah, al, nil)
     end
 
     def parse_dri
@@ -170,7 +191,7 @@ module PureJPEG
         end
         @pos += 2
       end
-      @scan_data = @data[start...@pos]
+      @data[start...@pos]
     end
   end
 end
