@@ -18,6 +18,12 @@ module PureJPEG
 
     def read_bits(n)
       return 0 if n == 0
+      # Fast path: enough bits already in the buffer
+      if @bits_in_buffer >= n
+        @bits_in_buffer -= n
+        return (@buffer >> @bits_in_buffer) & ((1 << n) - 1)
+      end
+      # Slow path: need to refill
       value = 0
       n.times { value = (value << 1) | read_bit }
       value
