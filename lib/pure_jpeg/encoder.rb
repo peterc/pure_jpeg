@@ -223,16 +223,27 @@ module PureJPEG
 
     # --- Pixel extraction ---
 
+    # Determine RGB bit shifts for a packed_pixels source.
+    # ChunkyPNG uses (r<<24 | g<<16 | b<<8 | a), Image uses (r<<16 | g<<8 | b).
+    def packed_shifts
+      if source.is_a?(Image)
+        [16, 8, 0]
+      else
+        [24, 16, 8]
+      end
+    end
+
     def extract_luminance(width, height)
       luminance = Array.new(width * height)
       if source.respond_to?(:packed_pixels)
         packed = source.packed_pixels
+        r_shift, g_shift, b_shift = packed_shifts
         i = 0
         (width * height).times do
           color = packed[i]
-          r = (color >> 24) & 0xFF
-          g = (color >> 16) & 0xFF
-          b = (color >> 8) & 0xFF
+          r = (color >> r_shift) & 0xFF
+          g = (color >> g_shift) & 0xFF
+          b = (color >> b_shift) & 0xFF
           luminance[i] = (0.299 * r + 0.587 * g + 0.114 * b).round.clamp(0, 255)
           i += 1
         end
@@ -256,12 +267,13 @@ module PureJPEG
 
       if source.respond_to?(:packed_pixels)
         packed = source.packed_pixels
+        r_shift, g_shift, b_shift = packed_shifts
         i = 0
         size.times do
           color = packed[i]
-          r = (color >> 24) & 0xFF
-          g = (color >> 16) & 0xFF
-          b = (color >> 8) & 0xFF
+          r = (color >> r_shift) & 0xFF
+          g = (color >> g_shift) & 0xFF
+          b = (color >> b_shift) & 0xFF
           y_data[i]  = ( 0.299    * r + 0.587    * g + 0.114    * b).round.clamp(0, 255)
           cb_data[i] = (-0.168736 * r - 0.331264 * g + 0.5      * b + 128.0).round.clamp(0, 255)
           cr_data[i] = ( 0.5      * r - 0.418688 * g - 0.081312 * b + 128.0).round.clamp(0, 255)

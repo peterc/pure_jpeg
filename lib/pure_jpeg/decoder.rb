@@ -185,7 +185,7 @@ module PureJPEG
         dst_row = y * width
         width.times do |x|
           v = ch[:data][src_row + x]
-          pixels[dst_row + x] = Source::Pixel.new(v, v, v)
+          pixels[dst_row + x] = (v << 16) | (v << 8) | v
         end
       end
       Image.new(width, height, pixels)
@@ -228,7 +228,7 @@ module PureJPEG
           g = g < 0 ? 0 : (g > 255 ? 255 : g)
           b = b < 0 ? 0 : (b > 255 ? 255 : b)
 
-          pixels[dst_row + px] = Source::Pixel.new(r, g, b)
+          pixels[dst_row + px] = (r << 16) | (g << 8) | b
         end
       end
 

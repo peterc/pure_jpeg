@@ -3,22 +3,28 @@
 module PureJPEG
   # A decoded JPEG image with pixel-level access.
   #
-  # Implements the same pixel source interface (+width+, +height+, +[x, y]+)
-  # as encoder inputs, so a decoded image can be passed directly to
-  # {PureJPEG.encode} for re-encoding.
+  # Internally stores pixels as packed integers (+r << 16 | g << 8 | b+) to
+  # avoid per-pixel object allocation. Implements the same pixel source
+  # interface (+width+, +height+, +[x, y]+) as encoder inputs, so a decoded
+  # image can be passed directly to {PureJPEG.encode} for re-encoding.
   class Image
     # @return [Integer] image width in pixels
     attr_reader :width
     # @return [Integer] image height in pixels
     attr_reader :height
 
+    # @return [Array<Integer>] flat row-major array of packed RGB integers.
+    #   Format: +(r << 16) | (g << 8) | b+.
+    attr_reader :packed_pixels
+
     # @param width [Integer]
     # @param height [Integer]
-    # @param pixels [Array<Source::Pixel>] flat row-major array of pixels
-    def initialize(width, height, pixels)
+    # @param packed_pixels [Array<Integer>] flat row-major array of packed RGB
+    #   integers in the format +(r << 16) | (g << 8) | b+
+    def initialize(width, height, packed_pixels)
       @width = width
       @height = height
-      @pixels = pixels
+      @packed_pixels = packed_pixels
     end
 
     # Retrieve a pixel by coordinate.
@@ -27,7 +33,8 @@ module PureJPEG
     # @param y [Integer] row (0-based)
     # @return [Source::Pixel] pixel with +.r+, +.g+, +.b+ in 0-255
     def [](x, y)
-      @pixels[y * @width + x]
+      color = @packed_pixels[y * @width + x]
+      Source::Pixel.new((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF)
     end
 
     # Set a pixel by coordinate.
@@ -37,7 +44,8 @@ module PureJPEG
     # @param pixel [Source::Pixel] replacement pixel
     # @return [Source::Pixel]
     def []=(x, y, pixel)
-      @pixels[y * @width + x] = pixel
+      @packed_pixels[y * @width + x] = (pixel.r << 16) | (pixel.g << 8) | pixel.b
+      pixel
     end
 
     # Iterate over every pixel in the image.
