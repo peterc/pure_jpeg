@@ -33,7 +33,7 @@ module PureJPEG
             return @values[@val_ptr[len] + code - @min_code[len]]
           end
         end
-        raise "Invalid Huffman code"
+        raise PureJPEG::DecodeError, "Invalid Huffman code"
       end
     end
   end

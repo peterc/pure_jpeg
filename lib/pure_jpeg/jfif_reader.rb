@@ -50,6 +50,7 @@ module PureJPEG
     end
 
     def read_byte
+      raise PureJPEG::DecodeError, "Unexpected end of JPEG data" if @pos >= @data.bytesize
       byte = @data.getbyte(@pos)
       @pos += 1
       byte
@@ -61,7 +62,7 @@ module PureJPEG
 
     def read_marker
       byte = read_byte
-      raise "Expected 0xFF, got 0x#{byte.to_s(16)}" unless byte == 0xFF
+      raise PureJPEG::DecodeError, "Expected 0xFF, got 0x#{byte.to_s(16)}" unless byte == 0xFF
       # Skip padding 0xFF bytes
       code = read_byte
       code = read_byte while code == 0xFF
@@ -70,7 +71,7 @@ module PureJPEG
 
     def expect_marker(expected)
       marker = read_marker
-      raise "Expected marker 0x#{expected.to_s(16)}, got 0x#{marker.to_s(16)}" unless marker == expected
+      raise PureJPEG::DecodeError, "Expected marker 0x#{expected.to_s(16)}, got 0x#{marker.to_s(16)}" unless marker == expected
     end
 
     def skip_segment

@@ -25,6 +25,9 @@ require_relative "pure_jpeg/decoder"
   # Supports baseline DCT (SOF0) with 8-bit precision, grayscale and YCbCr
   # color (4:2:0 chroma subsampling), and standard Huffman tables (Annex K).
 module PureJPEG
+  # Raised when decoding invalid or unsupported JPEG data.
+  class DecodeError < StandardError; end
+
   # Encode a pixel source as a JPEG.
   #
   # @param source [#width, #height, #[]] any object responding to +width+,
