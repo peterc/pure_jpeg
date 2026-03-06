@@ -28,6 +28,9 @@ module PureJPEG
   # Raised when decoding invalid or unsupported JPEG data.
   class DecodeError < StandardError; end
 
+  # Maximum image dimension (width or height) allowed for encoding and decoding.
+  MAX_DIMENSION = 8192
+
   # Encode a pixel source as a JPEG.
   #
   # @param source [#width, #height, #[]] any object responding to +width+,

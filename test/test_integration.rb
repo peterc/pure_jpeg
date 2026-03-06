@@ -146,6 +146,16 @@ class TestIntegration < Minitest::Test
     assert_raises(ArgumentError) { PureJPEG.encode(source, luminance_table: bad_table) }
   end
 
+  def test_encoder_rejects_zero_dimensions
+    source = PureJPEG::Source::RawSource.new(0, 10)
+    assert_raises(ArgumentError) { PureJPEG.encode(source).to_bytes }
+  end
+
+  def test_encoder_rejects_oversized_dimensions
+    source = PureJPEG::Source::RawSource.new(8193, 100)
+    assert_raises(ArgumentError) { PureJPEG.encode(source).to_bytes }
+  end
+
   def test_raw_source_without_block_encodes_black
     source = PureJPEG::Source::RawSource.new(16, 16)
     bytes = PureJPEG.encode(source, quality: 95).to_bytes

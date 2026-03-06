@@ -91,6 +91,11 @@ module PureJPEG
       width = source.width
       height = source.height
 
+      raise ArgumentError, "Width must be a positive integer (got #{width.inspect})" unless width.is_a?(Integer) && width > 0
+      raise ArgumentError, "Height must be a positive integer (got #{height.inspect})" unless height.is_a?(Integer) && height > 0
+      raise ArgumentError, "Width #{width} exceeds maximum of #{MAX_DIMENSION}" if width > MAX_DIMENSION
+      raise ArgumentError, "Height #{height} exceeds maximum of #{MAX_DIMENSION}" if height > MAX_DIMENSION
+
       lum_qtable = build_lum_qtable
       lum_dc = Huffman.build_table(Huffman::DC_LUMINANCE_BITS, Huffman::DC_LUMINANCE_VALUES)
       lum_ac = Huffman.build_table(Huffman::AC_LUMINANCE_BITS, Huffman::AC_LUMINANCE_VALUES)

@@ -27,6 +27,7 @@ module PureJPEG
 
     def decode
       jfif = JFIFReader.new(@data)
+      validate_dimensions!(jfif.width, jfif.height)
       return decode_progressive(jfif) if jfif.progressive
 
       width = jfif.width
@@ -128,6 +129,11 @@ module PureJPEG
     end
 
     private
+
+    def validate_dimensions!(width, height)
+      raise DecodeError, "Invalid image dimensions: #{width}x#{height}" if width <= 0 || height <= 0
+      raise DecodeError, "Image too large: #{width}x#{height} (max #{MAX_DIMENSION}x#{MAX_DIMENSION})" if width > MAX_DIMENSION || height > MAX_DIMENSION
+    end
 
     # --- Progressive JPEG decoding ---
 
