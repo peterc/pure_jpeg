@@ -67,6 +67,29 @@ class TestDecode < Minitest::Test
     assert_equal 16 * 16, count
   end
 
+  def test_each_rgb
+    source = gradient_source(16, 16)
+    data = PureJPEG.encode(source, quality: 95).to_bytes
+    image = PureJPEG.read(data)
+
+    count = 0
+    image.each_rgb do |x, y, r, g, b|
+      assert_includes 0...16, x
+      assert_includes 0...16, y
+      assert_includes 0..255, r
+      assert_includes 0..255, g
+      assert_includes 0..255, b
+      # Should match each_pixel results
+      pixel = image[x, y]
+      assert_equal pixel.r, r
+      assert_equal pixel.g, g
+      assert_equal pixel.b, b
+      count += 1
+    end
+
+    assert_equal 16 * 16, count
+  end
+
   def test_pixel_values_roughly_correct
     source = PureJPEG::Source::RawSource.new(16, 16) do |_x, _y|
       [255, 0, 0]

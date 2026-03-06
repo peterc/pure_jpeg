@@ -61,5 +61,24 @@ module PureJPEG
         end
       end
     end
+
+    # Iterate over every pixel without allocating Pixel structs.
+    #
+    # @yieldparam x [Integer] column
+    # @yieldparam y [Integer] row
+    # @yieldparam r [Integer] red component (0-255)
+    # @yieldparam g [Integer] green component (0-255)
+    # @yieldparam b [Integer] blue component (0-255)
+    # @return [void]
+    def each_rgb
+      i = 0
+      @height.times do |y|
+        @width.times do |x|
+          color = @packed_pixels[i]
+          yield x, y, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF
+          i += 1
+        end
+      end
+    end
   end
 end
