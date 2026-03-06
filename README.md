@@ -204,21 +204,17 @@ rake profile     # CPU profile with StackProf (requires the stackprof gem)
 
 ## AI Disclosure
 
-Claude Code did the majority of the work because the math of JPEG encoding/decoding is beyond me.
+**Claude Code did the majority of the work.** The math of JPEG encoding/decoding is beyond me, except 'getting it' at a high level. I understand it like I understand the engine in my car :-)
 
-I have read all of the code produced. A lot of the internals are above my paygrade but I'm generally OK with what has been produced and fixed a variety of stylistic things along the way.
+**I have read all of the code produced.** The algorithms are above my paygrade, but I'm OK with what has been produced, and I manually fixed a variety of stylistic things along the way. For example, CC seems to like wrapping entire functions in `if` statements rather than bailing on the opposite condition.
 
-Now for the problems.
+**CC needed a lot of guidance.** Its initial JPEG algorithm was somewhat naive and output odd looking JPEGs akin to those of my Kodak digital camera from 2001. After some back and forth and image comparisons, we figured out it was doing the quantization entirely wrong (specifically not using the zigzag approach during quanitization but just going in raster order). I *like* this aesthetic, but fixed it up so that it works as a generally usable JPEG library, while adding ways to customize things so you can recreate the effect, if preferred (see `CREATIVE.md` for more on that).
 
-CC required a lot of guidance as it was quite naive in its approach with its initial JPEG outputs looking akin to those of my Kodak digital camera from 2001! It turns out it got something wrong which, amusingly, many devices of that era also got wrong (specifically not using the zigzag approach during quanitization). Luckily, I wanted this aesthetic, but felt we should made it correct for, y'know, normal users who expect things to work.
+**CC is lazy.** The initial implementation was VERY SLOW. It took 15 seconds to turn a 1024x1024 PNG into a JPEG, so we went down the profiling rabbit hole and found many optimizations to make it ~6x faster. CC is poor at considering the role of Ruby's GC when implementing low level algorithms and needs some prodding to make the correct optimizations. CC is also lazy to the point of recommending that you just use another language (e.g. Go or Rust) rather than do a pure Ruby version of something - despite it being possible with some extra work.
 
-The initial implementation was also INCREDIBLY SLOW. It took about 15 seconds just to turn a 1024x1024 PNG into a JPEG, so profiling was necessary which ended up finding a lot of possible optimizations to make it about 6x faster. In my experience, CC is quite poor at considering the role of Ruby's GC when implementing low level algorithms and needs some prodding to make the correct optimizations.
+**CC's testing and cleanliness leaves a bit to be desired.** The CC-created tests were superficial, so I worked on getting them beefed up to tackle a variety of edge cases. They could still get better. It also didn't do RDoc comments, use Minitest, and a variety of other things I coerced it into working on. A good `CLAUDE.md` file could probably avoid many of these problems. I worked without one.
 
-The CC-created tests were superficial, so I worked on getting them beefed up to tackle a variety of edge cases. They could still get better. It also didn't do RDoc comments, use Minitest, and a variety of other things I coerced it into working on.
-
-The overall experience was positive, but CC does still require an experienced developer to keep it on the rails IMHO and to not end up with a bunch of buggy half-working crap.
-
-BTW, I didn't bother setting up a git repo until the whole thing worked. Sadly it did not take a mere 19 minutes to produce.. :-D
+**The overall experience was good.** I enjoyed this project, but CC clearly requires an experienced developer to keep it on the rails and to not end up with a bunch of buggy half-working crap. Getting to the basic 'turn a PNG into a JPEG' took only twenty minutes, but the rest of making it actually widely useful took several hours more.
 
 ## License
 
