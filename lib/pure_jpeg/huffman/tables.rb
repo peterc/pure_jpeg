@@ -64,8 +64,9 @@ module PureJPEG
 
     # Build a lookup table: symbol -> [code, code_length]
     # from the bits/values specification.
+    # Returns an Array indexed by symbol value for O(1) lookup.
     def self.build_table(bits, values)
-      table = {}
+      table = Array.new(256)
       code = 0
       k = 0
 

@@ -38,9 +38,12 @@ class TestRawSource < Minitest::Test
     assert_equal 255, source[0, 0].r
   end
 
-  def test_without_block_pixels_are_nil
+  def test_without_block_pixels_are_black
     source = PureJPEG::Source::RawSource.new(2, 2)
-    assert_nil source[0, 0]
+    pixel = source[0, 0]
+    assert_equal 0, pixel.r
+    assert_equal 0, pixel.g
+    assert_equal 0, pixel.b
   end
 
   def test_pixel_responds_to_rgb

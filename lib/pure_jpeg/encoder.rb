@@ -41,6 +41,8 @@ module PureJPEG
       @quality = quality
       @grayscale = grayscale
       @chroma_quality = chroma_quality || quality
+      validate_qtable!(luminance_table, "luminance_table") if luminance_table
+      validate_qtable!(chrominance_table, "chrominance_table") if chrominance_table
       @luminance_table = luminance_table
       @chrominance_table = chrominance_table
       @quantization_modifier = quantization_modifier
@@ -76,6 +78,13 @@ module PureJPEG
       table = @chrominance_table || Quantization.scale_table(Quantization::CHROMINANCE_BASE, @chroma_quality)
       table = @quantization_modifier.call(table, :chrominance) if @quantization_modifier
       table
+    end
+
+    def validate_qtable!(table, name)
+      raise ArgumentError, "#{name} must have exactly 64 elements (got #{table.length})" unless table.length == 64
+      unless table.all? { |v| v.is_a?(Integer) && v >= 1 && v <= 255 }
+        raise ArgumentError, "#{name} elements must be integers between 1 and 255"
+      end
     end
 
     def encode(io)

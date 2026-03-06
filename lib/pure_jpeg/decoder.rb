@@ -13,7 +13,7 @@ module PureJPEG
     # @param path_or_data [String] a file path or raw JPEG bytes
     # @return [Image] decoded image with pixel access
     def self.decode(path_or_data)
-      data = if path_or_data.is_a?(String) && !path_or_data.include?("\x00") && File.exist?(path_or_data)
+      data = if path_or_data.is_a?(String) && !path_or_data.start_with?("\xFF\xD8".b) && File.exist?(path_or_data)
                File.binread(path_or_data)
              else
                path_or_data.b
