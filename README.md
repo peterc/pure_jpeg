@@ -184,12 +184,12 @@ Not supported: arithmetic coding, 12-bit precision, EXIF/ICC profile preservatio
 
 ## Performance
 
-On a 1024x1024 image (Ruby 3.4 on my M1 Max):
+On a 1024x1024 image (Ruby 4.0.1 on my M1 Max):
 
 | Operation | Time |
 |-----------|------|
-| Encode (color, q85) | ~1.9s |
-| Decode (color) | ~2.0s |
+| Encode (color, q85) | ~1.7s |
+| Decode (color) | ~1.8s |
 
 Both the encoder and decoder use a separable DCT with a precomputed cosine matrix and reuse all per-block buffers to minimize GC pressure. Pixel data is stored as packed integers internally to avoid per-pixel object allocation.
 
