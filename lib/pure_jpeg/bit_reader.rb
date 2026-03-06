@@ -47,6 +47,7 @@ module PureJPEG
       byte = @data.getbyte(@pos)
       @pos += 1
       if byte == 0xFF
+        raise "Unexpected end of scan data" if @pos >= @length
         next_byte = @data.getbyte(@pos)
         @pos += 1
         # 0xFF 0x00 is a stuffed 0xFF byte
