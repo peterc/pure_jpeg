@@ -33,8 +33,8 @@ module PureJPEG
         last_nonzero = 63
         last_nonzero -= 1 while last_nonzero > 0 && zigzag[last_nonzero] == 0
 
-        if last_nonzero == 0 && zigzag[0] == zigzag[0]  # AC starts at index 1
-          # All AC coefficients are zero
+        if last_nonzero == 0
+          # All AC coefficients are zero (AC starts at index 1)
           eob = @ac_table[0x00]
           writer.write_bits(eob[0], eob[1])
           return
