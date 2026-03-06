@@ -225,11 +225,24 @@ module PureJPEG
 
     def extract_luminance(width, height)
       luminance = Array.new(width * height)
-      height.times do |y|
-        row = y * width
-        width.times do |x|
-          pixel = source[x, y]
-          luminance[row + x] = (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b).round.clamp(0, 255)
+      if source.respond_to?(:packed_pixels)
+        packed = source.packed_pixels
+        i = 0
+        (width * height).times do
+          color = packed[i]
+          r = (color >> 24) & 0xFF
+          g = (color >> 16) & 0xFF
+          b = (color >> 8) & 0xFF
+          luminance[i] = (0.299 * r + 0.587 * g + 0.114 * b).round.clamp(0, 255)
+          i += 1
+        end
+      else
+        height.times do |y|
+          row = y * width
+          width.times do |x|
+            pixel = source[x, y]
+            luminance[row + x] = (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b).round.clamp(0, 255)
+          end
         end
       end
       luminance
@@ -241,15 +254,30 @@ module PureJPEG
       cb_data = Array.new(size)
       cr_data = Array.new(size)
 
-      height.times do |py|
-        row = py * width
-        width.times do |px|
-          pixel = source[px, py]
-          r = pixel.r; g = pixel.g; b = pixel.b
-          i = row + px
+      if source.respond_to?(:packed_pixels)
+        packed = source.packed_pixels
+        i = 0
+        size.times do
+          color = packed[i]
+          r = (color >> 24) & 0xFF
+          g = (color >> 16) & 0xFF
+          b = (color >> 8) & 0xFF
           y_data[i]  = ( 0.299    * r + 0.587    * g + 0.114    * b).round.clamp(0, 255)
           cb_data[i] = (-0.168736 * r - 0.331264 * g + 0.5      * b + 128.0).round.clamp(0, 255)
           cr_data[i] = ( 0.5      * r - 0.418688 * g - 0.081312 * b + 128.0).round.clamp(0, 255)
+          i += 1
+        end
+      else
+        height.times do |py|
+          row = py * width
+          width.times do |px|
+            pixel = source[px, py]
+            r = pixel.r; g = pixel.g; b = pixel.b
+            i = row + px
+            y_data[i]  = ( 0.299    * r + 0.587    * g + 0.114    * b).round.clamp(0, 255)
+            cb_data[i] = (-0.168736 * r - 0.331264 * g + 0.5      * b + 128.0).round.clamp(0, 255)
+            cr_data[i] = ( 0.5      * r - 0.418688 * g - 0.081312 * b + 128.0).round.clamp(0, 255)
+          end
         end
       end
 

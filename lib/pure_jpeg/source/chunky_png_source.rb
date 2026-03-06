@@ -19,10 +19,13 @@ module PureJPEG
 
       # @param image [ChunkyPNG::Image] the source PNG image
       def initialize(image)
-        @image = image
         @width = image.width
         @height = image.height
+        @packed_pixels = image.pixels
       end
+
+      # @return [Array<Integer>] flat row-major array of packed RGBA integers
+      attr_reader :packed_pixels
 
       # Retrieve a pixel at the given coordinate.
       #
@@ -30,11 +33,11 @@ module PureJPEG
       # @param y [Integer] row (0-based)
       # @return [Pixel]
       def [](x, y)
-        color = @image[x, y]
+        color = @packed_pixels[y * @width + x]
         Pixel.new(
-          ChunkyPNG::Color.r(color),
-          ChunkyPNG::Color.g(color),
-          ChunkyPNG::Color.b(color)
+          (color >> 24) & 0xFF,
+          (color >> 16) & 0xFF,
+          (color >> 8) & 0xFF
         )
       end
     end
