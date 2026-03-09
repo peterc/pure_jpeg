@@ -91,10 +91,8 @@ module PureJPEG
           end
 
           jfif.scan_components.each do |sc|
-            comp = comp_info[sc.id]
-            dc_tab = dc_tables[sc.dc_table_id]
-            ac_tab = ac_tables[sc.ac_table_id]
-            qt = jfif.quant_tables[comp.qt_id]
+            comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables)
+            qt = fetch_quant_table!(jfif, comp)
             ch = channels[comp.id]
 
             comp.v_sampling.times do |bv|
@@ -123,8 +121,10 @@ module PureJPEG
       num_components = jfif.components.length
       if num_components == 1
         assemble_grayscale(width, height, channels, jfif.components[0])
-      else
+      elsif num_components == 3
         assemble_color(width, height, channels, jfif.components, max_h, max_v)
+      else
+        raise DecodeError, "Unsupported number of components: #{num_components}"
       end
     end
 
@@ -209,7 +209,7 @@ module PureJPEG
       spatial = Array.new(64, 0.0)
 
       jfif.components.each do |c|
-        qt = jfif.quant_tables[c.qt_id]
+        qt = fetch_quant_table!(jfif, c)
         ch = channels[c.id]
         coeff_buf = coeffs[c.id]
         bx_count, by_count = comp_blocks[c.id]
@@ -230,17 +230,17 @@ module PureJPEG
       num_components = jfif.components.length
       if num_components == 1
         assemble_grayscale(width, height, channels, jfif.components[0])
-      else
+      elsif num_components == 3
         assemble_color(width, height, channels, jfif.components, max_h, max_v)
+      else
+        raise DecodeError, "Unsupported number of components: #{num_components}"
       end
     end
 
     def prog_scan_non_interleaved(reader, scan, comp_info, dc_tables, ac_tables,
                                   coeffs, comp_blocks, restart_interval, ss, se, ah, al)
       sc = scan.components[0]
-      comp = comp_info[sc.id]
-      dc_tab = dc_tables[sc.dc_table_id]
-      ac_tab = ac_tables[sc.ac_table_id]
+      comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: ss > 0)
       coeff_buf = coeffs[comp.id]
       bx_count, by_count = comp_blocks[comp.id]
 
@@ -290,8 +290,7 @@ module PureJPEG
           end
 
           scan.components.each do |sc|
-            comp = comp_info[sc.id]
-            dc_tab = dc_tables[sc.dc_table_id]
+            comp, dc_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: false)
             coeff_buf = coeffs[comp.id]
             bx_count = comp_blocks[comp.id][0]
 
@@ -469,6 +468,28 @@ module PureJPEG
       end
     end
 
+    def resolve_scan_references!(scan_component, comp_info, dc_tables, ac_tables, require_ac: true)
+      comp = comp_info[scan_component.id]
+      raise DecodeError, "Scan references unknown component id #{scan_component.id}" unless comp
+
+      dc_tab = dc_tables[scan_component.dc_table_id]
+      raise DecodeError, "Component #{scan_component.id} references missing DC Huffman table #{scan_component.dc_table_id}" unless dc_tab
+
+      if require_ac
+        ac_tab = ac_tables[scan_component.ac_table_id]
+        raise DecodeError, "Component #{scan_component.id} references missing AC Huffman table #{scan_component.ac_table_id}" unless ac_tab
+      end
+
+      [comp, dc_tab, ac_tab]
+    end
+
+    def fetch_quant_table!(jfif, comp)
+      qt = jfif.quant_tables[comp.qt_id]
+      raise DecodeError, "Component #{comp.id} references missing quantization table #{comp.qt_id}" unless qt
+
+      qt
+    end
+
     def assemble_grayscale(width, height, channels, comp)
       ch = channels[comp.id]
       pixels = Array.new(width * height)
@@ -485,12 +506,19 @@ module PureJPEG
 
     def assemble_color(width, height, channels, components, max_h, max_v)
       # Upsample chroma channels if needed and convert YCbCr to RGB
-      y_ch  = channels[components[0].id]
-      cb_ch = channels[components[1].id]
-      cr_ch = channels[components[2].id]
+      by_id = components.each_with_object({}) { |comp, memo| memo[comp.id] = comp }
+      y_comp = by_id[1]
+      cb_comp = by_id[2]
+      cr_comp = by_id[3]
 
-      cb_comp = components[1]
-      cr_comp = components[2]
+      unless y_comp && cb_comp && cr_comp
+        ids = components.map(&:id).sort.join(", ")
+        raise DecodeError, "Unsupported 3-component JPEG: expected YCbCr component ids 1, 2, 3 (got #{ids})"
+      end
+
+      y_ch = channels[y_comp.id]
+      cb_ch = channels[cb_comp.id]
+      cr_ch = channels[cr_comp.id]
 
       pixels = Array.new(width * height)
 

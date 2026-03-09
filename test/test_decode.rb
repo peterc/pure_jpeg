@@ -235,4 +235,79 @@ class TestDecode < Minitest::Test
     assert_equal 16, image.height
     assert_valid_pixel(image[0, 0])
   end
+
+  def test_decode_color_when_sof_components_are_reordered
+    source = PureJPEG::Source::RawSource.new(16, 16) do |x, y|
+      [x * 12, y * 12, 80]
+    end
+    data = PureJPEG.encode(source, quality: 85).to_bytes
+
+    reordered = reorder_sof_components(data, 1, 0, 2)
+
+    original_image = PureJPEG.read(data)
+    reordered_image = PureJPEG.read(reordered)
+
+    assert_equal original_image.width, reordered_image.width
+    assert_equal original_image.height, reordered_image.height
+    assert_equal original_image.packed_pixels, reordered_image.packed_pixels
+  end
+
+  def test_missing_quantization_table_raises_decode_error
+    source = gradient_source(8, 8)
+    data = PureJPEG.encode(source, quality: 85, grayscale: true).to_bytes
+    patched = patch_sof_quant_table_id(data, 5)
+
+    error = assert_raises(PureJPEG::DecodeError) { PureJPEG.read(patched) }
+    assert_match(/missing quantization table 5/, error.message)
+  end
+
+  def test_missing_huffman_table_raises_decode_error
+    source = gradient_source(8, 8)
+    data = PureJPEG.encode(source, quality: 85, grayscale: true).to_bytes
+    patched = patch_sos_table_selectors(data, 0, 2)
+
+    error = assert_raises(PureJPEG::DecodeError) { PureJPEG.read(patched) }
+    assert_match(/missing AC Huffman table 2/, error.message)
+  end
+
+  private
+
+  def reorder_sof_components(data, *order)
+    bytes = data.dup
+    sof_pos = bytes.index("\xFF\xC0".b)
+    refute_nil sof_pos, "Should find SOF0 marker"
+
+    num_components = bytes.getbyte(sof_pos + 9)
+    descriptors_pos = sof_pos + 10
+    descriptors = Array.new(num_components) do |i|
+      bytes.byteslice(descriptors_pos + i * 3, 3)
+    end
+
+    order.each_with_index do |source_index, dest_index|
+      bytes[descriptors_pos + dest_index * 3, 3] = descriptors[source_index]
+    end
+
+    bytes
+  end
+
+  def patch_sof_quant_table_id(data, qt_id)
+    bytes = data.dup
+    sof_pos = bytes.index("\xFF\xC0".b)
+    refute_nil sof_pos, "Should find SOF0 marker"
+
+    num_components = bytes.getbyte(sof_pos + 9)
+    first_component_qt_pos = sof_pos + 10 + (num_components * 3) - 1
+    bytes.setbyte(first_component_qt_pos, qt_id)
+    bytes
+  end
+
+  def patch_sos_table_selectors(data, dc_id, ac_id)
+    bytes = data.dup
+    sos_pos = bytes.index("\xFF\xDA".b)
+    refute_nil sos_pos, "Should find SOS marker"
+
+    table_selector_pos = sos_pos + 6
+    bytes.setbyte(table_selector_pos, (dc_id << 4) | ac_id)
+    bytes
+  end
 end
