@@ -135,6 +135,16 @@ pixel.b  # => 97
 image = PureJPEG.read(jpeg_bytes)
 ```
 
+### Read dimensions and metadata only
+
+```ruby
+info = PureJPEG.info("photo.jpg")
+info.width           # => 1024
+info.height          # => 768
+info.component_count # => 3
+info.progressive     # => false
+```
+
 ### Iterating pixels
 
 ```ruby

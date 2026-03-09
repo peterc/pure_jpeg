@@ -9,8 +9,9 @@ module PureJPEG
     ScanComponent = Struct.new(:id, :dc_table_id, :ac_table_id)
     Scan = Struct.new(:components, :spectral_start, :spectral_end, :successive_high, :successive_low, :data, :huffman_tables)
 
-    def initialize(data)
+    def initialize(data, stop_after_frame: false)
       @data = data.b
+      @stop_after_frame = stop_after_frame
       @pos = 0
       @quant_tables = {}
       @huffman_tables = {}
@@ -45,9 +46,11 @@ module PureJPEG
           parse_dht
         when 0xC0 # SOF0 (baseline)
           parse_sof0
+          return if @stop_after_frame
         when 0xC2 # SOF2 (progressive)
           parse_sof0
           @progressive = true
+          return if @stop_after_frame
         when 0xDA # SOS
           scan = parse_sos
           scan.data = extract_scan_data

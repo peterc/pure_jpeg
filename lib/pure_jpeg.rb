@@ -16,6 +16,7 @@ require_relative "pure_jpeg/huffman/encoder"
 require_relative "pure_jpeg/huffman/decoder"
 require_relative "pure_jpeg/jfif_writer"
 require_relative "pure_jpeg/jfif_reader"
+require_relative "pure_jpeg/info"
 require_relative "pure_jpeg/image"
 require_relative "pure_jpeg/encoder"
 require_relative "pure_jpeg/decoder"
@@ -62,5 +63,27 @@ module PureJPEG
   # @return [Image] decoded image with pixel access
   def self.read(path_or_data)
     Decoder.decode(path_or_data)
+  end
+
+  # Read JPEG dimensions and basic frame metadata without decoding scan data.
+  #
+  # @param path_or_data [String] a file path or raw JPEG bytes
+  # @return [Info] image metadata parsed from the frame header
+  def self.info(path_or_data)
+    data = if path_or_data.is_a?(String) && !path_or_data.start_with?("\xFF\xD8".b) && File.exist?(path_or_data)
+             File.binread(path_or_data)
+           else
+             path_or_data.b
+           end
+
+    jfif = JFIFReader.new(data, stop_after_frame: true)
+    raise DecodeError, "JPEG frame header not found" unless jfif.width && jfif.height
+
+    Info.new(
+      width: jfif.width,
+      height: jfif.height,
+      component_count: jfif.components.length,
+      progressive: jfif.progressive
+    )
   end
 end
