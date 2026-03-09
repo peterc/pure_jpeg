@@ -252,6 +252,22 @@ class TestDecode < Minitest::Test
     assert_equal original_image.packed_pixels, reordered_image.packed_pixels
   end
 
+  def test_decode_color_with_nonstandard_component_ids
+    source = PureJPEG::Source::RawSource.new(16, 16) do |x, y|
+      [x * 12, y * 12, 80]
+    end
+    data = PureJPEG.encode(source, quality: 85).to_bytes
+
+    remapped = remap_component_ids(data, 1 => 0, 2 => 1, 3 => 2)
+
+    original_image = PureJPEG.read(data)
+    remapped_image = PureJPEG.read(remapped)
+
+    assert_equal original_image.width, remapped_image.width
+    assert_equal original_image.height, remapped_image.height
+    assert_equal original_image.packed_pixels, remapped_image.packed_pixels
+  end
+
   def test_missing_quantization_table_raises_decode_error
     source = gradient_source(8, 8)
     data = PureJPEG.encode(source, quality: 85, grayscale: true).to_bytes
@@ -308,6 +324,28 @@ class TestDecode < Minitest::Test
 
     table_selector_pos = sos_pos + 6
     bytes.setbyte(table_selector_pos, (dc_id << 4) | ac_id)
+    bytes
+  end
+
+  def remap_component_ids(data, mapping)
+    bytes = data.dup
+
+    sof_pos = bytes.index("\xFF\xC0".b)
+    refute_nil sof_pos, "Should find SOF0 marker"
+    sof_components = bytes.getbyte(sof_pos + 9)
+    sof_components.times do |i|
+      id_pos = sof_pos + 10 + (i * 3)
+      bytes.setbyte(id_pos, mapping.fetch(bytes.getbyte(id_pos), bytes.getbyte(id_pos)))
+    end
+
+    sos_pos = bytes.index("\xFF\xDA".b)
+    refute_nil sos_pos, "Should find SOS marker"
+    sos_components = bytes.getbyte(sos_pos + 4)
+    sos_components.times do |i|
+      id_pos = sos_pos + 5 + (i * 2)
+      bytes.setbyte(id_pos, mapping.fetch(bytes.getbyte(id_pos), bytes.getbyte(id_pos)))
+    end
+
     bytes
   end
 end

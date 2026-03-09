@@ -506,15 +506,7 @@ module PureJPEG
 
     def assemble_color(width, height, channels, components, max_h, max_v)
       # Upsample chroma channels if needed and convert YCbCr to RGB
-      by_id = components.each_with_object({}) { |comp, memo| memo[comp.id] = comp }
-      y_comp = by_id[1]
-      cb_comp = by_id[2]
-      cr_comp = by_id[3]
-
-      unless y_comp && cb_comp && cr_comp
-        ids = components.map(&:id).sort.join(", ")
-        raise DecodeError, "Unsupported 3-component JPEG: expected YCbCr component ids 1, 2, 3 (got #{ids})"
-      end
+      y_comp, cb_comp, cr_comp = resolve_color_components(components)
 
       y_ch = channels[y_comp.id]
       cb_ch = channels[cb_comp.id]
@@ -553,6 +545,15 @@ module PureJPEG
       end
 
       Image.new(width, height, pixels)
+    end
+
+    def resolve_color_components(components)
+      by_id = components.each_with_object({}) { |comp, memo| memo[comp.id] = comp }
+      if by_id[1] && by_id[2] && by_id[3]
+        [by_id[1], by_id[2], by_id[3]]
+      else
+        components
+      end
     end
   end
 end
