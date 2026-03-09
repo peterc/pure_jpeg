@@ -216,9 +216,9 @@ rake profile     # CPU profile with StackProf (requires the stackprof gem)
 
 ## AI Disclosure
 
-**Claude Code did the majority of the work.** The math of JPEG encoding/decoding is beyond me, except 'getting it' at a high level. I understand it like I understand the engine in my car :-)
+**Claude Code did the majority of the work.** The math of JPEG encoding/decoding is beyond me, except 'getting it' at a high level. I understand it like I understand the engine in my car :-) *Later update: OpenAI Codex is also reviewing and adding features now. It feels stronger in many areas.*
 
-**I have read all of the code produced.** The algorithms are above my paygrade, but I'm OK with what has been produced, and I manually fixed a variety of stylistic things along the way. For example, CC seems to like wrapping entire functions in `if` statements rather than bailing on the opposite condition.
+**I have read all of the code produced up to v0.2.0.** The algorithms are above my paygrade, but I'm OK with what has been produced, and I manually fixed a variety of stylistic things along the way. For example, CC seems to like wrapping entire functions in `if` statements rather than bailing on the opposite condition. *Later update: I have not read the ICC and optimized Huffman code yet, but it is heavily tested.*
 
 **CC needed a lot of guidance.** Its initial JPEG algorithm was somewhat naive and output odd looking JPEGs akin to those of my Kodak digital camera from 2001. After some back and forth and image comparisons, we figured out it was doing the quantization entirely wrong (specifically not using the zigzag approach during quanitization but just going in raster order). I *like* this aesthetic, but fixed it up so that it works as a generally usable JPEG library, while adding ways to customize things so you can recreate the effect, if preferred (see `CREATIVE.md` for more on that).
 
