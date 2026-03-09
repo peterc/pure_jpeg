@@ -18,5 +18,8 @@ else
 end
 
 PureJPEG.encode(source, quality: quality, scramble_quantization: true).write(output)
-
 puts "#{input} -> #{output} (#{File.size(output)} bytes, q#{quality}, scrambled quantization)"
+
+output_opt = output.sub(/\.jpg$/i, '_optimized.jpg')
+PureJPEG.encode(source, quality: quality, scramble_quantization: true, optimize_huffman: true).write(output_opt)
+puts "#{input} -> #{output_opt} (#{File.size(output_opt)} bytes, q#{quality}, scrambled quantization + optimized huffman)"
