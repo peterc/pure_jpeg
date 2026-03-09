@@ -277,6 +277,26 @@ class TestDecode < Minitest::Test
     assert_match(/missing quantization table 5/, error.message)
   end
 
+  def test_decoded_image_carries_icc_profile
+    source = gradient_source(8, 8)
+    data = PureJPEG.encode(source, quality: 85).to_bytes
+    profile_data = "test-icc-profile-bytes"
+    data_with_icc = inject_icc_profile(data, profile_data)
+
+    image = PureJPEG.read(data_with_icc)
+
+    assert_equal profile_data, image.icc_profile
+  end
+
+  def test_decoded_image_without_icc_profile
+    source = gradient_source(8, 8)
+    data = PureJPEG.encode(source, quality: 85).to_bytes
+
+    image = PureJPEG.read(data)
+
+    assert_nil image.icc_profile
+  end
+
   def test_missing_huffman_table_raises_decode_error
     source = gradient_source(8, 8)
     data = PureJPEG.encode(source, quality: 85, grayscale: true).to_bytes
@@ -347,5 +367,16 @@ class TestDecode < Minitest::Test
     end
 
     bytes
+  end
+
+  def inject_icc_profile(jpeg_data, profile_data)
+    sig = "ICC_PROFILE\0".b
+    seq = 1.chr.b
+    total = 1.chr.b
+    payload = sig + seq + total + profile_data.b
+    length = [payload.bytesize + 2].pack("n")
+    app2 = "\xFF\xE2".b + length + payload
+
+    jpeg_data[0, 2] + app2 + jpeg_data[2..]
   end
 end

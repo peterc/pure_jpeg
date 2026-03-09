@@ -83,7 +83,8 @@ module PureJPEG
       width: jfif.width,
       height: jfif.height,
       component_count: jfif.components.length,
-      progressive: jfif.progressive
+      progressive: jfif.progressive,
+      icc_profile: jfif.icc_profile
     )
   end
 end

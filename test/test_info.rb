@@ -46,4 +46,38 @@ class TestInfo < Minitest::Test
   def test_info_raises_when_frame_header_missing
     assert_raises(PureJPEG::DecodeError) { PureJPEG.info("\xFF\xD8\xFF\xD9".b) }
   end
+
+  def test_info_returns_nil_icc_profile_when_absent
+    source = gradient_source(8, 8)
+    data = PureJPEG.encode(source, quality: 85).to_bytes
+
+    info = PureJPEG.info(data)
+
+    assert_nil info.icc_profile
+  end
+
+  def test_info_extracts_icc_profile
+    source = gradient_source(8, 8)
+    data = PureJPEG.encode(source, quality: 85).to_bytes
+    profile_data = "fake-icc-profile-data-for-testing"
+    data_with_icc = inject_icc_profile(data, profile_data)
+
+    info = PureJPEG.info(data_with_icc)
+
+    assert_equal profile_data, info.icc_profile
+  end
+
+  private
+
+  def inject_icc_profile(jpeg_data, profile_data)
+    # Insert a single APP2 ICC_PROFILE chunk right after SOI
+    sig = "ICC_PROFILE\0".b
+    seq = 1.chr.b
+    total = 1.chr.b
+    payload = sig + seq + total + profile_data.b
+    length = [payload.bytesize + 2].pack("n")
+    app2 = "\xFF\xE2".b + length + payload
+
+    jpeg_data[0, 2] + app2 + jpeg_data[2..]
+  end
 end

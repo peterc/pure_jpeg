@@ -17,14 +17,19 @@ module PureJPEG
     #   Format: +(r << 16) | (g << 8) | b+.
     attr_reader :packed_pixels
 
+    # @return [String, nil] raw ICC color profile data, if present in the source JPEG
+    attr_reader :icc_profile
+
     # @param width [Integer]
     # @param height [Integer]
     # @param packed_pixels [Array<Integer>] flat row-major array of packed RGB
     #   integers in the format +(r << 16) | (g << 8) | b+
-    def initialize(width, height, packed_pixels)
+    # @param icc_profile [String, nil] raw ICC profile bytes
+    def initialize(width, height, packed_pixels, icc_profile: nil)
       @width = width
       @height = height
       @packed_pixels = packed_pixels
+      @icc_profile = icc_profile
     end
 
     # Retrieve a pixel by coordinate.

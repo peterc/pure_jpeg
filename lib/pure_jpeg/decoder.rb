@@ -27,6 +27,7 @@ module PureJPEG
 
     def decode
       jfif = JFIFReader.new(@data)
+      @icc_profile = jfif.icc_profile
       validate_dimensions!(jfif.width, jfif.height)
       return decode_progressive(jfif) if jfif.progressive
 
@@ -501,7 +502,7 @@ module PureJPEG
           pixels[dst_row + x] = (v << 16) | (v << 8) | v
         end
       end
-      Image.new(width, height, pixels)
+      Image.new(width, height, pixels, icc_profile: @icc_profile)
     end
 
     def assemble_color(width, height, channels, components, max_h, max_v)
@@ -544,7 +545,7 @@ module PureJPEG
         end
       end
 
-      Image.new(width, height, pixels)
+      Image.new(width, height, pixels, icc_profile: @icc_profile)
     end
 
     def resolve_color_components(components)

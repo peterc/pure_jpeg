@@ -3,7 +3,7 @@
 module PureJPEG
   class JFIFReader
     attr_reader :width, :height, :components, :quant_tables, :huffman_tables,
-                :restart_interval, :progressive, :scans
+                :restart_interval, :progressive, :scans, :icc_profile
 
     Component = Struct.new(:id, :h_sampling, :v_sampling, :qt_id)
     ScanComponent = Struct.new(:id, :dc_table_id, :ac_table_id)
@@ -19,7 +19,9 @@ module PureJPEG
       @restart_interval = 0
       @progressive = false
       @scans = []
+      @icc_chunks = {}
       parse
+      assemble_icc_profile
     end
 
     def scan_components
@@ -38,7 +40,9 @@ module PureJPEG
       loop do
         marker = read_marker
         case marker
-        when 0xE0..0xEF # APP0-APP15
+        when 0xE2 # APP2 (may contain ICC profile)
+          parse_app2
+        when 0xE0, 0xE1, 0xE3..0xEF # APP0, APP1, APP3-APP15
           skip_segment
         when 0xDB # DQT
           parse_dqt
@@ -92,6 +96,28 @@ module PureJPEG
     def expect_marker(expected)
       marker = read_marker
       raise PureJPEG::DecodeError, "Expected marker 0x#{expected.to_s(16)}, got 0x#{marker.to_s(16)}" unless marker == expected
+    end
+
+    ICC_PROFILE_SIG = "ICC_PROFILE\0".b
+
+    def parse_app2
+      length = read_u16
+      end_pos = @pos + length - 2
+
+      if length >= 16 && @data[@pos, 12] == ICC_PROFILE_SIG
+        @pos += 12
+        seq_no = read_byte
+        _total = read_byte
+        @icc_chunks[seq_no] = @data[@pos, end_pos - @pos]
+      end
+
+      @pos = end_pos
+    end
+
+    def assemble_icc_profile
+      return if @icc_chunks.empty?
+
+      @icc_profile = @icc_chunks.sort_by(&:first).map(&:last).join.b
     end
 
     def skip_segment
