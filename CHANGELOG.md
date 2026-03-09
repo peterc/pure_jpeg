@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.0
+
+New features:
+
+- `PureJPEG.info` for reading dimensions and metadata without full decode
+- ICC color profile extraction (available on `Info` and `Image`)
+- Optional image-specific optimized Huffman tables (`optimize_huffman: true`)
+
+Fixes:
+
+- Decoder validates Huffman table, quantization table, and component references with clear error messages
+- Color decoding looks up Y/Cb/Cr components by ID instead of assuming SOF array order
+- Support for non-standard component IDs (e.g. 0, 1, 2 as used by some Adobe tools)
+- Explicit error for unsupported component counts (e.g. CMYK)
+- Encoder no longer holds file handle open during encoding
+
 ## 0.2.0
 
 New features:
