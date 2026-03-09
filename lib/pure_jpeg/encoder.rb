@@ -60,7 +60,7 @@ module PureJPEG
     # @param path [String] output file path
     # @return [void]
     def write(path)
-      File.open(path, "wb") { |f| encode(f) }
+      File.binwrite(path, to_bytes)
     end
 
     # Return the encoded JPEG as a binary string.
