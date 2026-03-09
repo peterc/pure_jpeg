@@ -194,6 +194,8 @@ Decoding:
 
 Not supported: arithmetic coding, 12-bit precision, EXIF/ICC profile preservation, adding a default background for transparent sources (see what happens above!). Largely because I don't need these, but they are all do-able, especially with how loosely coupled this library is internally. Raise an issue if you really care about them!
 
+Possible future improvements: AAN/fixed-point DCT (but it's a LOT of work), ICC profile rendering/conversion.
+
 ## Performance
 
 On a 1024x1024 image (Ruby 4.0.1 on my M1 Max):
