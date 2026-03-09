@@ -44,4 +44,38 @@ class TestEncode < Minitest::Test
 
     assert high.bytesize > low.bytesize, "Higher quality should produce larger output"
   end
+
+  def test_optimized_huffman_can_reduce_color_output_size
+    source = PureJPEG::Source::RawSource.new(128, 128) do |x, y|
+      r = ((Math.sin(x * 0.1) + 1) * 127).round
+      g = ((Math.sin(y * 0.1) + 1) * 127).round
+      b = ((Math.sin((x + y) * 0.05) + 1) * 127).round
+      [r, g, b]
+    end
+
+    standard = PureJPEG.encode(source, quality: 90).to_bytes
+    optimized = PureJPEG.encode(source, quality: 90, optimize_huffman: true).to_bytes
+
+    assert_operator optimized.bytesize, :<=, standard.bytesize
+
+    standard_image = PureJPEG.read(standard)
+    optimized_image = PureJPEG.read(optimized)
+    assert_equal standard_image.packed_pixels, optimized_image.packed_pixels
+  end
+
+  def test_optimized_huffman_can_reduce_grayscale_output_size
+    source = PureJPEG::Source::RawSource.new(128, 128) do |x, y|
+      value = (((Math.sin(x * 0.12) + Math.cos(y * 0.08) + 2) / 4) * 255).round
+      [value, value, value]
+    end
+
+    standard = PureJPEG.encode(source, quality: 90, grayscale: true).to_bytes
+    optimized = PureJPEG.encode(source, quality: 90, grayscale: true, optimize_huffman: true).to_bytes
+
+    assert_operator optimized.bytesize, :<=, standard.bytesize
+
+    standard_image = PureJPEG.read(standard)
+    optimized_image = PureJPEG.read(optimized)
+    assert_equal standard_image.packed_pixels, optimized_image.packed_pixels
+  end
 end

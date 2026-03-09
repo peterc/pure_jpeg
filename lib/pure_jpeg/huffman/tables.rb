@@ -81,5 +81,96 @@ module PureJPEG
 
       table
     end
+
+    # Build a JPEG canonical Huffman table definition from symbol frequencies.
+    # Returns [bits, values], where bits has 16 entries for code lengths 1..16.
+    def self.optimize_table(frequencies)
+      lengths = build_code_lengths(frequencies)
+      counts = length_counts(lengths)
+      trim_counts_to_jpeg_limit!(counts)
+
+      symbols = (0...256).select { |symbol| frequencies[symbol].positive? }
+      symbols.sort_by! { |symbol| [-frequencies[symbol], symbol] }
+
+      bits = Array.new(16, 0)
+      values = []
+      index = 0
+
+      1.upto(16) do |length|
+        count = counts[length]
+        bits[length - 1] = count
+        count.times do
+          values << symbols[index]
+          index += 1
+        end
+      end
+
+      [bits.freeze, values.freeze]
+    end
+
+    def self.build_code_lengths(frequencies)
+      nodes = []
+      256.times do |symbol|
+        freq = frequencies[symbol]
+        nodes << { freq: freq, symbol: symbol } if freq.positive?
+      end
+      nodes << { freq: 1, symbol: 256 }
+
+      while nodes.length > 1
+        nodes.sort_by! do |node|
+          [node[:freq], node[:symbol] || 257]
+        end
+        left = nodes.shift
+        right = nodes.shift
+        nodes << { freq: left[:freq] + right[:freq], left: left, right: right }
+      end
+
+      lengths = Array.new(257, 0)
+      assign_code_lengths(nodes.first, 0, lengths)
+      lengths
+    end
+    private_class_method :build_code_lengths
+
+    def self.assign_code_lengths(node, depth, lengths)
+      if node[:symbol]
+        lengths[node[:symbol]] = depth.zero? ? 1 : depth
+        return
+      end
+
+      assign_code_lengths(node[:left], depth + 1, lengths)
+      assign_code_lengths(node[:right], depth + 1, lengths)
+    end
+    private_class_method :assign_code_lengths
+
+    def self.length_counts(lengths)
+      counts = Array.new([lengths.max + 1, 33].max, 0)
+      lengths.each do |length|
+        counts[length] += 1 if length.positive?
+      end
+      counts
+    end
+    private_class_method :length_counts
+
+    def self.trim_counts_to_jpeg_limit!(counts)
+      max_length = counts.length - 1
+      while max_length > 16
+        while counts[max_length].positive?
+          j = max_length - 2
+          j -= 1 while j.positive? && counts[j].zero?
+          raise ArgumentError, "Unable to limit Huffman code lengths" unless j.positive?
+
+          counts[max_length] -= 2
+          counts[max_length - 1] += 1
+          counts[j + 1] += 2
+          counts[j] -= 1
+        end
+        max_length -= 1
+      end
+
+      max_length = 16
+      max_length -= 1 while max_length.positive? && counts[max_length].zero?
+      counts[max_length] -= 1
+    end
+    private_class_method :trim_counts_to_jpeg_limit!
   end
 end

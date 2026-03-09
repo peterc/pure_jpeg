@@ -15,6 +15,8 @@ module PureJPEG
     attr_reader :quality
     # @return [Boolean] whether grayscale mode is enabled
     attr_reader :grayscale
+    # @return [Boolean] whether image-specific Huffman tables are generated
+    attr_reader :optimize_huffman
 
     # Create a new encoder for the given pixel source.
     #
@@ -34,12 +36,16 @@ module PureJPEG
     # @param scramble_quantization [Boolean] write quantization tables in raster
     #   order instead of zigzag (non-spec-compliant; recreates the "early digicam"
     #   artifact look when decoded by standard viewers)
+    # @param optimize_huffman [Boolean] build image-specific Huffman tables with
+    #   an additional analysis pass (default false)
     def initialize(source, quality: 85, grayscale: false, chroma_quality: nil,
                    luminance_table: nil, chrominance_table: nil,
-                   quantization_modifier: nil, scramble_quantization: false)
+                   quantization_modifier: nil, scramble_quantization: false,
+                   optimize_huffman: false)
       @source = source
       @quality = quality
       @grayscale = grayscale
+      @optimize_huffman = optimize_huffman
       @chroma_quality = chroma_quality || quality
       validate_qtable!(luminance_table, "luminance_table") if luminance_table
       validate_qtable!(chrominance_table, "chrominance_table") if chrominance_table
@@ -97,60 +103,121 @@ module PureJPEG
       raise ArgumentError, "Height #{height} exceeds maximum of #{MAX_DIMENSION}" if height > MAX_DIMENSION
 
       lum_qtable = build_lum_qtable
-      lum_dc = Huffman.build_table(Huffman::DC_LUMINANCE_BITS, Huffman::DC_LUMINANCE_VALUES)
-      lum_ac = Huffman.build_table(Huffman::AC_LUMINANCE_BITS, Huffman::AC_LUMINANCE_VALUES)
-      lum_huff = Huffman::Encoder.new(lum_dc, lum_ac)
 
       if grayscale
-        scan_data = encode_grayscale(width, height, lum_qtable, lum_huff)
-        write_grayscale_jfif(io, width, height, lum_qtable, scan_data)
+        y_data = extract_luminance(width, height)
+        lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values =
+          if optimize_huffman
+            counter = collect_grayscale_frequencies(y_data, width, height, lum_qtable)
+            dc_bits, dc_values = Huffman.optimize_table(counter.dc_frequencies)
+            ac_bits, ac_values = Huffman.optimize_table(counter.ac_frequencies)
+            [dc_bits, dc_values, ac_bits, ac_values]
+          else
+            [Huffman::DC_LUMINANCE_BITS, Huffman::DC_LUMINANCE_VALUES,
+             Huffman::AC_LUMINANCE_BITS, Huffman::AC_LUMINANCE_VALUES]
+          end
+
+        lum_huff = Huffman::Encoder.new(
+          Huffman.build_table(lum_dc_bits, lum_dc_values),
+          Huffman.build_table(lum_ac_bits, lum_ac_values)
+        )
+
+        scan_data = encode_grayscale_data(y_data, width, height, lum_qtable, lum_huff)
+        write_grayscale_jfif(io, width, height, lum_qtable, scan_data,
+                             lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values)
       else
         chr_qtable = build_chr_qtable
-        chr_dc = Huffman.build_table(Huffman::DC_CHROMINANCE_BITS, Huffman::DC_CHROMINANCE_VALUES)
-        chr_ac = Huffman.build_table(Huffman::AC_CHROMINANCE_BITS, Huffman::AC_CHROMINANCE_VALUES)
-        chr_huff = Huffman::Encoder.new(chr_dc, chr_ac)
+        y_data, cb_data, cr_data = extract_ycbcr(width, height)
+        sub_w = (width + 1) / 2
+        sub_h = (height + 1) / 2
+        cb_sub = downsample(cb_data, width, height, sub_w, sub_h)
+        cr_sub = downsample(cr_data, width, height, sub_w, sub_h)
 
-        scan_data = encode_color(width, height, lum_qtable, chr_qtable, lum_huff, chr_huff)
-        write_color_jfif(io, width, height, lum_qtable, chr_qtable, scan_data)
+        lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values,
+          chr_dc_bits, chr_dc_values, chr_ac_bits, chr_ac_values =
+          if optimize_huffman
+            lum_counter, chr_counter = collect_color_frequencies(
+              y_data, cb_sub, cr_sub, width, height, sub_w, sub_h, lum_qtable, chr_qtable
+            )
+            dc_bits, dc_values = Huffman.optimize_table(lum_counter.dc_frequencies)
+            ac_bits, ac_values = Huffman.optimize_table(lum_counter.ac_frequencies)
+            chr_dc_bits, chr_dc_values = Huffman.optimize_table(chr_counter.dc_frequencies)
+            chr_ac_bits, chr_ac_values = Huffman.optimize_table(chr_counter.ac_frequencies)
+            [dc_bits, dc_values, ac_bits, ac_values, chr_dc_bits, chr_dc_values, chr_ac_bits, chr_ac_values]
+          else
+            [Huffman::DC_LUMINANCE_BITS, Huffman::DC_LUMINANCE_VALUES,
+             Huffman::AC_LUMINANCE_BITS, Huffman::AC_LUMINANCE_VALUES,
+             Huffman::DC_CHROMINANCE_BITS, Huffman::DC_CHROMINANCE_VALUES,
+             Huffman::AC_CHROMINANCE_BITS, Huffman::AC_CHROMINANCE_VALUES]
+          end
+
+        lum_huff = Huffman::Encoder.new(
+          Huffman.build_table(lum_dc_bits, lum_dc_values),
+          Huffman.build_table(lum_ac_bits, lum_ac_values)
+        )
+        chr_huff = Huffman::Encoder.new(
+          Huffman.build_table(chr_dc_bits, chr_dc_values),
+          Huffman.build_table(chr_ac_bits, chr_ac_values)
+        )
+
+        scan_data = encode_color_data(
+          y_data, cb_sub, cr_sub, width, height, sub_w, sub_h, lum_qtable, chr_qtable, lum_huff, chr_huff
+        )
+        write_color_jfif(io, width, height, lum_qtable, chr_qtable, scan_data,
+                         lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values,
+                         chr_dc_bits, chr_dc_values, chr_ac_bits, chr_ac_values)
       end
     end
 
     # --- Grayscale encoding ---
 
-    def encode_grayscale(width, height, qtable, huff)
-      y_data = extract_luminance(width, height)
-      padded_w = (width + 7) & ~7
-      padded_h = (height + 7) & ~7
+    def collect_grayscale_frequencies(y_data, width, height, qtable)
+      counter = Huffman::FrequencyCounter.new
+      each_grayscale_block(y_data, width, height, qtable) do |zbuf|
+        counter.observe_block(zbuf, :y)
+      end
+      counter
+    end
 
-      # Reusable buffers
-      block = Array.new(64, 0.0)
-      temp  = Array.new(64, 0.0)
-      dct   = Array.new(64, 0.0)
-      qbuf  = Array.new(64, 0)
-      zbuf  = Array.new(64, 0)
-
+    def encode_grayscale_data(y_data, width, height, qtable, huff)
       bit_writer = BitWriter.new
       prev_dc = 0
 
-      (0...padded_h).step(8) do |by|
-        (0...padded_w).step(8) do |bx|
-          extract_block_into(y_data, width, height, bx, by, block)
-          prev_dc = encode_block(block, temp, dct, qbuf, zbuf, qtable, huff, prev_dc, bit_writer)
-        end
+      each_grayscale_block(y_data, width, height, qtable) do |zbuf|
+        prev_dc = huff.encode_block(zbuf, prev_dc, bit_writer)
       end
 
       bit_writer.flush
       bit_writer.bytes
     end
 
-    def write_grayscale_jfif(io, width, height, qtable, scan_data)
+    def each_grayscale_block(y_data, width, height, qtable)
+      padded_w = (width + 7) & ~7
+      padded_h = (height + 7) & ~7
+
+      block = Array.new(64, 0.0)
+      temp  = Array.new(64, 0.0)
+      dct   = Array.new(64, 0.0)
+      qbuf  = Array.new(64, 0)
+      zbuf  = Array.new(64, 0)
+
+      (0...padded_h).step(8) do |by|
+        (0...padded_w).step(8) do |bx|
+          extract_block_into(y_data, width, height, bx, by, block)
+          transform_block(block, temp, dct, qbuf, zbuf, qtable)
+          yield zbuf
+        end
+      end
+    end
+
+    def write_grayscale_jfif(io, width, height, qtable, scan_data, dc_bits, dc_values, ac_bits, ac_values)
       jfif = JFIFWriter.new(io, scramble_quantization: @scramble_quantization)
       jfif.write_soi
       jfif.write_app0
       jfif.write_dqt(qtable, 0)
       jfif.write_sof0(width, height, [[1, 1, 1, 0]])
-      jfif.write_dht(0, 0, Huffman::DC_LUMINANCE_BITS, Huffman::DC_LUMINANCE_VALUES)
-      jfif.write_dht(1, 0, Huffman::AC_LUMINANCE_BITS, Huffman::AC_LUMINANCE_VALUES)
+      jfif.write_dht(0, 0, dc_bits, dc_values)
+      jfif.write_dht(1, 0, ac_bits, ac_values)
       jfif.write_sos([[1, 0, 0]])
       jfif.write_scan_data(scan_data)
       jfif.write_eoi
@@ -158,51 +225,38 @@ module PureJPEG
 
     # --- Color encoding (YCbCr 4:2:0) ---
 
-    def encode_color(width, height, lum_qt, chr_qt, lum_huff, chr_huff)
-      y_data, cb_data, cr_data = extract_ycbcr(width, height)
+    def collect_color_frequencies(y_data, cb_sub, cr_sub, width, height, sub_w, sub_h, lum_qt, chr_qt)
+      lum_counter = Huffman::FrequencyCounter.new
+      chr_counter = Huffman::FrequencyCounter.new
 
-      sub_w = (width + 1) / 2
-      sub_h = (height + 1) / 2
-      cb_sub = downsample(cb_data, width, height, sub_w, sub_h)
-      cr_sub = downsample(cr_data, width, height, sub_w, sub_h)
+      each_color_block(y_data, cb_sub, cr_sub, width, height, sub_w, sub_h, lum_qt, chr_qt) do |component, zbuf|
+        case component
+        when :y
+          lum_counter.observe_block(zbuf, :y)
+        when :cb
+          chr_counter.observe_block(zbuf, :cb)
+        when :cr
+          chr_counter.observe_block(zbuf, :cr)
+        end
+      end
 
-      mcu_w = (width + 15) & ~15
-      mcu_h = (height + 15) & ~15
+      [lum_counter, chr_counter]
+    end
 
-      # Reusable buffers
-      block = Array.new(64, 0.0)
-      temp  = Array.new(64, 0.0)
-      dct   = Array.new(64, 0.0)
-      qbuf  = Array.new(64, 0)
-      zbuf  = Array.new(64, 0)
-
+    def encode_color_data(y_data, cb_sub, cr_sub, width, height, sub_w, sub_h, lum_qt, chr_qt, lum_huff, chr_huff)
       bit_writer = BitWriter.new
       prev_dc_y = 0
       prev_dc_cb = 0
       prev_dc_cr = 0
 
-      (0...mcu_h).step(16) do |my|
-        (0...mcu_w).step(16) do |mx|
-          # 4 luminance blocks
-          extract_block_into(y_data, width, height, mx, my, block)
-          prev_dc_y = encode_block(block, temp, dct, qbuf, zbuf, lum_qt, lum_huff, prev_dc_y, bit_writer)
-
-          extract_block_into(y_data, width, height, mx + 8, my, block)
-          prev_dc_y = encode_block(block, temp, dct, qbuf, zbuf, lum_qt, lum_huff, prev_dc_y, bit_writer)
-
-          extract_block_into(y_data, width, height, mx, my + 8, block)
-          prev_dc_y = encode_block(block, temp, dct, qbuf, zbuf, lum_qt, lum_huff, prev_dc_y, bit_writer)
-
-          extract_block_into(y_data, width, height, mx + 8, my + 8, block)
-          prev_dc_y = encode_block(block, temp, dct, qbuf, zbuf, lum_qt, lum_huff, prev_dc_y, bit_writer)
-
-          # 1 Cb block
-          extract_block_into(cb_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          prev_dc_cb = encode_block(block, temp, dct, qbuf, zbuf, chr_qt, chr_huff, prev_dc_cb, bit_writer)
-
-          # 1 Cr block
-          extract_block_into(cr_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          prev_dc_cr = encode_block(block, temp, dct, qbuf, zbuf, chr_qt, chr_huff, prev_dc_cr, bit_writer)
+      each_color_block(y_data, cb_sub, cr_sub, width, height, sub_w, sub_h, lum_qt, chr_qt) do |component, zbuf|
+        case component
+        when :y
+          prev_dc_y = lum_huff.encode_block(zbuf, prev_dc_y, bit_writer)
+        when :cb
+          prev_dc_cb = chr_huff.encode_block(zbuf, prev_dc_cb, bit_writer)
+        when :cr
+          prev_dc_cr = chr_huff.encode_block(zbuf, prev_dc_cr, bit_writer)
         end
       end
 
@@ -210,17 +264,58 @@ module PureJPEG
       bit_writer.bytes
     end
 
-    def write_color_jfif(io, width, height, lum_qt, chr_qt, scan_data)
+    def each_color_block(y_data, cb_sub, cr_sub, width, height, sub_w, sub_h, lum_qt, chr_qt)
+      mcu_w = (width + 15) & ~15
+      mcu_h = (height + 15) & ~15
+
+      block = Array.new(64, 0.0)
+      temp  = Array.new(64, 0.0)
+      dct   = Array.new(64, 0.0)
+      qbuf  = Array.new(64, 0)
+      zbuf  = Array.new(64, 0)
+
+      (0...mcu_h).step(16) do |my|
+        (0...mcu_w).step(16) do |mx|
+          extract_block_into(y_data, width, height, mx, my, block)
+          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
+          yield :y, zbuf
+
+          extract_block_into(y_data, width, height, mx + 8, my, block)
+          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
+          yield :y, zbuf
+
+          extract_block_into(y_data, width, height, mx, my + 8, block)
+          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
+          yield :y, zbuf
+
+          extract_block_into(y_data, width, height, mx + 8, my + 8, block)
+          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
+          yield :y, zbuf
+
+          extract_block_into(cb_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
+          transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
+          yield :cb, zbuf
+
+          extract_block_into(cr_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
+          transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
+          yield :cr, zbuf
+        end
+      end
+    end
+
+    def write_color_jfif(io, width, height, lum_qt, chr_qt, scan_data,
+                         lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values,
+                         chr_dc_bits, chr_dc_values, chr_ac_bits, chr_ac_values)
       jfif = JFIFWriter.new(io, scramble_quantization: @scramble_quantization)
       jfif.write_soi
       jfif.write_app0
       jfif.write_dqt(lum_qt, 0)
       jfif.write_dqt(chr_qt, 1)
       jfif.write_sof0(width, height, [[1, 2, 2, 0], [2, 1, 1, 1], [3, 1, 1, 1]])
-      jfif.write_dht(0, 0, Huffman::DC_LUMINANCE_BITS, Huffman::DC_LUMINANCE_VALUES)
-      jfif.write_dht(1, 0, Huffman::AC_LUMINANCE_BITS, Huffman::AC_LUMINANCE_VALUES)
-      jfif.write_dht(0, 1, Huffman::DC_CHROMINANCE_BITS, Huffman::DC_CHROMINANCE_VALUES)
-      jfif.write_dht(1, 1, Huffman::AC_CHROMINANCE_BITS, Huffman::AC_CHROMINANCE_VALUES)
+      jfif.write_dht(0, 0, lum_dc_bits, lum_dc_values)
+      jfif.write_dht(1, 0, lum_ac_bits, lum_ac_values)
+      jfif.write_dht(0, 1, chr_dc_bits, chr_dc_values)
+      jfif.write_dht(1, 1, chr_ac_bits, chr_ac_values)
       jfif.write_sos([[1, 0, 0], [2, 1, 1], [3, 1, 1]])
       jfif.write_scan_data(scan_data)
       jfif.write_eoi
@@ -228,11 +323,11 @@ module PureJPEG
 
     # --- Shared block pipeline (all buffers pre-allocated) ---
 
-    def encode_block(block, temp, dct, qbuf, zbuf, qtable, huff, prev_dc, bit_writer)
+    def transform_block(block, temp, dct, qbuf, zbuf, qtable)
       DCT.forward!(block, temp, dct)
       Quantization.quantize!(dct, qtable, qbuf)
       Zigzag.reorder!(qbuf, zbuf)
-      huff.encode_block(zbuf, prev_dc, bit_writer)
+      zbuf
     end
 
     # --- Pixel extraction ---

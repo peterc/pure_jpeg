@@ -79,7 +79,8 @@ PureJPEG.encode(source,
   luminance_table: nil,           # custom 64-element quantization table for Y
   chrominance_table: nil,         # custom 64-element quantization table for Cb/Cr
   quantization_modifier: nil,     # proc(table, :luminance/:chrominance) -> modified table
-  scramble_quantization: false    # intentionally misordered quant tables (creative effect)
+  scramble_quantization: false,   # intentionally misordered quant tables (creative effect)
+  optimize_huffman: false         # slower 2-pass encode, usually smaller files
 )
 ```
 
@@ -181,7 +182,8 @@ Encoding:
 - 8-bit precision
 - Grayscale (1 component) and YCbCr color (3 components)
 - 4:2:0 chroma subsampling (color) or no subsampling (grayscale)
-- Standard Huffman tables (Annex K)
+- Standard Huffman tables (Annex K) by default
+- Optional image-specific optimized Huffman tables
 
 Decoding:
 - Baseline DCT (SOF0) and Progressive DCT (SOF2)
