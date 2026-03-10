@@ -38,13 +38,21 @@ module PureJPEG
 
     # Quantize a 64-element DCT block in place into `out`.
     def self.quantize!(block, table, out)
-      64.times { |i| out[i] = (block[i] / table[i]).round }
+      i = 0
+      while i < 64
+        out[i] = (block[i] / table[i]).round
+        i += 1
+      end
       out
     end
 
     # Dequantize: multiply each coefficient by its quantization table entry.
     def self.dequantize!(block, table, out)
-      64.times { |i| out[i] = block[i] * table[i] }
+      i = 0
+      while i < 64
+        out[i] = block[i] * table[i]
+        i += 1
+      end
       out
     end
   end
