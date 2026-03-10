@@ -409,18 +409,22 @@ module PureJPEG
       out = Array.new(dst_w * dst_h)
       max_x = src_w - 1
       max_y = src_h - 1
-      dst_h.times do |dy|
+      dy = 0
+      while dy < dst_h
         sy = dy << 1
         y1 = sy < max_y ? sy + 1 : max_y
         row0 = sy * src_w
         row1 = y1 * src_w
         dst_row = dy * dst_w
-        dst_w.times do |dx|
+        dx = 0
+        while dx < dst_w
           sx = dx << 1
           x1 = sx < max_x ? sx + 1 : max_x
           out[dst_row + dx] = ((data[row0 + sx] + data[row0 + x1] +
                                 data[row1 + sx] + data[row1 + x1]) >> 2)
+          dx += 1
         end
+        dy += 1
       end
       out
     end
@@ -429,16 +433,20 @@ module PureJPEG
     def extract_block_into(channel, width, height, bx, by, block)
       max_x = width - 1
       max_y = height - 1
-      8.times do |row|
+      row = 0
+      while row < 8
         sy = by + row
         sy = max_y if sy > max_y
         src_row = sy * width
         row8 = row << 3
-        8.times do |col|
+        col = 0
+        while col < 8
           sx = bx + col
           sx = max_x if sx > max_x
           block[row8 | col] = channel[src_row + sx] - 128.0
+          col += 1
         end
+        row += 1
       end
       block
     end
