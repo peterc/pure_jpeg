@@ -36,9 +36,20 @@ module PureJPEG
       }
     end
 
-    # Quantize a 64-element DCT block in place into `out`.
+    # Quantize a 64-element DCT block into `out`.
+    # Uses integer rounding division (round-to-nearest) to match the
+    # behavior of Float division + round from the previous float DCT.
     def self.quantize!(block, table, out)
-      64.times { |i| out[i] = (block[i] / table[i]).round }
+      i = 0
+      while i < 64
+        v = block[i]; t = table[i]
+        out[i] = if v >= 0
+                   (v + (t >> 1)) / t
+                 else
+                   -((-v + (t >> 1)) / t)
+                 end
+        i += 1
+      end
       out
     end
 

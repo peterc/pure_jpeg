@@ -7,6 +7,8 @@ end
 
 desc "Benchmark encoding and decoding (3 runs each)"
 task :benchmark do
+  RubyVM::YJIT.enable if defined?(RubyVM::YJIT)
+
   require "chunky_png"
   require_relative "lib/pure_jpeg"
 
