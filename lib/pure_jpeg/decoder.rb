@@ -460,12 +460,16 @@ module PureJPEG
     # Write an 8x8 spatial block (level-shifted by +128) into a channel buffer.
     def write_block(spatial, channel, ch_width, bx, by)
       8.times do |row|
-        dst_row = (by + row) * ch_width + bx
-        row8 = row << 3
-        8.times do |col|
-          val = (spatial[row8 | col] + 128.0).round
-          channel[dst_row + col] = val < 0 ? 0 : (val > 255 ? 255 : val)
-        end
+        dst = (by + row) * ch_width + bx
+        r8 = row << 3
+        v = (spatial[r8] + 128.0).round;     channel[dst]     = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = (spatial[r8 | 1] + 128.0).round; channel[dst + 1] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = (spatial[r8 | 2] + 128.0).round; channel[dst + 2] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = (spatial[r8 | 3] + 128.0).round; channel[dst + 3] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = (spatial[r8 | 4] + 128.0).round; channel[dst + 4] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = (spatial[r8 | 5] + 128.0).round; channel[dst + 5] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = (spatial[r8 | 6] + 128.0).round; channel[dst + 6] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = (spatial[r8 | 7] + 128.0).round; channel[dst + 7] = v < 0 ? 0 : (v > 255 ? 255 : v)
       end
     end
 

@@ -441,13 +441,16 @@ module PureJPEG
       8.times do |row|
         sy = by + row
         sy = max_y if sy > max_y
-        src_row = sy * width
-        row8 = row << 3
-        8.times do |col|
-          sx = bx + col
-          sx = max_x if sx > max_x
-          block[row8 | col] = channel[src_row + sx] - 128.0
-        end
+        src = sy * width
+        r8 = row << 3
+        x = bx;     block[r8]     = channel[src + (x > max_x ? max_x : x)] - 128.0
+        x = bx + 1; block[r8 | 1] = channel[src + (x > max_x ? max_x : x)] - 128.0
+        x = bx + 2; block[r8 | 2] = channel[src + (x > max_x ? max_x : x)] - 128.0
+        x = bx + 3; block[r8 | 3] = channel[src + (x > max_x ? max_x : x)] - 128.0
+        x = bx + 4; block[r8 | 4] = channel[src + (x > max_x ? max_x : x)] - 128.0
+        x = bx + 5; block[r8 | 5] = channel[src + (x > max_x ? max_x : x)] - 128.0
+        x = bx + 6; block[r8 | 6] = channel[src + (x > max_x ? max_x : x)] - 128.0
+        x = bx + 7; block[r8 | 7] = channel[src + (x > max_x ? max_x : x)] - 128.0
       end
       block
     end
