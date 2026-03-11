@@ -215,24 +215,16 @@ module PureJPEG
         coeff_buf = coeffs[c.id]
         bx_count, by_count = comp_blocks[c.id]
 
-        block_y = 0
-        while block_y < by_count
-          block_x = 0
-          while block_x < bx_count
+        by_count.times do |block_y|
+          bx_count.times do |block_x|
             offset = (block_y * bx_count + block_x) * 64
-            i = 0
-            while i < 64
-              zigzag[i] = coeff_buf[offset + i]
-              i += 1
-            end
+            64.times { |i| zigzag[i] = coeff_buf[offset + i] }
 
             Zigzag.unreorder!(zigzag, raster)
             Quantization.dequantize!(raster, qt, dequant)
             DCT.inverse!(dequant, temp, spatial)
             write_block(spatial, ch[:data], ch[:width], block_x * 8, block_y * 8)
-            block_x += 1
           end
-          block_y += 1
         end
       end
 
@@ -467,17 +459,13 @@ module PureJPEG
 
     # Write an 8x8 spatial block (level-shifted by +128) into a channel buffer.
     def write_block(spatial, channel, ch_width, bx, by)
-      row = 0
-      while row < 8
+      8.times do |row|
         dst_row = (by + row) * ch_width + bx
         row8 = row << 3
-        col = 0
-        while col < 8
+        8.times do |col|
           val = (spatial[row8 | col] + 128.0).round
           channel[dst_row + col] = val < 0 ? 0 : (val > 255 ? 255 : val)
-          col += 1
         end
-        row += 1
       end
     end
 
@@ -505,21 +493,26 @@ module PureJPEG
 
     def assemble_grayscale(width, height, channels, comp)
       ch = channels[comp.id]
+      ch_data = ch[:data]
+      ch_width = ch[:width]
       pixels = Array.new(width * height)
-      y = 0
-      while y < height
-        src_row = y * ch[:width]
+      height.times do |y|
+        src_row = y * ch_width
         dst_row = y * width
-        x = 0
-        while x < width
-          v = ch[:data][src_row + x]
+        width.times do |x|
+          v = ch_data[src_row + x]
           pixels[dst_row + x] = (v << 16) | (v << 8) | v
-          x += 1
         end
-        y += 1
       end
       Image.new(width, height, pixels, icc_profile: @icc_profile)
     end
+
+    # Fixed-point coefficients (scaled by 2^16) for YCbCr→RGB.
+    FP_R_CR =  91881  # 1.402    * 65536
+    FP_G_CB = -22554  # -0.344136 * 65536
+    FP_G_CR = -46802  # -0.714136 * 65536
+    FP_B_CB = 116130  # 1.772    * 65536
+    FP_HALF =  32768  # rounding bias
 
     def assemble_color(width, height, channels, components, max_h, max_v)
       # Upsample chroma channels if needed and convert YCbCr to RGB
@@ -542,8 +535,7 @@ module PureJPEG
 
       pixels = Array.new(width * height)
 
-      py = 0
-      while py < height
+      height.times do |py|
         dst_row = py * width
         y_row = py * y_stride
 
@@ -551,27 +543,25 @@ module PureJPEG
         cb_row = ((py * cb_v) / max_v) * cb_stride
         cr_row = ((py * cr_v) / max_v) * cr_stride
 
-        px = 0
-        while px < width
+        width.times do |px|
           lum = y_data[y_row + px]
 
           cb_x = (px * cb_h) / max_h
           cr_x = (px * cr_h) / max_h
-          cb = cb_data[cb_row + cb_x] - 128.0
-          cr = cr_data[cr_row + cr_x] - 128.0
+          cb_val = cb_data[cb_row + cb_x] - 128
+          cr_val = cr_data[cr_row + cr_x] - 128
 
-          r = (lum + 1.402 * cr).round
-          g = (lum - 0.344136 * cb - 0.714136 * cr).round
-          b = (lum + 1.772 * cb).round
+          # Fixed-point YCbCr→RGB (all integer arithmetic)
+          r = lum + ((FP_R_CR * cr_val + FP_HALF) >> 16)
+          g = lum + ((FP_G_CB * cb_val + FP_G_CR * cr_val + FP_HALF) >> 16)
+          b = lum + ((FP_B_CB * cb_val + FP_HALF) >> 16)
 
           r = r < 0 ? 0 : (r > 255 ? 255 : r)
           g = g < 0 ? 0 : (g > 255 ? 255 : g)
           b = b < 0 ? 0 : (b > 255 ? 255 : b)
 
           pixels[dst_row + px] = (r << 16) | (g << 8) | b
-          px += 1
         end
-        py += 1
       end
 
       Image.new(width, height, pixels, icc_profile: @icc_profile)

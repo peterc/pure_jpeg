@@ -15,21 +15,13 @@ module PureJPEG
 
     # Reorder an 8x8 block into zigzag order, writing into `out`.
     def self.reorder!(block, out)
-      i = 0
-      while i < 64
-        out[i] = block[ORDER[i]]
-        i += 1
-      end
+      64.times { |i| out[i] = block[ORDER[i]] }
       out
     end
 
     # Reverse zigzag: from zigzag order back to raster order.
     def self.unreorder!(zigzag, out)
-      i = 0
-      while i < 64
-        out[ORDER[i]] = zigzag[i]
-        i += 1
-      end
+      64.times { |i| out[ORDER[i]] = zigzag[i] }
       out
     end
   end
