@@ -17,8 +17,8 @@ module PureJPEG
       while @bits_in_buffer >= 8
         @bits_in_buffer -= 8
         byte = (@buffer >> @bits_in_buffer) & 0xFF
-        @data << byte.chr
-        @data << "\x00".b if byte == 0xFF  # byte stuffing
+        @data << byte
+        @data << 0x00 if byte == 0xFF  # byte stuffing
       end
 
       @buffer &= (1 << @bits_in_buffer) - 1

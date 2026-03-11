@@ -1,0 +1,546 @@
+# YJIT Disassembly for: Quantization.dequantize!
+# Method: #<Method: PureJPEG::Quantization.dequantize!(block, table, out) /Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/quantization.rb:57>
+
+== disasm: #<ISeq:dequantize!@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/quantization.rb:57 (57,4)-(64,7)>
+local table (size: 4, argc: 3 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
+[ 4] block@0<Arg>[ 3] table@1<Arg>[ 2] out@2<Arg> [ 1] i@3
+0000 putobject_INT2FIX_0_                                             (  58)[LiCa]
+0001 setlocal_WC_0                          i@3
+0003 jump                                   37                        (  59)[Li]
+0005 putnil
+0006 pop
+0007 jump                                   37
+0009 getlocal_WC_0                          out@2                     (  60)[Li]
+0011 getlocal_WC_0                          i@3
+0013 getlocal_WC_0                          block@0
+0015 getlocal_WC_0                          i@3
+0017 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0019 getlocal_WC_0                          table@1
+0021 getlocal_WC_0                          i@3
+0023 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0025 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0027 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0029 pop
+0030 getlocal_WC_0                          i@3                       (  61)[Li]
+0032 putobject_INT2FIX_1_
+0033 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0035 setlocal_WC_0                          i@3
+0037 getlocal_WC_0                          i@3                       (  59)
+0039 putobject                              64
+0041 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0043 branchif                               9
+0045 putnil
+0046 pop
+0047 getlocal_WC_0                          out@2                     (  63)[Li]
+0049 leave                                                            (  64)[Re]
+
+NUM BLOCK VERSIONS: 29
+TOTAL INLINE CODE SIZE: 1804 bytes
+== BLOCK 1/29, ISEQ RANGE [0,5), 20 bytes =====================
+  0x121140598: mov x1, #1
+  0x12114059c: ldur x11, [x19, #0x20]
+  0x1211405a0: stur x1, [x11, #-0x18]
+  0x1211405a4: nop
+  0x1211405a8: nop
+
+== BLOCK 2/29, ISEQ RANGE [37,45), 68 bytes ===================
+  0x1211405ac: ldur x11, [x19, #0x20]
+  0x1211405b0: ldur x1, [x11, #-0x18]
+  0x1211405b4: mov x15, #0x81
+  0x1211405b8: cmp x1, x15
+  0x1211405bc: mov x11, #0x14
+  0x1211405c0: mov x12, #0
+  0x1211405c4: csel x11, x11, x12, lt
+  0x1211405c8: mov x1, x11
+  0x1211405cc: ldur w11, [x20, #0x20]
+  0x1211405d0: cbnz w11, #0x121142b50
+  0x1211405d4: tst x1, #-5
+  0x1211405d8: b.eq #0x121142b14
+  0x1211405dc: nop
+  0x1211405e0: nop
+  0x1211405e4: nop
+  0x1211405e8: nop
+  0x1211405ec: nop
+
+== BLOCK 3/29, ISEQ RANGE [9,13), 20 bytes ====================
+  0x1211405f0: mov x1, x14
+  0x1211405f4: nop
+  0x1211405f8: nop
+  0x1211405fc: nop
+  0x121140600: nop
+
+== BLOCK 4/29, ISEQ RANGE [11,15), 20 bytes ===================
+  0x121140604: ldur x15, [x21, #-0x20]
+  0x121140608: nop
+  0x12114060c: nop
+  0x121140610: nop
+  0x121140614: nop
+
+== BLOCK 5/29, ISEQ RANGE [13,17), 20 bytes ===================
+  0x121140618: stur x9, [x21, #0x10]
+  0x12114061c: nop
+  0x121140620: nop
+  0x121140624: nop
+  0x121140628: nop
+
+== BLOCK 6/29, ISEQ RANGE [15,19), 20 bytes ===================
+  0x12114062c: ldur x11, [x21, #-0x20]
+  0x121140630: stur x11, [x21, #0x18]
+  0x121140634: nop
+  0x121140638: nop
+  0x12114063c: nop
+
+== BLOCK 7/29, ISEQ RANGE [17,19), 180 bytes ==================
+  0x121140640: ldur x11, [x21, #0x10]
+  0x121140644: tst x11, #7
+  0x121140648: b.ne #0x121142df4
+  0x12114064c: nop
+  0x121140650: nop
+  0x121140654: nop
+  0x121140658: nop
+  0x12114065c: nop
+  0x121140660: ldur x11, [x21, #0x10]
+  0x121140664: cmp x11, #0
+  0x121140668: b.eq #0x121142e38
+  0x12114066c: nop
+  0x121140670: nop
+  0x121140674: nop
+  0x121140678: nop
+  0x12114067c: nop
+  0x121140680: ldur x11, [x21, #0x10]
+  0x121140684: ldr x12, #0x12114068c
+  0x121140688: b #0x121140694
+  0x12114068c: .byte 0x00, 0x09, 0xa3, 0x01
+  0x121140690: udf #1
+  0x121140694: ldur x11, [x11, #8]
+  0x121140698: cmp x11, x12
+  0x12114069c: b.ne #0x121142e7c
+  0x1211406a0: nop
+  0x1211406a4: nop
+  0x1211406a8: nop
+  0x1211406ac: nop
+  0x1211406b0: nop
+  0x1211406b4: ldur x11, [x21, #0x18]
+  0x1211406b8: tst x11, #1
+  0x1211406bc: b.eq #0x121142dac
+  0x1211406c0: asr x11, x11, #1
+  0x1211406c4: stur x1, [x21]
+  0x1211406c8: stur x15, [x21, #8]
+  0x1211406cc: stur x9, [x21, #-0x38]
+  0x1211406d0: stur x10, [x21, #-0x30]
+  0x1211406d4: stur x14, [x21, #-0x28]
+  0x1211406d8: mov x1, x11
+  0x1211406dc: ldur x0, [x21, #0x10]
+  0x1211406e0: mov x16, #0xff20
+  0x1211406e4: movk x16, #0x6d, lsl #16
+  0x1211406e8: movk x16, #1, lsl #32
+  0x1211406ec: blr x16
+  0x1211406f0: mov x10, x0
+
+== BLOCK 8/29, ISEQ RANGE [19,23), 20 bytes ===================
+  0x1211406f4: ldur x14, [x21, #-0x30]
+  0x1211406f8: nop
+  0x1211406fc: nop
+  0x121140700: nop
+  0x121140704: nop
+
+== BLOCK 9/29, ISEQ RANGE [21,25), 20 bytes ===================
+  0x121140708: ldur x15, [x21, #-0x20]
+  0x12114070c: nop
+  0x121140710: nop
+  0x121140714: nop
+  0x121140718: nop
+
+== BLOCK 10/29, ISEQ RANGE [23,25), 156 bytes =================
+  0x12114071c: tst x14, #7
+  0x121140720: b.ne #0x12114301c
+  0x121140724: nop
+  0x121140728: nop
+  0x12114072c: nop
+  0x121140730: nop
+  0x121140734: nop
+  0x121140738: cmp x14, #0
+  0x12114073c: b.eq #0x121143058
+  0x121140740: nop
+  0x121140744: nop
+  0x121140748: nop
+  0x12114074c: nop
+  0x121140750: nop
+  0x121140754: mov x11, x14
+  0x121140758: ldr x12, #0x121140760
+  0x12114075c: b #0x121140768
+  0x121140760: .byte 0x00, 0x09, 0xa3, 0x01
+  0x121140764: udf #1
+  0x121140768: ldur x11, [x11, #8]
+  0x12114076c: cmp x11, x12
+  0x121140770: b.ne #0x121143094
+  0x121140774: nop
+  0x121140778: nop
+  0x12114077c: nop
+  0x121140780: nop
+  0x121140784: nop
+  0x121140788: mov x11, x15
+  0x12114078c: tst x11, #1
+  0x121140790: b.eq #0x121142fdc
+  0x121140794: asr x11, x11, #1
+  0x121140798: stur x10, [x21, #0x10]
+  0x12114079c: mov x1, x11
+  0x1211407a0: mov x0, x14
+  0x1211407a4: mov x16, #0xff20
+  0x1211407a8: movk x16, #0x6d, lsl #16
+  0x1211407ac: movk x16, #1, lsl #32
+  0x1211407b0: blr x16
+  0x1211407b4: mov x14, x0
+
+== BLOCK 11/29, ISEQ RANGE [25,29), 120 bytes =================
+  0x1211407b8: ldur x11, [x21, #0x10]
+  0x1211407bc: tst x11, #1
+  0x1211407c0: b.eq #0x12114313c
+  0x1211407c4: nop
+  0x1211407c8: nop
+  0x1211407cc: nop
+  0x1211407d0: nop
+  0x1211407d4: nop
+  0x1211407d8: tst x14, #1
+  0x1211407dc: b.eq #0x121143170
+  0x1211407e0: nop
+  0x1211407e4: nop
+  0x1211407e8: nop
+  0x1211407ec: nop
+  0x1211407f0: nop
+  0x1211407f4: ldur x11, [x21, #0x10]
+  0x1211407f8: asr x11, x11, #1
+  0x1211407fc: subs x12, x14, #1
+  0x121140800: smulh x16, x11, x12
+  0x121140804: mul x11, x11, x12
+  0x121140808: asr x17, x11, #0x3f
+  0x12114080c: cmp x16, x17
+  0x121140810: b.ne #0x1211431a4
+  0x121140814: nop
+  0x121140818: nop
+  0x12114081c: nop
+  0x121140820: nop
+  0x121140824: nop
+  0x121140828: adds x11, x11, #1
+  0x12114082c: mov x10, x11
+
+== BLOCK 12/29, ISEQ RANGE [27,29), 192 bytes =================
+  0x121140830: ldur x11, [x21]
+  0x121140834: tst x11, #7
+  0x121140838: b.ne #0x12114320c
+  0x12114083c: nop
+  0x121140840: nop
+  0x121140844: nop
+  0x121140848: nop
+  0x12114084c: nop
+  0x121140850: ldur x11, [x21]
+  0x121140854: cmp x11, #0
+  0x121140858: b.eq #0x121143240
+  0x12114085c: nop
+  0x121140860: nop
+  0x121140864: nop
+  0x121140868: nop
+  0x12114086c: nop
+  0x121140870: ldur x11, [x21]
+  0x121140874: ldr x12, #0x12114087c
+  0x121140878: b #0x121140884
+  0x12114087c: .byte 0x00, 0x09, 0xa3, 0x01
+  0x121140880: udf #1
+  0x121140884: ldur x11, [x11, #8]
+  0x121140888: cmp x11, x12
+  0x12114088c: b.ne #0x121143274
+  0x121140890: nop
+  0x121140894: nop
+  0x121140898: nop
+  0x12114089c: nop
+  0x1211408a0: nop
+  0x1211408a4: mov x11, #0xcd30
+  0x1211408a8: movk x11, #0xaaea, lsl #16
+  0x1211408ac: movk x11, #0xc, lsl #32
+  0x1211408b0: stur x11, [x19]
+  0x1211408b4: add x11, x21, #0x18
+  0x1211408b8: mov x21, x11
+  0x1211408bc: stur x21, [x19, #8]
+  0x1211408c0: ldur x11, [x21, #-0x10]
+  0x1211408c4: asr x11, x11, #1
+  0x1211408c8: stur x10, [x21, #-8]
+  0x1211408cc: mov x2, x10
+  0x1211408d0: mov x1, x11
+  0x1211408d4: ldur x0, [x21, #-0x18]
+  0x1211408d8: mov x16, #0x648c
+  0x1211408dc: movk x16, #0x3b, lsl #16
+  0x1211408e0: movk x16, #1, lsl #32
+  0x1211408e4: blr x16
+  0x1211408e8: ldur x11, [x21, #-8]
+  0x1211408ec: mov x1, x11
+
+== BLOCK 13/29, ISEQ RANGE [29,32), 0 bytes ===================
+== BLOCK 14/29, ISEQ RANGE [30,35), 20 bytes ==================
+  0x1211408f0: ldur x1, [x21, #-0x38]
+  0x1211408f4: mov x9, #3
+  0x1211408f8: nop
+  0x1211408fc: nop
+  0x121140900: nop
+
+== BLOCK 15/29, ISEQ RANGE [33,37), 44 bytes ==================
+  0x121140904: tst x1, #1
+  0x121140908: b.eq #0x1211433b8
+  0x12114090c: nop
+  0x121140910: nop
+  0x121140914: nop
+  0x121140918: nop
+  0x12114091c: nop
+  0x121140920: subs x11, x1, #1
+  0x121140924: adds x11, x11, x9
+  0x121140928: b.vs #0x12114337c
+  0x12114092c: mov x1, x11
+
+== BLOCK 16/29, ISEQ RANGE [35,39), 20 bytes ==================
+  0x121140930: mov x9, x1
+  0x121140934: nop
+  0x121140938: nop
+  0x12114093c: nop
+  0x121140940: nop
+
+== BLOCK 17/29, ISEQ RANGE [37,45), 64 bytes ==================
+  0x121140944: mov x1, x9
+  0x121140948: mov x10, #0x81
+  0x12114094c: cmp x1, x10
+  0x121140950: mov x11, #0x14
+  0x121140954: mov x12, #0
+  0x121140958: csel x11, x11, x12, lt
+  0x12114095c: mov x1, x11
+  0x121140960: ldur w11, [x20, #0x20]
+  0x121140964: cbnz w11, #0x121143530
+  0x121140968: tst x1, #-5
+  0x12114096c: b.eq #0x121140c7c
+  0x121140970: nop
+  0x121140974: nop
+  0x121140978: nop
+  0x12114097c: nop
+  0x121140980: nop
+
+== BLOCK 18/29, ISEQ RANGE [9,13), 20 bytes ===================
+  0x121140984: ldur x1, [x21, #-0x40]
+  0x121140988: nop
+  0x12114098c: nop
+  0x121140990: nop
+  0x121140994: nop
+
+== BLOCK 19/29, ISEQ RANGE [11,15), 20 bytes ==================
+  0x121140998: mov x10, x9
+  0x12114099c: nop
+  0x1211409a0: nop
+  0x1211409a4: nop
+  0x1211409a8: nop
+
+== BLOCK 20/29, ISEQ RANGE [13,17), 20 bytes ==================
+  0x1211409ac: ldur x14, [x21, #-0x50]
+  0x1211409b0: nop
+  0x1211409b4: nop
+  0x1211409b8: nop
+  0x1211409bc: nop
+
+== BLOCK 21/29, ISEQ RANGE [15,19), 20 bytes ==================
+  0x1211409c0: mov x15, x9
+  0x1211409c4: nop
+  0x1211409c8: nop
+  0x1211409cc: nop
+  0x1211409d0: nop
+
+== BLOCK 22/29, ISEQ RANGE [17,19), 164 bytes =================
+  0x1211409d4: tst x14, #7
+  0x1211409d8: b.ne #0x12114379c
+  0x1211409dc: nop
+  0x1211409e0: nop
+  0x1211409e4: nop
+  0x1211409e8: nop
+  0x1211409ec: nop
+  0x1211409f0: cmp x14, #0
+  0x1211409f4: b.eq #0x1211437e0
+  0x1211409f8: nop
+  0x1211409fc: nop
+  0x121140a00: nop
+  0x121140a04: nop
+  0x121140a08: nop
+  0x121140a0c: mov x11, x14
+  0x121140a10: ldr x12, #0x121140a18
+  0x121140a14: b #0x121140a20
+  0x121140a18: .byte 0x00, 0x09, 0xa3, 0x01
+  0x121140a1c: udf #1
+  0x121140a20: ldur x11, [x11, #8]
+  0x121140a24: cmp x11, x12
+  0x121140a28: b.ne #0x121143824
+  0x121140a2c: nop
+  0x121140a30: nop
+  0x121140a34: nop
+  0x121140a38: nop
+  0x121140a3c: nop
+  0x121140a40: mov x11, x15
+  0x121140a44: tst x11, #1
+  0x121140a48: b.eq #0x121143754
+  0x121140a4c: asr x11, x11, #1
+  0x121140a50: stur x1, [x21, #-0x18]
+  0x121140a54: stur x10, [x21, #-0x10]
+  0x121140a58: stur x9, [x21, #-0x38]
+  0x121140a5c: mov x1, x11
+  0x121140a60: mov x0, x14
+  0x121140a64: mov x16, #0xff20
+  0x121140a68: movk x16, #0x6d, lsl #16
+  0x121140a6c: movk x16, #1, lsl #32
+  0x121140a70: blr x16
+  0x121140a74: mov x10, x0
+
+== BLOCK 23/29, ISEQ RANGE [19,23), 20 bytes ==================
+  0x121140a78: ldur x14, [x21, #-0x48]
+  0x121140a7c: nop
+  0x121140a80: nop
+  0x121140a84: nop
+  0x121140a88: nop
+
+== BLOCK 24/29, ISEQ RANGE [21,25), 20 bytes ==================
+  0x121140a8c: ldur x15, [x21, #-0x38]
+  0x121140a90: nop
+  0x121140a94: nop
+  0x121140a98: nop
+  0x121140a9c: nop
+
+== BLOCK 25/29, ISEQ RANGE [23,25), 156 bytes =================
+  0x121140aa0: tst x14, #7
+  0x121140aa4: b.ne #0x1211439bc
+  0x121140aa8: nop
+  0x121140aac: nop
+  0x121140ab0: nop
+  0x121140ab4: nop
+  0x121140ab8: nop
+  0x121140abc: cmp x14, #0
+  0x121140ac0: b.eq #0x1211439f8
+  0x121140ac4: nop
+  0x121140ac8: nop
+  0x121140acc: nop
+  0x121140ad0: nop
+  0x121140ad4: nop
+  0x121140ad8: mov x11, x14
+  0x121140adc: ldr x12, #0x121140ae4
+  0x121140ae0: b #0x121140aec
+  0x121140ae4: .byte 0x00, 0x09, 0xa3, 0x01
+  0x121140ae8: udf #1
+  0x121140aec: ldur x11, [x11, #8]
+  0x121140af0: cmp x11, x12
+  0x121140af4: b.ne #0x121143a34
+  0x121140af8: nop
+  0x121140afc: nop
+  0x121140b00: nop
+  0x121140b04: nop
+  0x121140b08: nop
+  0x121140b0c: mov x11, x15
+  0x121140b10: tst x11, #1
+  0x121140b14: b.eq #0x12114397c
+  0x121140b18: asr x11, x11, #1
+  0x121140b1c: stur x10, [x21, #-8]
+  0x121140b20: mov x1, x11
+  0x121140b24: mov x0, x14
+  0x121140b28: mov x16, #0xff20
+  0x121140b2c: movk x16, #0x6d, lsl #16
+  0x121140b30: movk x16, #1, lsl #32
+  0x121140b34: blr x16
+  0x121140b38: mov x14, x0
+
+== BLOCK 26/29, ISEQ RANGE [25,29), 120 bytes =================
+  0x121140b3c: ldur x11, [x21, #-8]
+  0x121140b40: tst x11, #1
+  0x121140b44: b.eq #0x121143adc
+  0x121140b48: nop
+  0x121140b4c: nop
+  0x121140b50: nop
+  0x121140b54: nop
+  0x121140b58: nop
+  0x121140b5c: tst x14, #1
+  0x121140b60: b.eq #0x121143b10
+  0x121140b64: nop
+  0x121140b68: nop
+  0x121140b6c: nop
+  0x121140b70: nop
+  0x121140b74: nop
+  0x121140b78: ldur x11, [x21, #-8]
+  0x121140b7c: asr x11, x11, #1
+  0x121140b80: subs x12, x14, #1
+  0x121140b84: smulh x16, x11, x12
+  0x121140b88: mul x11, x11, x12
+  0x121140b8c: asr x17, x11, #0x3f
+  0x121140b90: cmp x16, x17
+  0x121140b94: b.ne #0x121143b44
+  0x121140b98: nop
+  0x121140b9c: nop
+  0x121140ba0: nop
+  0x121140ba4: nop
+  0x121140ba8: nop
+  0x121140bac: adds x11, x11, #1
+  0x121140bb0: mov x10, x11
+
+== BLOCK 27/29, ISEQ RANGE [27,29), 200 bytes =================
+  0x121140bb4: ldur x11, [x21, #-0x18]
+  0x121140bb8: tst x11, #7
+  0x121140bbc: b.ne #0x121143bac
+  0x121140bc0: nop
+  0x121140bc4: nop
+  0x121140bc8: nop
+  0x121140bcc: nop
+  0x121140bd0: nop
+  0x121140bd4: ldur x11, [x21, #-0x18]
+  0x121140bd8: cmp x11, #0
+  0x121140bdc: b.eq #0x121143be0
+  0x121140be0: nop
+  0x121140be4: nop
+  0x121140be8: nop
+  0x121140bec: nop
+  0x121140bf0: nop
+  0x121140bf4: ldur x11, [x21, #-0x18]
+  0x121140bf8: ldr x12, #0x121140c00
+  0x121140bfc: b #0x121140c08
+  0x121140c00: .byte 0x00, 0x09, 0xa3, 0x01
+  0x121140c04: udf #1
+  0x121140c08: ldur x11, [x11, #8]
+  0x121140c0c: cmp x11, x12
+  0x121140c10: b.ne #0x121143c14
+  0x121140c14: nop
+  0x121140c18: nop
+  0x121140c1c: nop
+  0x121140c20: nop
+  0x121140c24: nop
+  0x121140c28: mov x11, #0xcd30
+  0x121140c2c: movk x11, #0xaaea, lsl #16
+  0x121140c30: movk x11, #0xc, lsl #32
+  0x121140c34: stur x11, [x19]
+  0x121140c38: ldur x11, [x21, #-0x10]
+  0x121140c3c: asr x11, x11, #1
+  0x121140c40: stur x10, [x21, #-8]
+  0x121140c44: mov x2, x10
+  0x121140c48: mov x1, x11
+  0x121140c4c: ldur x0, [x21, #-0x18]
+  0x121140c50: mov x16, #0x648c
+  0x121140c54: movk x16, #0x3b, lsl #16
+  0x121140c58: movk x16, #1, lsl #32
+  0x121140c5c: blr x16
+  0x121140c60: ldur x11, [x21, #-8]
+  0x121140c64: mov x1, x11
+  0x121140c68: b #0x1211408f0
+  0x121140c6c: nop
+  0x121140c70: nop
+  0x121140c74: nop
+  0x121140c78: nop
+
+== BLOCK 28/29, ISEQ RANGE [45,49), 4 bytes ===================
+  0x121140c7c: mov x1, #4
+
+== BLOCK 29/29, ISEQ RANGE [47,50), 36 bytes ==================
+  0x121140c80: ldur x1, [x21, #-0x40]
+  0x121140c84: ldur w11, [x20, #0x20]
+  0x121140c88: cbnz w11, #0x121143cec
+  0x121140c8c: adds x11, x19, #0x38
+  0x121140c90: mov x19, x11
+  0x121140c94: stur x19, [x20, #0x10]
+  0x121140c98: mov x0, x1
+  0x121140c9c: ldur x11, [x19, #-8]
+  0x121140ca0: br x11
+

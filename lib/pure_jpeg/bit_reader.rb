@@ -23,9 +23,24 @@ module PureJPEG
         @bits_in_buffer -= n
         return (@buffer >> @bits_in_buffer) & ((1 << n) - 1)
       end
-      # Slow path: need to refill
-      value = 0
-      n.times { value = (value << 1) | read_bit }
+      # Medium path: drain remaining bits, refill, then read rest.
+      # Avoids calling read_bit in a loop (eliminates block + per-bit overhead).
+      value = @buffer & ((1 << @bits_in_buffer) - 1)
+      remaining = n - @bits_in_buffer
+      @bits_in_buffer = 0
+      # May need up to 2 fills for reads > 8 bits
+      while remaining > 0
+        fill_buffer
+        if @bits_in_buffer >= remaining
+          @bits_in_buffer -= remaining
+          value = (value << remaining) | ((@buffer >> @bits_in_buffer) & ((1 << remaining) - 1))
+          remaining = 0
+        else
+          value = (value << @bits_in_buffer) | (@buffer & ((1 << @bits_in_buffer) - 1))
+          remaining -= @bits_in_buffer
+          @bits_in_buffer = 0
+        end
+      end
       value
     end
 

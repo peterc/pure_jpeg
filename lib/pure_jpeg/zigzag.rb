@@ -13,15 +13,35 @@ module PureJPEG
       53, 60, 61, 54, 47, 55, 62, 63
     ].freeze
 
-    # Reorder an 8x8 block into zigzag order, writing into `out`.
+    # Inverse order: INVERSE_ORDER[raster_pos] = zigzag_index
+    INVERSE_ORDER = Array.new(64).tap { |inv|
+      ORDER.each_with_index { |raster_pos, zigzag_idx| inv[raster_pos] = zigzag_idx }
+    }.freeze
+
+    # Reorder an 8x8 block from raster order into zigzag order.
+    # Writes into pre-allocated `out` buffer to avoid allocating a new Array.
+    # Uses a while loop instead of 64 unrolled assignments — YJIT generates
+    # a single compact block (~2KB) vs 320 blocks (~100KB) for unrolled code,
+    # dramatically reducing L1 I-cache pressure on Apple Silicon (192KB L1i).
     def self.reorder!(block, out)
-      64.times { |i| out[i] = block[ORDER[i]] }
+      order = ORDER
+      i = 0
+      while i < 64
+        out[i] = block[order[i]]
+        i += 1
+      end
       out
     end
 
     # Reverse zigzag: from zigzag order back to raster order.
+    # Writes into pre-allocated `out` buffer to avoid allocating a new Array.
     def self.unreorder!(zigzag, out)
-      64.times { |i| out[ORDER[i]] = zigzag[i] }
+      inv = INVERSE_ORDER
+      i = 0
+      while i < 64
+        out[i] = zigzag[inv[i]]
+        i += 1
+      end
       out
     end
   end

@@ -1,0 +1,405 @@
+# YJIT Disassembly for: Encoder#downsample
+# Method: #<Method: PureJPEG::Encoder#downsample(data, src_w, src_h, dst_w, dst_h) /Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/encoder.rb:417>
+
+== disasm: #<ISeq:downsample@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/encoder.rb:417 (417,4)-(435,7)>
+local table (size: 8, argc: 5 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
+[ 8] data@0<Arg>[ 7] src_w@1<Arg>[ 6] src_h@2<Arg>[ 5] dst_w@3<Arg>[ 4] dst_h@4<Arg>[ 3] out@5      [ 2] max_x@6    [ 1] max_y@7
+0000 opt_getconstant_path                   <ic:0 Array>              ( 418)[LiCa]
+0002 putnil
+0003 swap
+0004 getlocal_WC_0                          dst_w@3
+0006 getlocal_WC_0                          dst_h@4
+0008 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0010 opt_new                                <calldata!mid:new, argc:1, ARGS_SIMPLE>, 17
+0013 opt_send_without_block                 <calldata!mid:initialize, argc:1, FCALL|ARGS_SIMPLE>
+0015 jump                                   20
+0017 opt_send_without_block                 <calldata!mid:new, argc:1, ARGS_SIMPLE>
+0019 swap
+0020 pop
+0021 setlocal_WC_0                          out@5
+0023 getlocal_WC_0                          src_w@1                   ( 419)[Li]
+0025 putobject_INT2FIX_1_
+0026 opt_minus                              <calldata!mid:-, argc:1, ARGS_SIMPLE>[CcCr]
+0028 setlocal_WC_0                          max_x@6
+0030 getlocal_WC_0                          src_h@2                   ( 420)[Li]
+0032 putobject_INT2FIX_1_
+0033 opt_minus                              <calldata!mid:-, argc:1, ARGS_SIMPLE>[CcCr]
+0035 setlocal_WC_0                          max_y@7
+0037 getlocal_WC_0                          dst_h@4                   ( 421)[Li]
+0039 send                                   <calldata!mid:times, argc:0>, block in downsample
+0042 pop
+0043 getlocal_WC_0                          out@5                     ( 434)[Li]
+0045 leave                                                            ( 435)[Re]
+
+== disasm: #<ISeq:block in downsample@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/encoder.rb:421 (421,18)-(433,9)>
+local table (size: 6, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
+[ 6] dy@0<AmbiguousArg>[ 5] sy@1       [ 4] y1@2       [ 3] row0@3     [ 2] row1@4     [ 1] dst_row@5
+0000 getlocal_WC_0                          dy@0                      ( 422)[LiBc]
+0002 putobject_INT2FIX_1_
+0003 opt_ltlt                               <calldata!mid:<<, argc:1, ARGS_SIMPLE>[CcCr]
+0005 setlocal_WC_0                          sy@1
+0007 getlocal_WC_0                          sy@1                      ( 423)[Li]
+0009 getlocal_WC_1                          max_y@7
+0011 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0013 branchunless                           22
+0015 getlocal_WC_0                          sy@1
+0017 putobject_INT2FIX_1_
+0018 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0020 jump                                   24
+0022 getlocal_WC_1                          max_y@7
+0024 setlocal_WC_0                          y1@2
+0026 getlocal_WC_0                          sy@1                      ( 424)[Li]
+0028 getlocal_WC_1                          src_w@1
+0030 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0032 setlocal_WC_0                          row0@3
+0034 getlocal_WC_0                          y1@2                      ( 425)[Li]
+0036 getlocal_WC_1                          src_w@1
+0038 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0040 setlocal_WC_0                          row1@4
+0042 getlocal_WC_0                          dy@0                      ( 426)[Li]
+0044 getlocal_WC_1                          dst_w@3
+0046 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0048 setlocal_WC_0                          dst_row@5
+0050 getlocal_WC_1                          dst_w@3                   ( 427)[Li]
+0052 send                                   <calldata!mid:times, argc:0>, block (2 levels) in downsample
+0055 leave                                                            ( 433)[Br]
+
+== disasm: #<ISeq:block (2 levels) in downsample@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/encoder.rb:427 (427,20)-(432,11)>
+local table (size: 3, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
+[ 3] dx@0<AmbiguousArg>[ 2] sx@1       [ 1] x1@2
+0000 getlocal_WC_0                          dx@0                      ( 428)[LiBc]
+0002 putobject_INT2FIX_1_
+0003 opt_ltlt                               <calldata!mid:<<, argc:1, ARGS_SIMPLE>[CcCr]
+0005 setlocal_WC_0                          sx@1
+0007 getlocal_WC_0                          sx@1                      ( 429)[Li]
+0009 getlocal                               max_x@6, 2
+0012 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0014 branchunless                           23
+0016 getlocal_WC_0                          sx@1
+0018 putobject_INT2FIX_1_
+0019 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0021 jump                                   26
+0023 getlocal                               max_x@6, 2
+0026 setlocal_WC_0                          x1@2
+0028 putnil                                                           ( 430)[Li]
+0029 getlocal                               out@5, 2
+0032 getlocal_WC_1                          dst_row@5
+0034 getlocal_WC_0                          dx@0
+0036 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0038 getlocal                               data@0, 2
+0041 getlocal_WC_1                          row0@3
+0043 getlocal_WC_0                          sx@1
+0045 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0047 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0049 getlocal                               data@0, 2
+0052 getlocal_WC_1                          row0@3
+0054 getlocal_WC_0                          x1@2
+0056 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0058 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0060 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0062 getlocal                               data@0, 2                 ( 431)
+0065 getlocal_WC_1                          row1@4
+0067 getlocal_WC_0                          sx@1
+0069 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0071 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0073 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>( 430)[CcCr]
+0075 getlocal                               data@0, 2                 ( 431)
+0078 getlocal_WC_1                          row1@4
+0080 getlocal_WC_0                          x1@2
+0082 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0084 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0086 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0088 putobject                              2
+0090 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
+0092 setn                                   3                         ( 430)
+0094 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0096 pop
+0097 leave                                                            ( 432)[Br]
+
+NUM BLOCK VERSIONS: 19
+TOTAL INLINE CODE SIZE: 984 bytes
+== BLOCK 1/19, ISEQ RANGE [0,2), 20 bytes =====================
+  0x121178a74: ldr x11, #0x121178a7c
+  0x121178a78: b #0x121178a84
+  0x121178a7c: .byte 0x00, 0x09, 0xa3, 0x01
+  0x121178a80: udf #1
+  0x121178a84: mov x1, x11
+
+== BLOCK 2/19, ISEQ RANGE [2,6), 20 bytes =====================
+  0x121178a88: mov x9, #4
+  0x121178a8c: mov x11, x9
+  0x121178a90: mov x12, x1
+  0x121178a94: mov x9, x12
+  0x121178a98: mov x1, x11
+
+== BLOCK 3/19, ISEQ RANGE [4,8), 20 bytes =====================
+  0x121178a9c: ldur x10, [x21, #-0x40]
+  0x121178aa0: nop
+  0x121178aa4: nop
+  0x121178aa8: nop
+  0x121178aac: nop
+
+== BLOCK 4/19, ISEQ RANGE [6,10), 20 bytes ====================
+  0x121178ab0: ldur x14, [x21, #-0x38]
+  0x121178ab4: nop
+  0x121178ab8: nop
+  0x121178abc: nop
+  0x121178ac0: nop
+
+== BLOCK 5/19, ISEQ RANGE [8,13), 112 bytes ===================
+  0x121178ac4: tst x10, #1
+  0x121178ac8: b.eq #0x12117b5dc
+  0x121178acc: nop
+  0x121178ad0: nop
+  0x121178ad4: nop
+  0x121178ad8: nop
+  0x121178adc: nop
+  0x121178ae0: tst x14, #1
+  0x121178ae4: b.eq #0x12117b61c
+  0x121178ae8: nop
+  0x121178aec: nop
+  0x121178af0: nop
+  0x121178af4: nop
+  0x121178af8: nop
+  0x121178afc: asr x11, x10, #1
+  0x121178b00: subs x12, x14, #1
+  0x121178b04: smulh x16, x11, x12
+  0x121178b08: mul x11, x11, x12
+  0x121178b0c: asr x17, x11, #0x3f
+  0x121178b10: cmp x16, x17
+  0x121178b14: b.ne #0x12117b65c
+  0x121178b18: nop
+  0x121178b1c: nop
+  0x121178b20: nop
+  0x121178b24: nop
+  0x121178b28: nop
+  0x121178b2c: adds x11, x11, #1
+  0x121178b30: mov x10, x11
+
+== BLOCK 6/19, ISEQ RANGE [10,13), 44 bytes ===================
+  0x121178b34: ldr x11, #0x121178b3c
+  0x121178b38: b #0x121178b44
+  0x121178b3c: .byte 0x00, 0x09, 0xa3, 0x01
+  0x121178b40: udf #1
+  0x121178b44: cmp x9, x11
+  0x121178b48: b.ne #0x12117b6d8
+  0x121178b4c: nop
+  0x121178b50: nop
+  0x121178b54: nop
+  0x121178b58: nop
+  0x121178b5c: nop
+
+== BLOCK 7/19, ISEQ RANGE [17,19), 236 bytes ==================
+  0x121178b60: ldr x11, #0x121178b68
+  0x121178b64: b #0x121178b70
+  0x121178b68: .byte 0x00, 0x09, 0xa3, 0x01
+  0x121178b6c: udf #1
+  0x121178b70: cmp x9, x11
+  0x121178b74: b.ne #0x12117b750
+  0x121178b78: nop
+  0x121178b7c: nop
+  0x121178b80: nop
+  0x121178b84: nop
+  0x121178b88: nop
+  0x121178b8c: ldur w11, [x20, #0x20]
+  0x121178b90: cbnz w11, #0x12117b78c
+  0x121178b94: add x11, x21, #0xa8
+  0x121178b98: cmp x19, x11
+  0x121178b9c: b.ls #0x12117b78c
+  0x121178ba0: mov x11, #0xc520
+  0x121178ba4: movk x11, #0xaaec, lsl #16
+  0x121178ba8: movk x11, #0xc, lsl #32
+  0x121178bac: stur x11, [x19]
+  0x121178bb0: add x11, x21, #0x30
+  0x121178bb4: ldr x12, #0x121178bbc
+  0x121178bb8: b #0x121178bc4
+  0x121178bbc: .byte 0x50, 0xc5, 0xa5, 0x01
+  0x121178bc0: udf #1
+  0x121178bc4: stur x12, [x11, #-0x18]
+  0x121178bc8: stur xzr, [x11, #-0x10]
+  0x121178bcc: mov x12, #0x83
+  0x121178bd0: movk x12, #0x5555, lsl #16
+  0x121178bd4: stur x12, [x11, #-8]
+  0x121178bd8: mov x12, #0xffff
+  0x121178bdc: movk x12, #0xffff, lsl #16
+  0x121178be0: movk x12, #0xffff, lsl #32
+  0x121178be4: movk x12, #0xffff, lsl #48
+  0x121178be8: stur x12, [x19, #-0x38]
+  0x121178bec: stur x11, [x19, #-0x30]
+  0x121178bf0: stur xzr, [x19, #-0x28]
+  0x121178bf4: stur x9, [x19, #-0x20]
+  0x121178bf8: stur xzr, [x19, #-0x10]
+  0x121178bfc: subs x11, x11, #8
+  0x121178c00: stur x11, [x19, #-0x18]
+  0x121178c04: sub x11, x19, #0x38
+  0x121178c08: stur x11, [x20, #0x10]
+  0x121178c0c: add x11, x21, #8
+  0x121178c10: mov x21, x11
+  0x121178c14: stur x21, [x19, #8]
+  0x121178c18: add x11, x21, #8
+  0x121178c1c: stur x1, [x21, #-8]
+  0x121178c20: stur x9, [x21]
+  0x121178c24: stur x10, [x21, #8]
+  0x121178c28: mov x2, x9
+  0x121178c2c: mov x1, x11
+  0x121178c30: mov x0, #1
+  0x121178c34: mov x16, #0xd338
+  0x121178c38: movk x16, #0x3b, lsl #16
+  0x121178c3c: movk x16, #1, lsl #32
+  0x121178c40: blr x16
+  0x121178c44: mov x9, x0
+  0x121178c48: stur x19, [x20, #0x10]
+
+== BLOCK 8/19, ISEQ RANGE [19,23), 16 bytes ===================
+  0x121178c4c: mov x11, x9
+  0x121178c50: ldur x12, [x21, #-8]
+  0x121178c54: mov x9, x12
+  0x121178c58: stur x11, [x21, #-8]
+
+== BLOCK 9/19, ISEQ RANGE [21,25), 36 bytes ===================
+  0x121178c5c: ldur x11, [x21, #-0x10]
+  0x121178c60: tst x11, #8
+  0x121178c64: b.ne #0x12117b828
+  0x121178c68: nop
+  0x121178c6c: nop
+  0x121178c70: nop
+  0x121178c74: nop
+  0x121178c78: nop
+  0x121178c7c: ldur x15, [x21, #-8]
+
+== BLOCK 10/19, ISEQ RANGE [23,28), 20 bytes ==================
+  0x121178c80: ldur x1, [x21, #-0x58]
+  0x121178c84: mov x9, #3
+  0x121178c88: nop
+  0x121178c8c: nop
+  0x121178c90: nop
+
+== BLOCK 11/19, ISEQ RANGE [26,30), 44 bytes ==================
+  0x121178c94: tst x1, #1
+  0x121178c98: b.eq #0x12117b944
+  0x121178c9c: nop
+  0x121178ca0: nop
+  0x121178ca4: nop
+  0x121178ca8: nop
+  0x121178cac: nop
+  0x121178cb0: subs x11, x1, x9
+  0x121178cb4: b.vs #0x12117b904
+  0x121178cb8: adds x11, x11, #1
+  0x121178cbc: mov x1, x11
+
+== BLOCK 12/19, ISEQ RANGE [28,32), 20 bytes ==================
+  0x121178cc0: mov x14, x1
+  0x121178cc4: nop
+  0x121178cc8: nop
+  0x121178ccc: nop
+  0x121178cd0: nop
+
+== BLOCK 13/19, ISEQ RANGE [30,35), 20 bytes ==================
+  0x121178cd4: ldur x1, [x21, #-0x50]
+  0x121178cd8: mov x9, #3
+  0x121178cdc: nop
+  0x121178ce0: nop
+  0x121178ce4: nop
+
+== BLOCK 14/19, ISEQ RANGE [33,37), 44 bytes ==================
+  0x121178ce8: tst x1, #1
+  0x121178cec: b.eq #0x12117bae4
+  0x121178cf0: nop
+  0x121178cf4: nop
+  0x121178cf8: nop
+  0x121178cfc: nop
+  0x121178d00: nop
+  0x121178d04: subs x11, x1, x9
+  0x121178d08: b.vs #0x12117baa0
+  0x121178d0c: adds x11, x11, #1
+  0x121178d10: mov x1, x11
+
+== BLOCK 15/19, ISEQ RANGE [35,39), 20 bytes ==================
+  0x121178d14: mov x10, x1
+  0x121178d18: nop
+  0x121178d1c: nop
+  0x121178d20: nop
+  0x121178d24: nop
+
+== BLOCK 16/19, ISEQ RANGE [37,42), 20 bytes ==================
+  0x121178d28: ldur x1, [x21, #-0x40]
+  0x121178d2c: nop
+  0x121178d30: nop
+  0x121178d34: nop
+  0x121178d38: nop
+
+== BLOCK 17/19, ISEQ RANGE [39,42), 228 bytes =================
+  0x121178d3c: tst x1, #1
+  0x121178d40: b.eq #0x12117bc54
+  0x121178d44: nop
+  0x121178d48: nop
+  0x121178d4c: nop
+  0x121178d50: nop
+  0x121178d54: nop
+  0x121178d58: add x11, x21, #0x88
+  0x121178d5c: cmp x19, x11
+  0x121178d60: b.ls #0x12117bc94
+  0x121178d64: mov x11, #4
+  0x121178d68: stur x11, [x21]
+  0x121178d6c: sub x11, x21, #8
+  0x121178d70: stur x11, [x19, #8]
+  0x121178d74: mov x11, #0xc5d8
+  0x121178d78: movk x11, #0xaaec, lsl #16
+  0x121178d7c: movk x11, #0xc, lsl #32
+  0x121178d80: stur x11, [x19]
+  0x121178d84: add x11, x21, #0x20
+  0x121178d88: ldr x12, #0x121178d90
+  0x121178d8c: b #0x121178d98
+  0x121178d90: .byte 0x10, 0xed, 0xb7, 0x01
+  0x121178d94: udf #1
+  0x121178d98: stur x12, [x11, #-0x18]
+  0x121178d9c: ldr x12, #0x121178da4
+  0x121178da0: b #0x121178dac
+  0x121178da4: .byte 0xb0, 0x7b, 0xe6, 0x01
+  0x121178da8: udf #1
+  0x121178dac: stur x12, [x19, #0x28]
+  0x121178db0: add x12, x19, #0x18
+  0x121178db4: orr x12, x12, #1
+  0x121178db8: stur x12, [x11, #-0x10]
+  0x121178dbc: mov x12, #3
+  0x121178dc0: movk x12, #0x1111, lsl #16
+  0x121178dc4: stur x12, [x11, #-8]
+  0x121178dc8: stur x11, [x19, #-0x30]
+  0x121178dcc: ldr x12, #0x121178dd4
+  0x121178dd0: b #0x121178ddc
+  0x121178dd4: .byte 0x20, 0xfe, 0xb7, 0x01
+  0x121178dd8: udf #1
+  0x121178ddc: stur x12, [x19, #-0x28]
+  0x121178de0: stur x1, [x19, #-0x20]
+  0x121178de4: stur xzr, [x19, #-0x10]
+  0x121178de8: subs x12, x11, #8
+  0x121178dec: stur x12, [x19, #-0x18]
+  0x121178df0: stur x1, [x21, #-8]
+  0x121178df4: stur x15, [x21, #-0x38]
+  0x121178df8: stur x14, [x21, #-0x30]
+  0x121178dfc: stur x10, [x21, #-0x28]
+  0x121178e00: mov x21, x11
+  0x121178e04: mov x11, #0xc1d8
+  0x121178e08: movk x11, #0x2117, lsl #16
+  0x121178e0c: movk x11, #1, lsl #32
+  0x121178e10: stur x11, [x19, #-8]
+  0x121178e14: subs x11, x19, #0x38
+  0x121178e18: mov x19, x11
+  0x121178e1c: stur x19, [x20, #0x10]
+
+... 13240 byte gap ...
+== BLOCK 18/19, ISEQ RANGE [42,45), 8 bytes ===================
+  0x12117c1d8: ldur x21, [x19, #8]
+  0x12117c1dc: mov x1, x0
+
+== BLOCK 19/19, ISEQ RANGE [43,46), 36 bytes ==================
+  0x12117c1e0: ldur x1, [x21, #-0x30]
+  0x12117c1e4: ldur w11, [x20, #0x20]
+  0x12117c1e8: cbnz w11, #0x12117e258
+  0x12117c1ec: adds x11, x19, #0x38
+  0x12117c1f0: mov x19, x11
+  0x12117c1f4: stur x19, [x20, #0x10]
+  0x12117c1f8: mov x0, x1
+  0x12117c1fc: ldur x11, [x19, #-8]
+  0x12117c200: br x11
+

@@ -76,12 +76,18 @@ module PureJPEG
       restart_interval = jfif.restart_interval
       mcu_count = 0
 
-      # Reusable buffers
+      # Reusable buffers (raster eliminated by fused dequantize_unzigzag)
       zigzag = Array.new(64, 0)
-      raster = Array.new(64, 0.0)
-      dequant = Array.new(64, 0.0)
-      temp = Array.new(64, 0.0)
-      spatial = Array.new(64, 0.0)
+      dequant = Array.new(64, 0)
+      inv_order = Zigzag::INVERSE_ORDER
+
+      # Pre-resolve scan references and quant tables (constant per scan)
+      scan_refs = jfif.scan_components.map do |sc|
+        comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables)
+        qt = fetch_quant_table!(jfif, comp)
+        ch = channels[comp.id]
+        [sc, comp, dc_tab, ac_tab, qt, ch]
+      end
 
       mcus_y.times do |mcu_row|
         mcus_x.times do |mcu_col|
@@ -91,25 +97,20 @@ module PureJPEG
             prev_dc.clear
           end
 
-          jfif.scan_components.each do |sc|
-            comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables)
-            qt = fetch_quant_table!(jfif, comp)
-            ch = channels[comp.id]
-
+          scan_refs.each do |sc, comp, dc_tab, ac_tab, qt, ch|
             comp.v_sampling.times do |bv|
               comp.h_sampling.times do |bh|
                 # Decode one 8x8 block
                 decode_block(reader, dc_tab, ac_tab, prev_dc, sc.id, zigzag)
 
-                # Inverse pipeline: unzigzag -> dequantize -> IDCT -> level shift
-                Zigzag.unreorder!(zigzag, raster)
-                Quantization.dequantize!(raster, qt, dequant)
-                DCT.inverse!(dequant, temp, spatial)
+                # Inverse pipeline: fused unzigzag+dequantize -> IDCT -> level shift
+                Quantization.dequantize_unzigzag!(zigzag, qt, dequant, inv_order)
+                DCT.inverse!(dequant)
 
                 # Write block into channel buffer
                 bx = (mcu_col * comp.h_sampling + bh) * 8
                 by = (mcu_row * comp.v_sampling + bv) * 8
-                write_block(spatial, ch[:data], ch[:width], bx, by)
+                write_block(dequant, ch[:data], ch[:width], bx, by)
               end
             end
           end
@@ -204,10 +205,8 @@ module PureJPEG
       end
 
       zigzag = Array.new(64, 0)
-      raster = Array.new(64, 0.0)
-      dequant = Array.new(64, 0.0)
-      temp = Array.new(64, 0.0)
-      spatial = Array.new(64, 0.0)
+      dequant = Array.new(64, 0)
+      inv_order = Zigzag::INVERSE_ORDER
 
       jfif.components.each do |c|
         qt = fetch_quant_table!(jfif, c)
@@ -220,10 +219,9 @@ module PureJPEG
             offset = (block_y * bx_count + block_x) * 64
             64.times { |i| zigzag[i] = coeff_buf[offset + i] }
 
-            Zigzag.unreorder!(zigzag, raster)
-            Quantization.dequantize!(raster, qt, dequant)
-            DCT.inverse!(dequant, temp, spatial)
-            write_block(spatial, ch[:data], ch[:width], block_x * 8, block_y * 8)
+            Quantization.dequantize_unzigzag!(zigzag, qt, dequant, inv_order)
+            DCT.inverse!(dequant)
+            write_block(dequant, ch[:data], ch[:width], block_x * 8, block_y * 8)
           end
         end
       end
@@ -283,6 +281,14 @@ module PureJPEG
       prev_dc = Hash.new(0)
       mcu_count = 0
 
+      # Pre-resolve scan references (constant per scan)
+      scan_refs = scan.components.map do |sc|
+        comp, dc_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: false)
+        coeff_buf = coeffs[comp.id]
+        bx_count = comp_blocks[comp.id][0]
+        [sc, comp, dc_tab, coeff_buf, bx_count]
+      end
+
       mcus_y.times do |mcu_row|
         mcus_x.times do |mcu_col|
           if restart_interval > 0 && mcu_count > 0 && (mcu_count % restart_interval) == 0
@@ -290,11 +296,7 @@ module PureJPEG
             prev_dc.clear
           end
 
-          scan.components.each do |sc|
-            comp, dc_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: false)
-            coeff_buf = coeffs[comp.id]
-            bx_count = comp_blocks[comp.id][0]
-
+          scan_refs.each do |sc, comp, dc_tab, coeff_buf, bx_count|
             comp.v_sampling.times do |bv|
               comp.h_sampling.times do |bh|
                 block_x = mcu_col * comp.h_sampling + bh
@@ -438,16 +440,20 @@ module PureJPEG
           end
           break
         elsif symbol == 0xF0 # ZRL (16 zeros)
-          16.times do
-            out[i] = 0
-            i += 1
-          end
+          out[i] = 0; out[i+1] = 0; out[i+2] = 0; out[i+3] = 0
+          out[i+4] = 0; out[i+5] = 0; out[i+6] = 0; out[i+7] = 0
+          out[i+8] = 0; out[i+9] = 0; out[i+10] = 0; out[i+11] = 0
+          out[i+12] = 0; out[i+13] = 0; out[i+14] = 0; out[i+15] = 0
+          i += 16
         else
           run = (symbol >> 4) & 0x0F
           size = symbol & 0x0F
-          run.times do
+          # Use while loop for run-length zero fill (avoids block invocation)
+          j = run
+          while j > 0
             out[i] = 0
             i += 1
+            j -= 1
           end
           out[i] = reader.receive_extend(size)
           i += 1
@@ -460,12 +466,16 @@ module PureJPEG
     # Write an 8x8 spatial block (level-shifted by +128) into a channel buffer.
     def write_block(spatial, channel, ch_width, bx, by)
       8.times do |row|
-        dst_row = (by + row) * ch_width + bx
-        row8 = row << 3
-        8.times do |col|
-          val = (spatial[row8 | col] + 128.0).round
-          channel[dst_row + col] = val < 0 ? 0 : (val > 255 ? 255 : val)
-        end
+        dst = (by + row) * ch_width + bx
+        r8 = row << 3
+        v = spatial[r8]     + 128; channel[dst]     = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 1] + 128; channel[dst + 1] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 2] + 128; channel[dst + 2] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 3] + 128; channel[dst + 3] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 4] + 128; channel[dst + 4] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 5] + 128; channel[dst + 5] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 6] + 128; channel[dst + 6] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 7] + 128; channel[dst + 7] = v < 0 ? 0 : (v > 255 ? 255 : v)
       end
     end
 
@@ -493,17 +503,26 @@ module PureJPEG
 
     def assemble_grayscale(width, height, channels, comp)
       ch = channels[comp.id]
+      ch_data = ch[:data]
+      ch_width = ch[:width]
       pixels = Array.new(width * height)
       height.times do |y|
-        src_row = y * ch[:width]
+        src_row = y * ch_width
         dst_row = y * width
         width.times do |x|
-          v = ch[:data][src_row + x]
+          v = ch_data[src_row + x]
           pixels[dst_row + x] = (v << 16) | (v << 8) | v
         end
       end
       Image.new(width, height, pixels, icc_profile: @icc_profile)
     end
+
+    # Fixed-point coefficients (scaled by 2^16) for YCbCr→RGB.
+    FP_R_CR =  91881  # 1.402    * 65536
+    FP_G_CB = -22554  # -0.344136 * 65536
+    FP_G_CR = -46802  # -0.714136 * 65536
+    FP_B_CB = 116130  # 1.772    * 65536
+    FP_HALF =  32768  # rounding bias
 
     def assemble_color(width, height, channels, components, max_h, max_v)
       # Upsample chroma channels if needed and convert YCbCr to RGB
@@ -513,29 +532,55 @@ module PureJPEG
       cb_ch = channels[cb_comp.id]
       cr_ch = channels[cr_comp.id]
 
+      y_data = y_ch[:data]
+      cb_data = cb_ch[:data]
+      cr_data = cr_ch[:data]
+      y_stride = y_ch[:width]
+      cb_stride = cb_ch[:width]
+      cr_stride = cr_ch[:width]
+      cb_h = cb_comp.h_sampling
+      cb_v = cb_comp.v_sampling
+      cr_h = cr_comp.h_sampling
+      cr_v = cr_comp.v_sampling
+
       pixels = Array.new(width * height)
+
+      # Compute chroma shift factors — when sampling ratios are powers of 2
+      # (which they always are in JPEG), we can replace division with right-shift.
+      h_shift = 0
+      t = max_h / cb_h
+      while t > 1; h_shift += 1; t >>= 1; end
+      v_shift = 0
+      t = max_v / cb_v
+      while t > 1; v_shift += 1; t >>= 1; end
+
+      # Load fixed-point constants into locals so inner blocks use getlocal
+      # instead of opt_getconstant_path (5 lookups/pixel × 1M pixels eliminated)
+      fp_r_cr = FP_R_CR
+      fp_g_cb = FP_G_CB
+      fp_g_cr = FP_G_CR
+      fp_b_cb = FP_B_CB
+      fp_half = FP_HALF
 
       height.times do |py|
         dst_row = py * width
-        y_row = py * y_ch[:width]
+        y_row = py * y_stride
 
-        # Chroma coordinates (nearest-neighbor upsampling)
-        cb_y = (py * cb_comp.v_sampling) / max_v
-        cr_y = (py * cr_comp.v_sampling) / max_v
-        cb_row = cb_y * cb_ch[:width]
-        cr_row = cr_y * cr_ch[:width]
+        # Chroma row (nearest-neighbor upsampling via shift)
+        c_row = (py >> v_shift) * cb_stride
 
         width.times do |px|
-          lum = y_ch[:data][y_row + px]
+          lum = y_data[y_row + px]
 
-          cb_x = (px * cb_comp.h_sampling) / max_h
-          cr_x = (px * cr_comp.h_sampling) / max_h
-          cb = cb_ch[:data][cb_row + cb_x] - 128.0
-          cr = cr_ch[:data][cr_row + cr_x] - 128.0
+          # Cache chroma index to avoid computing c_row + cx twice
+          c_idx = c_row + (px >> h_shift)
+          cb_val = cb_data[c_idx] - 128
+          cr_val = cr_data[c_idx] - 128
 
-          r = (lum + 1.402 * cr).round
-          g = (lum - 0.344136 * cb - 0.714136 * cr).round
-          b = (lum + 1.772 * cb).round
+          # Fixed-point YCbCr→RGB (all integer arithmetic)
+          r = lum + ((fp_r_cr * cr_val + fp_half) >> 16)
+          g = lum + ((fp_g_cb * cb_val + fp_g_cr * cr_val + fp_half) >> 16)
+          b = lum + ((fp_b_cb * cb_val + fp_half) >> 16)
 
           r = r < 0 ? 0 : (r > 255 ? 255 : r)
           g = g < 0 ? 0 : (g > 255 ? 255 : g)

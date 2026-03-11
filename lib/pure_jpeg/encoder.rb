@@ -127,11 +127,9 @@ module PureJPEG
                              lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values)
       else
         chr_qtable = build_chr_qtable
-        y_data, cb_data, cr_data = extract_ycbcr(width, height)
         sub_w = (width + 1) / 2
         sub_h = (height + 1) / 2
-        cb_sub = downsample(cb_data, width, height, sub_w, sub_h)
-        cr_sub = downsample(cr_data, width, height, sub_w, sub_h)
+        y_data, cb_sub, cr_sub = extract_ycbcr_420(width, height, sub_w, sub_h)
 
         lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values,
           chr_dc_bits, chr_dc_values, chr_ac_bits, chr_ac_values =
@@ -195,17 +193,13 @@ module PureJPEG
       padded_w = (width + 7) & ~7
       padded_h = (height + 7) & ~7
 
-      block = Array.new(64, 0.0)
-      temp  = Array.new(64, 0.0)
-      dct   = Array.new(64, 0.0)
-      qbuf  = Array.new(64, 0)
+      block = Array.new(64, 0)
       zbuf  = Array.new(64, 0)
 
       (0...padded_h).step(8) do |by|
         (0...padded_w).step(8) do |bx|
           extract_block_into(y_data, width, height, bx, by, block)
-          transform_block(block, temp, dct, qbuf, zbuf, qtable)
-          yield zbuf
+          yield transform_block(block, zbuf, qtable)
         end
       end
     end
@@ -268,37 +262,28 @@ module PureJPEG
       mcu_w = (width + 15) & ~15
       mcu_h = (height + 15) & ~15
 
-      block = Array.new(64, 0.0)
-      temp  = Array.new(64, 0.0)
-      dct   = Array.new(64, 0.0)
-      qbuf  = Array.new(64, 0)
+      block = Array.new(64, 0)
       zbuf  = Array.new(64, 0)
 
       (0...mcu_h).step(16) do |my|
         (0...mcu_w).step(16) do |mx|
           extract_block_into(y_data, width, height, mx, my, block)
-          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
-          yield :y, zbuf
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my, block)
-          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
-          yield :y, zbuf
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx, my + 8, block)
-          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
-          yield :y, zbuf
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my + 8, block)
-          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
-          yield :y, zbuf
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(cb_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
-          yield :cb, zbuf
+          yield :cb, transform_block(block, zbuf, chr_qt)
 
           extract_block_into(cr_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
-          yield :cr, zbuf
+          yield :cr, transform_block(block, zbuf, chr_qt)
         end
       end
     end
@@ -323,11 +308,9 @@ module PureJPEG
 
     # --- Shared block pipeline (all buffers pre-allocated) ---
 
-    def transform_block(block, temp, dct, qbuf, zbuf, qtable)
-      DCT.forward!(block, temp, dct)
-      Quantization.quantize!(dct, qtable, qbuf)
-      Zigzag.reorder!(qbuf, zbuf)
-      zbuf
+    def transform_block(block, zbuf, qtable)
+      DCT.forward!(block)
+      Quantization.quantize_zigzag!(block, qtable, zbuf, Zigzag::ORDER)
     end
 
     # --- Pixel extraction ---
@@ -342,30 +325,164 @@ module PureJPEG
       end
     end
 
+    # Fixed-point coefficients (scaled by 2^16 = 65536) for RGB→YCbCr.
+    # Y  =  0.299*R + 0.587*G + 0.114*B
+    # Cb = -0.168736*R - 0.331264*G + 0.5*B + 128
+    # Cr =  0.5*R - 0.418688*G - 0.081312*B + 128
+    FP_Y_R  =  19595; FP_Y_G  =  38470; FP_Y_B  =   7471
+    FP_CB_R = -11058; FP_CB_G = -21710; FP_CB_B =  32768
+    FP_CR_R =  32768; FP_CR_G = -27440; FP_CR_B =  -5328
+    FP_HALF =  32768  # rounding bias
+    FP_128  = 8388608 # 128 << 16
+    FP_128_HALF = FP_128 + FP_HALF # merged 128 bias + rounding for Cb/Cr
+
     def extract_luminance(width, height)
       luminance = Array.new(width * height)
+      # Load fixed-point constants into locals for getlocal access
+      fp_y_r = FP_Y_R; fp_y_g = FP_Y_G; fp_y_b = FP_Y_B; fp_half = FP_HALF
+
       if source.respond_to?(:packed_pixels)
         packed = source.packed_pixels
         r_shift, g_shift, b_shift = packed_shifts
+        n = width * height
         i = 0
-        (width * height).times do
+        n.times do
           color = packed[i]
           r = (color >> r_shift) & 0xFF
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
-          luminance[i] = (0.299 * r + 0.587 * g + 0.114 * b).round.clamp(0, 255)
+          # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
+          luminance[i] = (fp_y_r * r + fp_y_g * g + fp_y_b * b + fp_half) >> 16
           i += 1
         end
       else
-        height.times do |y|
-          row = y * width
-          width.times do |x|
-            pixel = source[x, y]
-            luminance[row + x] = (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b).round.clamp(0, 255)
+        height.times do |py|
+          row = py * width
+          width.times do |px|
+            pixel = source[px, py]
+            r = pixel.r; g = pixel.g; b = pixel.b
+            # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
+            luminance[row + px] = (fp_y_r * r + fp_y_g * g + fp_y_b * b + fp_half) >> 16
           end
         end
       end
       luminance
+    end
+
+    # Fused YCbCr extraction + 4:2:0 chroma downsampling in a single pass.
+    # Avoids allocating two full-resolution chroma arrays (2M elements saved)
+    # and eliminates the separate downsample pass (2M reads + 512K writes saved).
+    def extract_ycbcr_420(width, height, sub_w, sub_h)
+      size = width * height
+      y_data  = Array.new(size)
+      cb_sub  = Array.new(sub_w * sub_h)
+      cr_sub  = Array.new(sub_w * sub_h)
+
+      fp_y_r = FP_Y_R; fp_y_g = FP_Y_G; fp_y_b = FP_Y_B
+      fp_cb_r = FP_CB_R; fp_cb_g = FP_CB_G; fp_cb_b = FP_CB_B
+      fp_cr_r = FP_CR_R; fp_cr_g = FP_CR_G; fp_cr_b = FP_CR_B
+      fp_half = FP_HALF; fp_128_half = FP_128_HALF
+
+      max_x = width - 1
+      max_y = height - 1
+
+      if source.respond_to?(:packed_pixels)
+        packed = source.packed_pixels
+        r_shift, g_shift, b_shift = packed_shifts
+
+        sub_h.times do |dy|
+          sy0 = dy << 1
+          sy1 = sy0 < max_y ? sy0 + 1 : max_y
+          row0 = sy0 * width
+          row1 = sy1 * width
+          dst_row = dy * sub_w
+
+          sub_w.times do |dx|
+            sx0 = dx << 1
+            sx1 = sx0 < max_x ? sx0 + 1 : max_x
+
+            # Pixel (sy0, sx0)
+            color = packed[row0 + sx0]
+            r0 = (color >> r_shift) & 0xFF; g0 = (color >> g_shift) & 0xFF; b0 = (color >> b_shift) & 0xFF
+            y_data[row0 + sx0] = (fp_y_r * r0 + fp_y_g * g0 + fp_y_b * b0 + fp_half) >> 16
+            cb_acc = fp_cb_r * r0 + fp_cb_g * g0 + fp_cb_b * b0
+            cr_acc = fp_cr_r * r0 + fp_cr_g * g0 + fp_cr_b * b0
+
+            # Pixel (sy0, sx1)
+            color = packed[row0 + sx1]
+            r1 = (color >> r_shift) & 0xFF; g1 = (color >> g_shift) & 0xFF; b1 = (color >> b_shift) & 0xFF
+            y_data[row0 + sx1] = (fp_y_r * r1 + fp_y_g * g1 + fp_y_b * b1 + fp_half) >> 16
+            cb_acc += fp_cb_r * r1 + fp_cb_g * g1 + fp_cb_b * b1
+            cr_acc += fp_cr_r * r1 + fp_cr_g * g1 + fp_cr_b * b1
+
+            # Pixel (sy1, sx0)
+            color = packed[row1 + sx0]
+            r2 = (color >> r_shift) & 0xFF; g2 = (color >> g_shift) & 0xFF; b2 = (color >> b_shift) & 0xFF
+            y_data[row1 + sx0] = (fp_y_r * r2 + fp_y_g * g2 + fp_y_b * b2 + fp_half) >> 16
+            cb_acc += fp_cb_r * r2 + fp_cb_g * g2 + fp_cb_b * b2
+            cr_acc += fp_cr_r * r2 + fp_cr_g * g2 + fp_cr_b * b2
+
+            # Pixel (sy1, sx1)
+            color = packed[row1 + sx1]
+            r3 = (color >> r_shift) & 0xFF; g3 = (color >> g_shift) & 0xFF; b3 = (color >> b_shift) & 0xFF
+            y_data[row1 + sx1] = (fp_y_r * r3 + fp_y_g * g3 + fp_y_b * b3 + fp_half) >> 16
+            cb_acc += fp_cb_r * r3 + fp_cb_g * g3 + fp_cb_b * b3
+            cr_acc += fp_cr_r * r3 + fp_cr_g * g3 + fp_cr_b * b3
+
+            # Average Cb/Cr over 4 pixels: (sum + 2*FP_128_HALF) >> 18
+            # Each pixel contributes (FP_CB_R*r + FP_CB_G*g + FP_CB_B*b),
+            # sum of 4 needs + 4*FP_128_HALF bias, then >> 18 (= >> 16 >> 2)
+            v = (cb_acc + 4 * fp_128_half) >> 18
+            cb_sub[dst_row + dx] = v < 0 ? 0 : (v > 255 ? 255 : v)
+            v = (cr_acc + 4 * fp_128_half) >> 18
+            cr_sub[dst_row + dx] = v < 0 ? 0 : (v > 255 ? 255 : v)
+          end
+        end
+      else
+        sub_h.times do |dy|
+          sy0 = dy << 1
+          sy1 = sy0 < max_y ? sy0 + 1 : max_y
+          row0 = sy0 * width
+          row1 = sy1 * width
+          dst_row = dy * sub_w
+
+          sub_w.times do |dx|
+            sx0 = dx << 1
+            sx1 = sx0 < max_x ? sx0 + 1 : max_x
+
+            pixel = source[sx0, sy0]
+            r0 = pixel.r; g0 = pixel.g; b0 = pixel.b
+            y_data[row0 + sx0] = (fp_y_r * r0 + fp_y_g * g0 + fp_y_b * b0 + fp_half) >> 16
+            cb_acc = fp_cb_r * r0 + fp_cb_g * g0 + fp_cb_b * b0
+            cr_acc = fp_cr_r * r0 + fp_cr_g * g0 + fp_cr_b * b0
+
+            pixel = source[sx1, sy0]
+            r1 = pixel.r; g1 = pixel.g; b1 = pixel.b
+            y_data[row0 + sx1] = (fp_y_r * r1 + fp_y_g * g1 + fp_y_b * b1 + fp_half) >> 16
+            cb_acc += fp_cb_r * r1 + fp_cb_g * g1 + fp_cb_b * b1
+            cr_acc += fp_cr_r * r1 + fp_cr_g * g1 + fp_cr_b * b1
+
+            pixel = source[sx0, sy1]
+            r2 = pixel.r; g2 = pixel.g; b2 = pixel.b
+            y_data[row1 + sx0] = (fp_y_r * r2 + fp_y_g * g2 + fp_y_b * b2 + fp_half) >> 16
+            cb_acc += fp_cb_r * r2 + fp_cb_g * g2 + fp_cb_b * b2
+            cr_acc += fp_cr_r * r2 + fp_cr_g * g2 + fp_cr_b * b2
+
+            pixel = source[sx1, sy1]
+            r3 = pixel.r; g3 = pixel.g; b3 = pixel.b
+            y_data[row1 + sx1] = (fp_y_r * r3 + fp_y_g * g3 + fp_y_b * b3 + fp_half) >> 16
+            cb_acc += fp_cb_r * r3 + fp_cb_g * g3 + fp_cb_b * b3
+            cr_acc += fp_cr_r * r3 + fp_cr_g * g3 + fp_cr_b * b3
+
+            v = (cb_acc + 4 * fp_128_half) >> 18
+            cb_sub[dst_row + dx] = v < 0 ? 0 : (v > 255 ? 255 : v)
+            v = (cr_acc + 4 * fp_128_half) >> 18
+            cr_sub[dst_row + dx] = v < 0 ? 0 : (v > 255 ? 255 : v)
+          end
+        end
+      end
+
+      [y_data, cb_sub, cr_sub]
     end
 
     def extract_ycbcr(width, height)
@@ -373,6 +490,13 @@ module PureJPEG
       y_data  = Array.new(size)
       cb_data = Array.new(size)
       cr_data = Array.new(size)
+
+      # Load fixed-point constants into locals so inner blocks use getlocal
+      # instead of opt_getconstant_path (10 lookups/pixel × 1M pixels eliminated)
+      fp_y_r = FP_Y_R; fp_y_g = FP_Y_G; fp_y_b = FP_Y_B
+      fp_cb_r = FP_CB_R; fp_cb_g = FP_CB_G; fp_cb_b = FP_CB_B
+      fp_cr_r = FP_CR_R; fp_cr_g = FP_CR_G; fp_cr_b = FP_CR_B
+      fp_half = FP_HALF; fp_128_half = FP_128_HALF
 
       if source.respond_to?(:packed_pixels)
         packed = source.packed_pixels
@@ -383,9 +507,12 @@ module PureJPEG
           r = (color >> r_shift) & 0xFF
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
-          y_data[i]  = ( 0.299    * r + 0.587    * g + 0.114    * b).round.clamp(0, 255)
-          cb_data[i] = (-0.168736 * r - 0.331264 * g + 0.5      * b + 128.0).round.clamp(0, 255)
-          cr_data[i] = ( 0.5      * r - 0.418688 * g - 0.081312 * b + 128.0).round.clamp(0, 255)
+          # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
+          y_data[i]  = (fp_y_r * r + fp_y_g * g + fp_y_b * b + fp_half) >> 16
+          v = (fp_cb_r * r + fp_cb_g * g + fp_cb_b * b + fp_128_half) >> 16
+          cb_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
+          v = (fp_cr_r * r + fp_cr_g * g + fp_cr_b * b + fp_128_half) >> 16
+          cr_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
           i += 1
         end
       else
@@ -395,9 +522,12 @@ module PureJPEG
             pixel = source[px, py]
             r = pixel.r; g = pixel.g; b = pixel.b
             i = row + px
-            y_data[i]  = ( 0.299    * r + 0.587    * g + 0.114    * b).round.clamp(0, 255)
-            cb_data[i] = (-0.168736 * r - 0.331264 * g + 0.5      * b + 128.0).round.clamp(0, 255)
-            cr_data[i] = ( 0.5      * r - 0.418688 * g - 0.081312 * b + 128.0).round.clamp(0, 255)
+            # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
+            y_data[i]  = (fp_y_r * r + fp_y_g * g + fp_y_b * b + fp_half) >> 16
+            v = (fp_cb_r * r + fp_cb_g * g + fp_cb_b * b + fp_128_half) >> 16
+            cb_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
+            v = (fp_cr_r * r + fp_cr_g * g + fp_cr_b * b + fp_128_half) >> 16
+            cr_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
           end
         end
       end
@@ -426,18 +556,39 @@ module PureJPEG
     end
 
     # Extract an 8x8 block into a pre-allocated array, level-shifted by -128.
+    # Fast path avoids per-pixel bounds checks for interior blocks (~98% of blocks).
     def extract_block_into(channel, width, height, bx, by, block)
-      max_x = width - 1
-      max_y = height - 1
-      8.times do |row|
-        sy = by + row
-        sy = max_y if sy > max_y
-        src_row = sy * width
-        row8 = row << 3
-        8.times do |col|
-          sx = bx + col
-          sx = max_x if sx > max_x
-          block[row8 | col] = channel[src_row + sx] - 128.0
+      if bx + 7 < width && by + 7 < height
+        # Fast path: no bounds checking needed
+        8.times do |row|
+          src = (by + row) * width + bx
+          r8 = row << 3
+          block[r8]     = channel[src]     - 128
+          block[r8 | 1] = channel[src + 1] - 128
+          block[r8 | 2] = channel[src + 2] - 128
+          block[r8 | 3] = channel[src + 3] - 128
+          block[r8 | 4] = channel[src + 4] - 128
+          block[r8 | 5] = channel[src + 5] - 128
+          block[r8 | 6] = channel[src + 6] - 128
+          block[r8 | 7] = channel[src + 7] - 128
+        end
+      else
+        # Slow path: edge blocks need bounds clamping
+        max_x = width - 1
+        max_y = height - 1
+        8.times do |row|
+          sy = by + row
+          sy = max_y if sy > max_y
+          src = sy * width
+          r8 = row << 3
+          x = bx;     block[r8]     = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 1; block[r8 | 1] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 2; block[r8 | 2] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 3; block[r8 | 3] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 4; block[r8 | 4] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 5; block[r8 | 5] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 6; block[r8 | 6] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 7; block[r8 | 7] = channel[src + (x > max_x ? max_x : x)] - 128
         end
       end
       block

@@ -36,15 +36,63 @@ module PureJPEG
       }
     end
 
-    # Quantize a 64-element DCT block in place into `out`.
+    # Quantize a 64-element DCT block into `out`.
+    # Uses integer rounding division (round-to-nearest) to match the
+    # behavior of Float division + round from the previous float DCT.
     def self.quantize!(block, table, out)
-      64.times { |i| out[i] = (block[i] / table[i]).round }
+      i = 0
+      while i < 64
+        v = block[i]; t = table[i]
+        out[i] = if v >= 0
+                   (v + (t >> 1)) / t
+                 else
+                   -((-v + (t >> 1)) / t)
+                 end
+        i += 1
+      end
+      out
+    end
+
+    # Fused quantize + zigzag reorder in a single 64-iteration pass.
+    # Reads DCT coefficients from raster-order `block` at zigzag-mapped
+    # positions and writes quantized values directly in zigzag order.
+    # Eliminates the intermediate quantized buffer and separate reorder pass.
+    def self.quantize_zigzag!(block, table, out, order)
+      i = 0
+      while i < 64
+        j = order[i]
+        v = block[j]; t = table[j]
+        out[i] = if v >= 0
+                   (v + (t >> 1)) / t
+                 else
+                   -((-v + (t >> 1)) / t)
+                 end
+        i += 1
+      end
       out
     end
 
     # Dequantize: multiply each coefficient by its quantization table entry.
     def self.dequantize!(block, table, out)
-      64.times { |i| out[i] = block[i] * table[i] }
+      i = 0
+      while i < 64
+        out[i] = block[i] * table[i]
+        i += 1
+      end
+      out
+    end
+
+    # Fused unzigzag + dequantize in a single 64-iteration pass.
+    # Reads zigzag-ordered coefficients at inverse-mapped positions and
+    # multiplies by raster-order quantization table, writing directly
+    # to raster order. Eliminates the intermediate raster buffer and
+    # separate unreorder pass.
+    def self.dequantize_unzigzag!(zigzag, table, out, inv_order)
+      i = 0
+      while i < 64
+        out[i] = zigzag[inv_order[i]] * table[i]
+        i += 1
+      end
       out
     end
   end
