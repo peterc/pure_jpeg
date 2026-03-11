@@ -434,16 +434,20 @@ module PureJPEG
           end
           break
         elsif symbol == 0xF0 # ZRL (16 zeros)
-          16.times do
-            out[i] = 0
-            i += 1
-          end
+          out[i] = 0; out[i+1] = 0; out[i+2] = 0; out[i+3] = 0
+          out[i+4] = 0; out[i+5] = 0; out[i+6] = 0; out[i+7] = 0
+          out[i+8] = 0; out[i+9] = 0; out[i+10] = 0; out[i+11] = 0
+          out[i+12] = 0; out[i+13] = 0; out[i+14] = 0; out[i+15] = 0
+          i += 16
         else
           run = (symbol >> 4) & 0x0F
           size = symbol & 0x0F
-          run.times do
+          # Use while loop for run-length zero fill (avoids block invocation)
+          j = run
+          while j > 0
             out[i] = 0
             i += 1
+            j -= 1
           end
           out[i] = reader.receive_extend(size)
           i += 1
