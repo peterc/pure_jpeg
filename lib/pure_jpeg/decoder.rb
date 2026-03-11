@@ -81,6 +81,14 @@ module PureJPEG
       raster = Array.new(64, 0)
       dequant = Array.new(64, 0)
 
+      # Pre-resolve scan references and quant tables (constant per scan)
+      scan_refs = jfif.scan_components.map do |sc|
+        comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables)
+        qt = fetch_quant_table!(jfif, comp)
+        ch = channels[comp.id]
+        [sc, comp, dc_tab, ac_tab, qt, ch]
+      end
+
       mcus_y.times do |mcu_row|
         mcus_x.times do |mcu_col|
           # Handle restart interval
@@ -89,18 +97,14 @@ module PureJPEG
             prev_dc.clear
           end
 
-          jfif.scan_components.each do |sc|
-            comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables)
-            qt = fetch_quant_table!(jfif, comp)
-            ch = channels[comp.id]
-
+          scan_refs.each do |sc, comp, dc_tab, ac_tab, qt, ch|
             comp.v_sampling.times do |bv|
               comp.h_sampling.times do |bh|
                 # Decode one 8x8 block
                 decode_block(reader, dc_tab, ac_tab, prev_dc, sc.id, zigzag)
 
                 # Inverse pipeline: unzigzag -> dequantize -> IDCT -> level shift
-                raster = Zigzag.unreorder!(zigzag)
+                Zigzag.unreorder!(zigzag, raster)
                 Quantization.dequantize!(raster, qt, dequant)
                 DCT.inverse!(dequant)
 
@@ -216,7 +220,7 @@ module PureJPEG
             offset = (block_y * bx_count + block_x) * 64
             64.times { |i| zigzag[i] = coeff_buf[offset + i] }
 
-            raster = Zigzag.unreorder!(zigzag)
+            Zigzag.unreorder!(zigzag, raster)
             Quantization.dequantize!(raster, qt, dequant)
             DCT.inverse!(dequant)
             write_block(dequant, ch[:data], ch[:width], block_x * 8, block_y * 8)
@@ -279,6 +283,14 @@ module PureJPEG
       prev_dc = Hash.new(0)
       mcu_count = 0
 
+      # Pre-resolve scan references (constant per scan)
+      scan_refs = scan.components.map do |sc|
+        comp, dc_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: false)
+        coeff_buf = coeffs[comp.id]
+        bx_count = comp_blocks[comp.id][0]
+        [sc, comp, dc_tab, coeff_buf, bx_count]
+      end
+
       mcus_y.times do |mcu_row|
         mcus_x.times do |mcu_col|
           if restart_interval > 0 && mcu_count > 0 && (mcu_count % restart_interval) == 0
@@ -286,11 +298,7 @@ module PureJPEG
             prev_dc.clear
           end
 
-          scan.components.each do |sc|
-            comp, dc_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: false)
-            coeff_buf = coeffs[comp.id]
-            bx_count = comp_blocks[comp.id][0]
-
+          scan_refs.each do |sc, comp, dc_tab, coeff_buf, bx_count|
             comp.v_sampling.times do |bv|
               comp.h_sampling.times do |bh|
                 block_x = mcu_col * comp.h_sampling + bh

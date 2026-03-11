@@ -315,7 +315,7 @@ module PureJPEG
     def transform_block(block, qbuf, zbuf, qtable)
       DCT.forward!(block)
       Quantization.quantize!(block, qtable, qbuf)
-      Zigzag.reorder!(qbuf)
+      Zigzag.reorder!(qbuf, zbuf)
     end
 
     # --- Pixel extraction ---
