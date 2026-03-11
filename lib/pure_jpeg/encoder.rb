@@ -340,10 +340,6 @@ module PureJPEG
     FP_HALF =  32768  # rounding bias
     FP_128  = 8388608 # 128 << 16
 
-    def clamp255(v)
-      v < 0 ? 0 : (v > 255 ? 255 : v)
-    end
-
     def extract_luminance(width, height)
       luminance = Array.new(width * height)
       if source.respond_to?(:packed_pixels)
@@ -356,7 +352,8 @@ module PureJPEG
           r = (color >> r_shift) & 0xFF
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
-          luminance[i] = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
+          v = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
+          luminance[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
           i += 1
         end
       else
@@ -365,7 +362,8 @@ module PureJPEG
           width.times do |px|
             pixel = source[px, py]
             r = pixel.r; g = pixel.g; b = pixel.b
-            luminance[row + px] = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
+            v = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
+            luminance[row + px] = v < 0 ? 0 : (v > 255 ? 255 : v)
           end
         end
       end
@@ -387,9 +385,12 @@ module PureJPEG
           r = (color >> r_shift) & 0xFF
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
-          y_data[i]  = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
-          cb_data[i] = clamp255((FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16)
-          cr_data[i] = clamp255((FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16)
+          v = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
+          y_data[i]  = v < 0 ? 0 : (v > 255 ? 255 : v)
+          v = (FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16
+          cb_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
+          v = (FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16
+          cr_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
           i += 1
         end
       else
@@ -399,11 +400,13 @@ module PureJPEG
             pixel = source[px, py]
             r = pixel.r; g = pixel.g; b = pixel.b
             i = row + px
-            y_data[i]  = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
-            cb_data[i] = clamp255((FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16)
-            cr_data[i] = clamp255((FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16)
+            v = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
+            y_data[i]  = v < 0 ? 0 : (v > 255 ? 255 : v)
+            v = (FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16
+            cb_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
+            v = (FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16
+            cr_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
           end
-          py += 1
         end
       end
 

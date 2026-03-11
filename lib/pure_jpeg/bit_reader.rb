@@ -23,7 +23,7 @@ module PureJPEG
         @bits_in_buffer -= n
         return (@buffer >> @bits_in_buffer) & ((1 << n) - 1)
       end
-      # Slow path: need to refill
+      # Slow path: accumulate bit-by-bit
       value = 0
       n.times { value = (value << 1) | read_bit }
       value

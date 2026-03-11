@@ -535,21 +535,28 @@ module PureJPEG
 
       pixels = Array.new(width * height)
 
+      # Compute chroma shift factors — when sampling ratios are powers of 2
+      # (which they always are in JPEG), we can replace division with right-shift.
+      h_shift = 0
+      t = max_h / cb_h
+      while t > 1; h_shift += 1; t >>= 1; end
+      v_shift = 0
+      t = max_v / cb_v
+      while t > 1; v_shift += 1; t >>= 1; end
+
       height.times do |py|
         dst_row = py * width
         y_row = py * y_stride
 
-        # Chroma coordinates (nearest-neighbor upsampling)
-        cb_row = ((py * cb_v) / max_v) * cb_stride
-        cr_row = ((py * cr_v) / max_v) * cr_stride
+        # Chroma row (nearest-neighbor upsampling via shift)
+        c_row = (py >> v_shift) * cb_stride
 
         width.times do |px|
           lum = y_data[y_row + px]
 
-          cb_x = (px * cb_h) / max_h
-          cr_x = (px * cr_h) / max_h
-          cb_val = cb_data[cb_row + cb_x] - 128
-          cr_val = cr_data[cr_row + cr_x] - 128
+          cx = px >> h_shift
+          cb_val = cb_data[c_row + cx] - 128
+          cr_val = cr_data[c_row + cx] - 128
 
           # Fixed-point YCbCr→RGB (all integer arithmetic)
           r = lum + ((FP_R_CR * cr_val + FP_HALF) >> 16)
