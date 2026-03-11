@@ -24,9 +24,10 @@ module PureJPEG
     # a single compact block (~2KB) vs 320 blocks (~100KB) for unrolled code,
     # dramatically reducing L1 I-cache pressure on Apple Silicon (192KB L1i).
     def self.reorder!(block, out)
+      order = ORDER
       i = 0
       while i < 64
-        out[i] = block[ORDER[i]]
+        out[i] = block[order[i]]
         i += 1
       end
       out
@@ -35,9 +36,10 @@ module PureJPEG
     # Reverse zigzag: from zigzag order back to raster order.
     # Writes into pre-allocated `out` buffer to avoid allocating a new Array.
     def self.unreorder!(zigzag, out)
+      inv = INVERSE_ORDER
       i = 0
       while i < 64
-        out[i] = zigzag[INVERSE_ORDER[i]]
+        out[i] = zigzag[inv[i]]
         i += 1
       end
       out
