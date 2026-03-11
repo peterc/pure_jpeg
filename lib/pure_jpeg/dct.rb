@@ -64,6 +64,9 @@ module PureJPEG
     # but ignored; computation is done in-place on `data`.
     def self.forward!(data, _temp = nil, _out = nil)
       # Pass 1: process rows
+      # Shift amounts are inlined as integer literals (2, 11, 5, 18) to avoid
+      # opt_getconstant_path bytecodes — each one generates a memory load +
+      # comparison in native code that is unnecessary for small fixed constants.
       8.times do |row|
         i = row << 3
         d0 = data[i]; d1 = data[i+1]; d2 = data[i+2]; d3 = data[i+3]
@@ -78,12 +81,12 @@ module PureJPEG
         tmp10 = tmp0 + tmp3; tmp13 = tmp0 - tmp3
         tmp11 = tmp1 + tmp2; tmp12 = tmp1 - tmp2
 
-        data[i]   = (tmp10 + tmp11) << P1
-        data[i+4] = (tmp10 - tmp11) << P1
+        data[i]   = (tmp10 + tmp11) << 2  # P1
+        data[i+4] = (tmp10 - tmp11) << 2  # P1
 
         z1 = (tmp12 + tmp13) * FIX_0_541196100
-        data[i+2] = (z1 + tmp13 * FIX_0_765366865 + ROUND_CB_M_P1) >> CB_M_P1
-        data[i+6] = (z1 - tmp12 * FIX_1_847759065 + ROUND_CB_M_P1) >> CB_M_P1
+        data[i+2] = (z1 + tmp13 * FIX_0_765366865 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[i+6] = (z1 - tmp12 * FIX_1_847759065 + ROUND_CB_M_P1) >> 11  # CB_M_P1
 
         # Odd part
         z1 = tmp4 + tmp7; z2 = tmp5 + tmp6
@@ -99,10 +102,10 @@ module PureJPEG
         z3 = z3 * NEG_FIX_1_961570560 + z5
         z4 = z4 * NEG_FIX_0_390180644 + z5
 
-        data[i+7] = (tmp4 + z1 + z3 + ROUND_CB_M_P1) >> CB_M_P1
-        data[i+5] = (tmp5 + z2 + z4 + ROUND_CB_M_P1) >> CB_M_P1
-        data[i+3] = (tmp6 + z2 + z3 + ROUND_CB_M_P1) >> CB_M_P1
-        data[i+1] = (tmp7 + z1 + z4 + ROUND_CB_M_P1) >> CB_M_P1
+        data[i+7] = (tmp4 + z1 + z3 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[i+5] = (tmp5 + z2 + z4 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[i+3] = (tmp6 + z2 + z3 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[i+1] = (tmp7 + z1 + z4 + ROUND_CB_M_P1) >> 11  # CB_M_P1
       end
 
       # Pass 2: process columns
@@ -118,12 +121,12 @@ module PureJPEG
         tmp10 = tmp0 + tmp3; tmp13 = tmp0 - tmp3
         tmp11 = tmp1 + tmp2; tmp12 = tmp1 - tmp2
 
-        data[col]    = (tmp10 + tmp11 + ROUND_P1_P3) >> P1_P3
-        data[col+32] = (tmp10 - tmp11 + ROUND_P1_P3) >> P1_P3
+        data[col]    = (tmp10 + tmp11 + ROUND_P1_P3) >> 5  # P1_P3
+        data[col+32] = (tmp10 - tmp11 + ROUND_P1_P3) >> 5  # P1_P3
 
         z1 = (tmp12 + tmp13) * FIX_0_541196100
-        data[col+16] = (z1 + tmp13 * FIX_0_765366865 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[col+48] = (z1 - tmp12 * FIX_1_847759065 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
+        data[col+16] = (z1 + tmp13 * FIX_0_765366865 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[col+48] = (z1 - tmp12 * FIX_1_847759065 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
 
         z1 = tmp4 + tmp7; z2 = tmp5 + tmp6
         z3 = tmp4 + tmp6; z4 = tmp5 + tmp7
@@ -138,10 +141,10 @@ module PureJPEG
         z3 = z3 * NEG_FIX_1_961570560 + z5
         z4 = z4 * NEG_FIX_0_390180644 + z5
 
-        data[col+56] = (tmp4 + z1 + z3 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[col+40] = (tmp5 + z2 + z4 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[col+24] = (tmp6 + z2 + z3 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[col+8]  = (tmp7 + z1 + z4 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
+        data[col+56] = (tmp4 + z1 + z3 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[col+40] = (tmp5 + z2 + z4 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[col+24] = (tmp6 + z2 + z3 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[col+8]  = (tmp7 + z1 + z4 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
       end
 
       data
@@ -151,6 +154,7 @@ module PureJPEG
     # Output: spatial-domain values (integers) that still need +128 level shift.
     def self.inverse!(data, _temp = nil, _out = nil)
       # Pass 1: process columns
+      # Shift amounts inlined as literals to eliminate opt_getconstant_path bytecodes.
       8.times do |col|
         d0 = data[col]; d2 = data[col+16]; d4 = data[col+32]; d6 = data[col+48]
         d1 = data[col+8]; d3 = data[col+24]; d5 = data[col+40]; d7 = data[col+56]
@@ -160,8 +164,8 @@ module PureJPEG
         tmp2 = z1 - d6 * FIX_1_847759065
         tmp3 = z1 + d2 * FIX_0_765366865
 
-        tmp0 = (d0 + d4) << CB
-        tmp1 = (d0 - d4) << CB
+        tmp0 = (d0 + d4) << 13  # CB
+        tmp1 = (d0 - d4) << 13  # CB
 
         tmp10 = tmp0 + tmp3; tmp13 = tmp0 - tmp3
         tmp11 = tmp1 + tmp2; tmp12 = tmp1 - tmp2
@@ -184,14 +188,14 @@ module PureJPEG
         tmp0 += z1 + z3; tmp1 += z2 + z4
         tmp2 += z2 + z3; tmp3 += z1 + z4
 
-        data[col]    = (tmp10 + tmp3 + ROUND_CB_M_P1) >> CB_M_P1
-        data[col+56] = (tmp10 - tmp3 + ROUND_CB_M_P1) >> CB_M_P1
-        data[col+8]  = (tmp11 + tmp2 + ROUND_CB_M_P1) >> CB_M_P1
-        data[col+48] = (tmp11 - tmp2 + ROUND_CB_M_P1) >> CB_M_P1
-        data[col+16] = (tmp12 + tmp1 + ROUND_CB_M_P1) >> CB_M_P1
-        data[col+40] = (tmp12 - tmp1 + ROUND_CB_M_P1) >> CB_M_P1
-        data[col+24] = (tmp13 + tmp0 + ROUND_CB_M_P1) >> CB_M_P1
-        data[col+32] = (tmp13 - tmp0 + ROUND_CB_M_P1) >> CB_M_P1
+        data[col]    = (tmp10 + tmp3 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[col+56] = (tmp10 - tmp3 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[col+8]  = (tmp11 + tmp2 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[col+48] = (tmp11 - tmp2 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[col+16] = (tmp12 + tmp1 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[col+40] = (tmp12 - tmp1 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[col+24] = (tmp13 + tmp0 + ROUND_CB_M_P1) >> 11  # CB_M_P1
+        data[col+32] = (tmp13 - tmp0 + ROUND_CB_M_P1) >> 11  # CB_M_P1
       end
 
       # Pass 2: process rows
@@ -205,8 +209,8 @@ module PureJPEG
         tmp2 = z1 - d6 * FIX_1_847759065
         tmp3 = z1 + d2 * FIX_0_765366865
 
-        tmp0 = (d0 + d4) << CB
-        tmp1 = (d0 - d4) << CB
+        tmp0 = (d0 + d4) << 13  # CB
+        tmp1 = (d0 - d4) << 13  # CB
 
         tmp10 = tmp0 + tmp3; tmp13 = tmp0 - tmp3
         tmp11 = tmp1 + tmp2; tmp12 = tmp1 - tmp2
@@ -229,14 +233,14 @@ module PureJPEG
         tmp0 += z1 + z3; tmp1 += z2 + z4
         tmp2 += z2 + z3; tmp3 += z1 + z4
 
-        data[i]   = (tmp10 + tmp3 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[i+7] = (tmp10 - tmp3 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[i+1] = (tmp11 + tmp2 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[i+6] = (tmp11 - tmp2 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[i+2] = (tmp12 + tmp1 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[i+5] = (tmp12 - tmp1 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[i+3] = (tmp13 + tmp0 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
-        data[i+4] = (tmp13 - tmp0 + ROUND_CB_P_P1_P3) >> CB_P_P1_P3
+        data[i]   = (tmp10 + tmp3 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[i+7] = (tmp10 - tmp3 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[i+1] = (tmp11 + tmp2 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[i+6] = (tmp11 - tmp2 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[i+2] = (tmp12 + tmp1 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[i+5] = (tmp12 - tmp1 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[i+3] = (tmp13 + tmp0 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
+        data[i+4] = (tmp13 - tmp0 + ROUND_CB_P_P1_P3) >> 18  # CB_P_P1_P3
       end
 
       data
