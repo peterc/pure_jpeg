@@ -342,26 +342,42 @@ module PureJPEG
       end
     end
 
+    # Fixed-point coefficients (scaled by 2^16 = 65536) for RGB→YCbCr.
+    # Y  =  0.299*R + 0.587*G + 0.114*B
+    # Cb = -0.168736*R - 0.331264*G + 0.5*B + 128
+    # Cr =  0.5*R - 0.418688*G - 0.081312*B + 128
+    FP_Y_R  =  19595; FP_Y_G  =  38470; FP_Y_B  =   7471
+    FP_CB_R = -11058; FP_CB_G = -21710; FP_CB_B =  32768
+    FP_CR_R =  32768; FP_CR_G = -27440; FP_CR_B =  -5328
+    FP_HALF =  32768  # rounding bias
+    FP_128  = 8388608 # 128 << 16
+
+    def clamp255(v)
+      v < 0 ? 0 : (v > 255 ? 255 : v)
+    end
+
     def extract_luminance(width, height)
       luminance = Array.new(width * height)
       if source.respond_to?(:packed_pixels)
         packed = source.packed_pixels
         r_shift, g_shift, b_shift = packed_shifts
+        n = width * height
         i = 0
-        (width * height).times do
+        n.times do
           color = packed[i]
           r = (color >> r_shift) & 0xFF
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
-          luminance[i] = (0.299 * r + 0.587 * g + 0.114 * b).round.clamp(0, 255)
+          luminance[i] = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
           i += 1
         end
       else
-        height.times do |y|
-          row = y * width
-          width.times do |x|
-            pixel = source[x, y]
-            luminance[row + x] = (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b).round.clamp(0, 255)
+        height.times do |py|
+          row = py * width
+          width.times do |px|
+            pixel = source[px, py]
+            r = pixel.r; g = pixel.g; b = pixel.b
+            luminance[row + px] = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
           end
         end
       end
@@ -383,9 +399,9 @@ module PureJPEG
           r = (color >> r_shift) & 0xFF
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
-          y_data[i]  = ( 0.299    * r + 0.587    * g + 0.114    * b).round.clamp(0, 255)
-          cb_data[i] = (-0.168736 * r - 0.331264 * g + 0.5      * b + 128.0).round.clamp(0, 255)
-          cr_data[i] = ( 0.5      * r - 0.418688 * g - 0.081312 * b + 128.0).round.clamp(0, 255)
+          y_data[i]  = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
+          cb_data[i] = clamp255((FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16)
+          cr_data[i] = clamp255((FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16)
           i += 1
         end
       else
@@ -395,10 +411,11 @@ module PureJPEG
             pixel = source[px, py]
             r = pixel.r; g = pixel.g; b = pixel.b
             i = row + px
-            y_data[i]  = ( 0.299    * r + 0.587    * g + 0.114    * b).round.clamp(0, 255)
-            cb_data[i] = (-0.168736 * r - 0.331264 * g + 0.5      * b + 128.0).round.clamp(0, 255)
-            cr_data[i] = ( 0.5      * r - 0.418688 * g - 0.081312 * b + 128.0).round.clamp(0, 255)
+            y_data[i]  = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
+            cb_data[i] = clamp255((FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16)
+            cr_data[i] = clamp255((FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16)
           end
+          py += 1
         end
       end
 
@@ -409,22 +426,18 @@ module PureJPEG
       out = Array.new(dst_w * dst_h)
       max_x = src_w - 1
       max_y = src_h - 1
-      dy = 0
-      while dy < dst_h
+      dst_h.times do |dy|
         sy = dy << 1
         y1 = sy < max_y ? sy + 1 : max_y
         row0 = sy * src_w
         row1 = y1 * src_w
         dst_row = dy * dst_w
-        dx = 0
-        while dx < dst_w
+        dst_w.times do |dx|
           sx = dx << 1
           x1 = sx < max_x ? sx + 1 : max_x
           out[dst_row + dx] = ((data[row0 + sx] + data[row0 + x1] +
                                 data[row1 + sx] + data[row1 + x1]) >> 2)
-          dx += 1
         end
-        dy += 1
       end
       out
     end
@@ -433,20 +446,16 @@ module PureJPEG
     def extract_block_into(channel, width, height, bx, by, block)
       max_x = width - 1
       max_y = height - 1
-      row = 0
-      while row < 8
+      8.times do |row|
         sy = by + row
         sy = max_y if sy > max_y
         src_row = sy * width
         row8 = row << 3
-        col = 0
-        while col < 8
+        8.times do |col|
           sx = bx + col
           sx = max_x if sx > max_x
           block[row8 | col] = channel[src_row + sx] - 128.0
-          col += 1
         end
-        row += 1
       end
       block
     end
