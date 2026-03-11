@@ -127,11 +127,9 @@ module PureJPEG
                              lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values)
       else
         chr_qtable = build_chr_qtable
-        y_data, cb_data, cr_data = extract_ycbcr(width, height)
         sub_w = (width + 1) / 2
         sub_h = (height + 1) / 2
-        cb_sub = downsample(cb_data, width, height, sub_w, sub_h)
-        cr_sub = downsample(cr_data, width, height, sub_w, sub_h)
+        y_data, cb_sub, cr_sub = extract_ycbcr_420(width, height, sub_w, sub_h)
 
         lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values,
           chr_dc_bits, chr_dc_values, chr_ac_bits, chr_ac_values =
@@ -372,6 +370,122 @@ module PureJPEG
         end
       end
       luminance
+    end
+
+    # Fused YCbCr extraction + 4:2:0 chroma downsampling in a single pass.
+    # Avoids allocating two full-resolution chroma arrays (2M elements saved)
+    # and eliminates the separate downsample pass (2M reads + 512K writes saved).
+    def extract_ycbcr_420(width, height, sub_w, sub_h)
+      size = width * height
+      y_data  = Array.new(size)
+      cb_sub  = Array.new(sub_w * sub_h)
+      cr_sub  = Array.new(sub_w * sub_h)
+
+      fp_y_r = FP_Y_R; fp_y_g = FP_Y_G; fp_y_b = FP_Y_B
+      fp_cb_r = FP_CB_R; fp_cb_g = FP_CB_G; fp_cb_b = FP_CB_B
+      fp_cr_r = FP_CR_R; fp_cr_g = FP_CR_G; fp_cr_b = FP_CR_B
+      fp_half = FP_HALF; fp_128_half = FP_128_HALF
+
+      max_x = width - 1
+      max_y = height - 1
+
+      if source.respond_to?(:packed_pixels)
+        packed = source.packed_pixels
+        r_shift, g_shift, b_shift = packed_shifts
+
+        sub_h.times do |dy|
+          sy0 = dy << 1
+          sy1 = sy0 < max_y ? sy0 + 1 : max_y
+          row0 = sy0 * width
+          row1 = sy1 * width
+          dst_row = dy * sub_w
+
+          sub_w.times do |dx|
+            sx0 = dx << 1
+            sx1 = sx0 < max_x ? sx0 + 1 : max_x
+
+            # Pixel (sy0, sx0)
+            color = packed[row0 + sx0]
+            r0 = (color >> r_shift) & 0xFF; g0 = (color >> g_shift) & 0xFF; b0 = (color >> b_shift) & 0xFF
+            y_data[row0 + sx0] = (fp_y_r * r0 + fp_y_g * g0 + fp_y_b * b0 + fp_half) >> 16
+            cb_acc = fp_cb_r * r0 + fp_cb_g * g0 + fp_cb_b * b0
+            cr_acc = fp_cr_r * r0 + fp_cr_g * g0 + fp_cr_b * b0
+
+            # Pixel (sy0, sx1)
+            color = packed[row0 + sx1]
+            r1 = (color >> r_shift) & 0xFF; g1 = (color >> g_shift) & 0xFF; b1 = (color >> b_shift) & 0xFF
+            y_data[row0 + sx1] = (fp_y_r * r1 + fp_y_g * g1 + fp_y_b * b1 + fp_half) >> 16
+            cb_acc += fp_cb_r * r1 + fp_cb_g * g1 + fp_cb_b * b1
+            cr_acc += fp_cr_r * r1 + fp_cr_g * g1 + fp_cr_b * b1
+
+            # Pixel (sy1, sx0)
+            color = packed[row1 + sx0]
+            r2 = (color >> r_shift) & 0xFF; g2 = (color >> g_shift) & 0xFF; b2 = (color >> b_shift) & 0xFF
+            y_data[row1 + sx0] = (fp_y_r * r2 + fp_y_g * g2 + fp_y_b * b2 + fp_half) >> 16
+            cb_acc += fp_cb_r * r2 + fp_cb_g * g2 + fp_cb_b * b2
+            cr_acc += fp_cr_r * r2 + fp_cr_g * g2 + fp_cr_b * b2
+
+            # Pixel (sy1, sx1)
+            color = packed[row1 + sx1]
+            r3 = (color >> r_shift) & 0xFF; g3 = (color >> g_shift) & 0xFF; b3 = (color >> b_shift) & 0xFF
+            y_data[row1 + sx1] = (fp_y_r * r3 + fp_y_g * g3 + fp_y_b * b3 + fp_half) >> 16
+            cb_acc += fp_cb_r * r3 + fp_cb_g * g3 + fp_cb_b * b3
+            cr_acc += fp_cr_r * r3 + fp_cr_g * g3 + fp_cr_b * b3
+
+            # Average Cb/Cr over 4 pixels: (sum + 2*FP_128_HALF) >> 18
+            # Each pixel contributes (FP_CB_R*r + FP_CB_G*g + FP_CB_B*b),
+            # sum of 4 needs + 4*FP_128_HALF bias, then >> 18 (= >> 16 >> 2)
+            v = (cb_acc + 4 * fp_128_half) >> 18
+            cb_sub[dst_row + dx] = v < 0 ? 0 : (v > 255 ? 255 : v)
+            v = (cr_acc + 4 * fp_128_half) >> 18
+            cr_sub[dst_row + dx] = v < 0 ? 0 : (v > 255 ? 255 : v)
+          end
+        end
+      else
+        sub_h.times do |dy|
+          sy0 = dy << 1
+          sy1 = sy0 < max_y ? sy0 + 1 : max_y
+          row0 = sy0 * width
+          row1 = sy1 * width
+          dst_row = dy * sub_w
+
+          sub_w.times do |dx|
+            sx0 = dx << 1
+            sx1 = sx0 < max_x ? sx0 + 1 : max_x
+
+            pixel = source[sx0, sy0]
+            r0 = pixel.r; g0 = pixel.g; b0 = pixel.b
+            y_data[row0 + sx0] = (fp_y_r * r0 + fp_y_g * g0 + fp_y_b * b0 + fp_half) >> 16
+            cb_acc = fp_cb_r * r0 + fp_cb_g * g0 + fp_cb_b * b0
+            cr_acc = fp_cr_r * r0 + fp_cr_g * g0 + fp_cr_b * b0
+
+            pixel = source[sx1, sy0]
+            r1 = pixel.r; g1 = pixel.g; b1 = pixel.b
+            y_data[row0 + sx1] = (fp_y_r * r1 + fp_y_g * g1 + fp_y_b * b1 + fp_half) >> 16
+            cb_acc += fp_cb_r * r1 + fp_cb_g * g1 + fp_cb_b * b1
+            cr_acc += fp_cr_r * r1 + fp_cr_g * g1 + fp_cr_b * b1
+
+            pixel = source[sx0, sy1]
+            r2 = pixel.r; g2 = pixel.g; b2 = pixel.b
+            y_data[row1 + sx0] = (fp_y_r * r2 + fp_y_g * g2 + fp_y_b * b2 + fp_half) >> 16
+            cb_acc += fp_cb_r * r2 + fp_cb_g * g2 + fp_cb_b * b2
+            cr_acc += fp_cr_r * r2 + fp_cr_g * g2 + fp_cr_b * b2
+
+            pixel = source[sx1, sy1]
+            r3 = pixel.r; g3 = pixel.g; b3 = pixel.b
+            y_data[row1 + sx1] = (fp_y_r * r3 + fp_y_g * g3 + fp_y_b * b3 + fp_half) >> 16
+            cb_acc += fp_cb_r * r3 + fp_cb_g * g3 + fp_cb_b * b3
+            cr_acc += fp_cr_r * r3 + fp_cr_g * g3 + fp_cr_b * b3
+
+            v = (cb_acc + 4 * fp_128_half) >> 18
+            cb_sub[dst_row + dx] = v < 0 ? 0 : (v > 255 ? 255 : v)
+            v = (cr_acc + 4 * fp_128_half) >> 18
+            cr_sub[dst_row + dx] = v < 0 ? 0 : (v > 255 ? 255 : v)
+          end
+        end
+      end
+
+      [y_data, cb_sub, cr_sub]
     end
 
     def extract_ycbcr(width, height)
