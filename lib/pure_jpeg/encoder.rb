@@ -343,6 +343,9 @@ module PureJPEG
 
     def extract_luminance(width, height)
       luminance = Array.new(width * height)
+      # Load fixed-point constants into locals for getlocal access
+      fp_y_r = FP_Y_R; fp_y_g = FP_Y_G; fp_y_b = FP_Y_B; fp_half = FP_HALF
+
       if source.respond_to?(:packed_pixels)
         packed = source.packed_pixels
         r_shift, g_shift, b_shift = packed_shifts
@@ -354,7 +357,7 @@ module PureJPEG
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
           # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
-          luminance[i] = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
+          luminance[i] = (fp_y_r * r + fp_y_g * g + fp_y_b * b + fp_half) >> 16
           i += 1
         end
       else
@@ -364,7 +367,7 @@ module PureJPEG
             pixel = source[px, py]
             r = pixel.r; g = pixel.g; b = pixel.b
             # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
-            luminance[row + px] = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
+            luminance[row + px] = (fp_y_r * r + fp_y_g * g + fp_y_b * b + fp_half) >> 16
           end
         end
       end
@@ -377,6 +380,13 @@ module PureJPEG
       cb_data = Array.new(size)
       cr_data = Array.new(size)
 
+      # Load fixed-point constants into locals so inner blocks use getlocal
+      # instead of opt_getconstant_path (10 lookups/pixel × 1M pixels eliminated)
+      fp_y_r = FP_Y_R; fp_y_g = FP_Y_G; fp_y_b = FP_Y_B
+      fp_cb_r = FP_CB_R; fp_cb_g = FP_CB_G; fp_cb_b = FP_CB_B
+      fp_cr_r = FP_CR_R; fp_cr_g = FP_CR_G; fp_cr_b = FP_CR_B
+      fp_half = FP_HALF; fp_128_half = FP_128_HALF
+
       if source.respond_to?(:packed_pixels)
         packed = source.packed_pixels
         r_shift, g_shift, b_shift = packed_shifts
@@ -387,10 +397,10 @@ module PureJPEG
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
           # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
-          y_data[i]  = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
-          v = (FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128_HALF) >> 16
+          y_data[i]  = (fp_y_r * r + fp_y_g * g + fp_y_b * b + fp_half) >> 16
+          v = (fp_cb_r * r + fp_cb_g * g + fp_cb_b * b + fp_128_half) >> 16
           cb_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
-          v = (FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128_HALF) >> 16
+          v = (fp_cr_r * r + fp_cr_g * g + fp_cr_b * b + fp_128_half) >> 16
           cr_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
           i += 1
         end
@@ -402,10 +412,10 @@ module PureJPEG
             r = pixel.r; g = pixel.g; b = pixel.b
             i = row + px
             # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
-            y_data[i]  = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
-            v = (FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128_HALF) >> 16
+            y_data[i]  = (fp_y_r * r + fp_y_g * g + fp_y_b * b + fp_half) >> 16
+            v = (fp_cb_r * r + fp_cb_g * g + fp_cb_b * b + fp_128_half) >> 16
             cb_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
-            v = (FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128_HALF) >> 16
+            v = (fp_cr_r * r + fp_cr_g * g + fp_cr_b * b + fp_128_half) >> 16
             cr_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
           end
         end

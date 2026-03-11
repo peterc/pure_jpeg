@@ -556,6 +556,14 @@ module PureJPEG
       t = max_v / cb_v
       while t > 1; v_shift += 1; t >>= 1; end
 
+      # Load fixed-point constants into locals so inner blocks use getlocal
+      # instead of opt_getconstant_path (5 lookups/pixel × 1M pixels eliminated)
+      fp_r_cr = FP_R_CR
+      fp_g_cb = FP_G_CB
+      fp_g_cr = FP_G_CR
+      fp_b_cb = FP_B_CB
+      fp_half = FP_HALF
+
       height.times do |py|
         dst_row = py * width
         y_row = py * y_stride
@@ -572,9 +580,9 @@ module PureJPEG
           cr_val = cr_data[c_idx] - 128
 
           # Fixed-point YCbCr→RGB (all integer arithmetic)
-          r = lum + ((FP_R_CR * cr_val + FP_HALF) >> 16)
-          g = lum + ((FP_G_CB * cb_val + FP_G_CR * cr_val + FP_HALF) >> 16)
-          b = lum + ((FP_B_CB * cb_val + FP_HALF) >> 16)
+          r = lum + ((fp_r_cr * cr_val + fp_half) >> 16)
+          g = lum + ((fp_g_cb * cb_val + fp_g_cr * cr_val + fp_half) >> 16)
+          b = lum + ((fp_b_cb * cb_val + fp_half) >> 16)
 
           r = r < 0 ? 0 : (r > 255 ? 255 : r)
           g = g < 0 ? 0 : (g > 255 ? 255 : g)
