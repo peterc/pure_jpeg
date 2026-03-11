@@ -195,16 +195,14 @@ module PureJPEG
       padded_w = (width + 7) & ~7
       padded_h = (height + 7) & ~7
 
-      block = Array.new(64, 0.0)
-      temp  = Array.new(64, 0.0)
-      dct   = Array.new(64, 0.0)
+      block = Array.new(64, 0)
       qbuf  = Array.new(64, 0)
       zbuf  = Array.new(64, 0)
 
       (0...padded_h).step(8) do |by|
         (0...padded_w).step(8) do |bx|
           extract_block_into(y_data, width, height, bx, by, block)
-          yield transform_block(block, temp, dct, qbuf, zbuf, qtable)
+          yield transform_block(block, qbuf, zbuf, qtable)
         end
       end
     end
@@ -267,31 +265,29 @@ module PureJPEG
       mcu_w = (width + 15) & ~15
       mcu_h = (height + 15) & ~15
 
-      block = Array.new(64, 0.0)
-      temp  = Array.new(64, 0.0)
-      dct   = Array.new(64, 0.0)
+      block = Array.new(64, 0)
       qbuf  = Array.new(64, 0)
       zbuf  = Array.new(64, 0)
 
       (0...mcu_h).step(16) do |my|
         (0...mcu_w).step(16) do |mx|
           extract_block_into(y_data, width, height, mx, my, block)
-          yield :y, transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my, block)
-          yield :y, transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx, my + 8, block)
-          yield :y, transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my + 8, block)
-          yield :y, transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
 
           extract_block_into(cb_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          yield :cb, transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
+          yield :cb, transform_block(block, qbuf, zbuf, chr_qt)
 
           extract_block_into(cr_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          yield :cr, transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
+          yield :cr, transform_block(block, qbuf, zbuf, chr_qt)
         end
       end
     end
@@ -316,9 +312,9 @@ module PureJPEG
 
     # --- Shared block pipeline (all buffers pre-allocated) ---
 
-    def transform_block(block, temp, dct, qbuf, zbuf, qtable)
-      DCT.forward!(block, temp, dct)
-      Quantization.quantize!(dct, qtable, qbuf)
+    def transform_block(block, qbuf, zbuf, qtable)
+      DCT.forward!(block)
+      Quantization.quantize!(block, qtable, qbuf)
       Zigzag.reorder!(qbuf)
     end
 
@@ -443,14 +439,14 @@ module PureJPEG
         sy = max_y if sy > max_y
         src = sy * width
         r8 = row << 3
-        x = bx;     block[r8]     = channel[src + (x > max_x ? max_x : x)] - 128.0
-        x = bx + 1; block[r8 | 1] = channel[src + (x > max_x ? max_x : x)] - 128.0
-        x = bx + 2; block[r8 | 2] = channel[src + (x > max_x ? max_x : x)] - 128.0
-        x = bx + 3; block[r8 | 3] = channel[src + (x > max_x ? max_x : x)] - 128.0
-        x = bx + 4; block[r8 | 4] = channel[src + (x > max_x ? max_x : x)] - 128.0
-        x = bx + 5; block[r8 | 5] = channel[src + (x > max_x ? max_x : x)] - 128.0
-        x = bx + 6; block[r8 | 6] = channel[src + (x > max_x ? max_x : x)] - 128.0
-        x = bx + 7; block[r8 | 7] = channel[src + (x > max_x ? max_x : x)] - 128.0
+        x = bx;     block[r8]     = channel[src + (x > max_x ? max_x : x)] - 128
+        x = bx + 1; block[r8 | 1] = channel[src + (x > max_x ? max_x : x)] - 128
+        x = bx + 2; block[r8 | 2] = channel[src + (x > max_x ? max_x : x)] - 128
+        x = bx + 3; block[r8 | 3] = channel[src + (x > max_x ? max_x : x)] - 128
+        x = bx + 4; block[r8 | 4] = channel[src + (x > max_x ? max_x : x)] - 128
+        x = bx + 5; block[r8 | 5] = channel[src + (x > max_x ? max_x : x)] - 128
+        x = bx + 6; block[r8 | 6] = channel[src + (x > max_x ? max_x : x)] - 128
+        x = bx + 7; block[r8 | 7] = channel[src + (x > max_x ? max_x : x)] - 128
       end
       block
     end

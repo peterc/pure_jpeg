@@ -78,10 +78,8 @@ module PureJPEG
 
       # Reusable buffers
       zigzag = Array.new(64, 0)
-      raster = Array.new(64, 0.0)
-      dequant = Array.new(64, 0.0)
-      temp = Array.new(64, 0.0)
-      spatial = Array.new(64, 0.0)
+      raster = Array.new(64, 0)
+      dequant = Array.new(64, 0)
 
       mcus_y.times do |mcu_row|
         mcus_x.times do |mcu_col|
@@ -104,12 +102,12 @@ module PureJPEG
                 # Inverse pipeline: unzigzag -> dequantize -> IDCT -> level shift
                 raster = Zigzag.unreorder!(zigzag)
                 Quantization.dequantize!(raster, qt, dequant)
-                DCT.inverse!(dequant, temp, spatial)
+                DCT.inverse!(dequant)
 
                 # Write block into channel buffer
                 bx = (mcu_col * comp.h_sampling + bh) * 8
                 by = (mcu_row * comp.v_sampling + bv) * 8
-                write_block(spatial, ch[:data], ch[:width], bx, by)
+                write_block(dequant, ch[:data], ch[:width], bx, by)
               end
             end
           end
@@ -204,10 +202,8 @@ module PureJPEG
       end
 
       zigzag = Array.new(64, 0)
-      raster = Array.new(64, 0.0)
-      dequant = Array.new(64, 0.0)
-      temp = Array.new(64, 0.0)
-      spatial = Array.new(64, 0.0)
+      raster = Array.new(64, 0)
+      dequant = Array.new(64, 0)
 
       jfif.components.each do |c|
         qt = fetch_quant_table!(jfif, c)
@@ -222,8 +218,8 @@ module PureJPEG
 
             raster = Zigzag.unreorder!(zigzag)
             Quantization.dequantize!(raster, qt, dequant)
-            DCT.inverse!(dequant, temp, spatial)
-            write_block(spatial, ch[:data], ch[:width], block_x * 8, block_y * 8)
+            DCT.inverse!(dequant)
+            write_block(dequant, ch[:data], ch[:width], block_x * 8, block_y * 8)
           end
         end
       end
@@ -462,14 +458,14 @@ module PureJPEG
       8.times do |row|
         dst = (by + row) * ch_width + bx
         r8 = row << 3
-        v = (spatial[r8] + 128.0).round;     channel[dst]     = v < 0 ? 0 : (v > 255 ? 255 : v)
-        v = (spatial[r8 | 1] + 128.0).round; channel[dst + 1] = v < 0 ? 0 : (v > 255 ? 255 : v)
-        v = (spatial[r8 | 2] + 128.0).round; channel[dst + 2] = v < 0 ? 0 : (v > 255 ? 255 : v)
-        v = (spatial[r8 | 3] + 128.0).round; channel[dst + 3] = v < 0 ? 0 : (v > 255 ? 255 : v)
-        v = (spatial[r8 | 4] + 128.0).round; channel[dst + 4] = v < 0 ? 0 : (v > 255 ? 255 : v)
-        v = (spatial[r8 | 5] + 128.0).round; channel[dst + 5] = v < 0 ? 0 : (v > 255 ? 255 : v)
-        v = (spatial[r8 | 6] + 128.0).round; channel[dst + 6] = v < 0 ? 0 : (v > 255 ? 255 : v)
-        v = (spatial[r8 | 7] + 128.0).round; channel[dst + 7] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8]     + 128; channel[dst]     = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 1] + 128; channel[dst + 1] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 2] + 128; channel[dst + 2] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 3] + 128; channel[dst + 3] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 4] + 128; channel[dst + 4] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 5] + 128; channel[dst + 5] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 6] + 128; channel[dst + 6] = v < 0 ? 0 : (v > 255 ? 255 : v)
+        v = spatial[r8 | 7] + 128; channel[dst + 7] = v < 0 ? 0 : (v > 255 ? 255 : v)
       end
     end
 
