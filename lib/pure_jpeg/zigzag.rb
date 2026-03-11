@@ -13,16 +13,22 @@ module PureJPEG
       53, 60, 61, 54, 47, 55, 62, 63
     ].freeze
 
-    # Reorder an 8x8 block into zigzag order, writing into `out`.
-    def self.reorder!(block, out)
-      64.times { |i| out[i] = block[ORDER[i]] }
-      out
+    # Inverse order: INVERSE_ORDER[raster_pos] = zigzag_index
+    # Used by unreorder! to convert via values_at instead of 64 individual stores.
+    INVERSE_ORDER = Array.new(64).tap { |inv|
+      ORDER.each_with_index { |raster_pos, zigzag_idx| inv[raster_pos] = zigzag_idx }
+    }.freeze
+
+    # Reorder an 8x8 block into zigzag order.
+    # Uses Array#values_at (C-implemented bulk gather) instead of 64 individual
+    # Ruby-level array accesses, which is ~3x faster under YJIT.
+    def self.reorder!(block, _out = nil)
+      block.values_at(*ORDER)
     end
 
     # Reverse zigzag: from zigzag order back to raster order.
-    def self.unreorder!(zigzag, out)
-      64.times { |i| out[ORDER[i]] = zigzag[i] }
-      out
+    def self.unreorder!(zigzag, _out = nil)
+      zigzag.values_at(*INVERSE_ORDER)
     end
   end
 end

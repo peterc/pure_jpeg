@@ -102,7 +102,7 @@ module PureJPEG
                 decode_block(reader, dc_tab, ac_tab, prev_dc, sc.id, zigzag)
 
                 # Inverse pipeline: unzigzag -> dequantize -> IDCT -> level shift
-                Zigzag.unreorder!(zigzag, raster)
+                raster = Zigzag.unreorder!(zigzag)
                 Quantization.dequantize!(raster, qt, dequant)
                 DCT.inverse!(dequant, temp, spatial)
 
@@ -220,7 +220,7 @@ module PureJPEG
             offset = (block_y * bx_count + block_x) * 64
             64.times { |i| zigzag[i] = coeff_buf[offset + i] }
 
-            Zigzag.unreorder!(zigzag, raster)
+            raster = Zigzag.unreorder!(zigzag)
             Quantization.dequantize!(raster, qt, dequant)
             DCT.inverse!(dequant, temp, spatial)
             write_block(spatial, ch[:data], ch[:width], block_x * 8, block_y * 8)

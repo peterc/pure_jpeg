@@ -204,8 +204,7 @@ module PureJPEG
       (0...padded_h).step(8) do |by|
         (0...padded_w).step(8) do |bx|
           extract_block_into(y_data, width, height, bx, by, block)
-          transform_block(block, temp, dct, qbuf, zbuf, qtable)
-          yield zbuf
+          yield transform_block(block, temp, dct, qbuf, zbuf, qtable)
         end
       end
     end
@@ -277,28 +276,22 @@ module PureJPEG
       (0...mcu_h).step(16) do |my|
         (0...mcu_w).step(16) do |mx|
           extract_block_into(y_data, width, height, mx, my, block)
-          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
-          yield :y, zbuf
+          yield :y, transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my, block)
-          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
-          yield :y, zbuf
+          yield :y, transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx, my + 8, block)
-          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
-          yield :y, zbuf
+          yield :y, transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my + 8, block)
-          transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
-          yield :y, zbuf
+          yield :y, transform_block(block, temp, dct, qbuf, zbuf, lum_qt)
 
           extract_block_into(cb_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
-          yield :cb, zbuf
+          yield :cb, transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
 
           extract_block_into(cr_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
-          yield :cr, zbuf
+          yield :cr, transform_block(block, temp, dct, qbuf, zbuf, chr_qt)
         end
       end
     end
@@ -326,8 +319,7 @@ module PureJPEG
     def transform_block(block, temp, dct, qbuf, zbuf, qtable)
       DCT.forward!(block, temp, dct)
       Quantization.quantize!(dct, qtable, qbuf)
-      Zigzag.reorder!(qbuf, zbuf)
-      zbuf
+      Zigzag.reorder!(qbuf)
     end
 
     # --- Pixel extraction ---
