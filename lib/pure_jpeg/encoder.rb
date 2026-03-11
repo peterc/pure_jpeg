@@ -556,22 +556,40 @@ module PureJPEG
     end
 
     # Extract an 8x8 block into a pre-allocated array, level-shifted by -128.
+    # Fast path avoids per-pixel bounds checks for interior blocks (~98% of blocks).
     def extract_block_into(channel, width, height, bx, by, block)
-      max_x = width - 1
-      max_y = height - 1
-      8.times do |row|
-        sy = by + row
-        sy = max_y if sy > max_y
-        src = sy * width
-        r8 = row << 3
-        x = bx;     block[r8]     = channel[src + (x > max_x ? max_x : x)] - 128
-        x = bx + 1; block[r8 | 1] = channel[src + (x > max_x ? max_x : x)] - 128
-        x = bx + 2; block[r8 | 2] = channel[src + (x > max_x ? max_x : x)] - 128
-        x = bx + 3; block[r8 | 3] = channel[src + (x > max_x ? max_x : x)] - 128
-        x = bx + 4; block[r8 | 4] = channel[src + (x > max_x ? max_x : x)] - 128
-        x = bx + 5; block[r8 | 5] = channel[src + (x > max_x ? max_x : x)] - 128
-        x = bx + 6; block[r8 | 6] = channel[src + (x > max_x ? max_x : x)] - 128
-        x = bx + 7; block[r8 | 7] = channel[src + (x > max_x ? max_x : x)] - 128
+      if bx + 7 < width && by + 7 < height
+        # Fast path: no bounds checking needed
+        8.times do |row|
+          src = (by + row) * width + bx
+          r8 = row << 3
+          block[r8]     = channel[src]     - 128
+          block[r8 | 1] = channel[src + 1] - 128
+          block[r8 | 2] = channel[src + 2] - 128
+          block[r8 | 3] = channel[src + 3] - 128
+          block[r8 | 4] = channel[src + 4] - 128
+          block[r8 | 5] = channel[src + 5] - 128
+          block[r8 | 6] = channel[src + 6] - 128
+          block[r8 | 7] = channel[src + 7] - 128
+        end
+      else
+        # Slow path: edge blocks need bounds clamping
+        max_x = width - 1
+        max_y = height - 1
+        8.times do |row|
+          sy = by + row
+          sy = max_y if sy > max_y
+          src = sy * width
+          r8 = row << 3
+          x = bx;     block[r8]     = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 1; block[r8 | 1] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 2; block[r8 | 2] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 3; block[r8 | 3] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 4; block[r8 | 4] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 5; block[r8 | 5] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 6; block[r8 | 6] = channel[src + (x > max_x ? max_x : x)] - 128
+          x = bx + 7; block[r8 | 7] = channel[src + (x > max_x ? max_x : x)] - 128
+        end
       end
       block
     end
