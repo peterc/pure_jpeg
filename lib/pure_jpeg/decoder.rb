@@ -554,9 +554,10 @@ module PureJPEG
         width.times do |px|
           lum = y_data[y_row + px]
 
-          cx = px >> h_shift
-          cb_val = cb_data[c_row + cx] - 128
-          cr_val = cr_data[c_row + cx] - 128
+          # Cache chroma index to avoid computing c_row + cx twice
+          c_idx = c_row + (px >> h_shift)
+          cb_val = cb_data[c_idx] - 128
+          cr_val = cr_data[c_idx] - 128
 
           # Fixed-point YCbCr→RGB (all integer arithmetic)
           r = lum + ((FP_R_CR * cr_val + FP_HALF) >> 16)

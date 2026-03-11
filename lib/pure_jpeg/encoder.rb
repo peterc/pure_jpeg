@@ -339,6 +339,7 @@ module PureJPEG
     FP_CR_R =  32768; FP_CR_G = -27440; FP_CR_B =  -5328
     FP_HALF =  32768  # rounding bias
     FP_128  = 8388608 # 128 << 16
+    FP_128_HALF = FP_128 + FP_HALF # merged 128 bias + rounding for Cb/Cr
 
     def extract_luminance(width, height)
       luminance = Array.new(width * height)
@@ -352,8 +353,8 @@ module PureJPEG
           r = (color >> r_shift) & 0xFF
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
-          v = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
-          luminance[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
+          # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
+          luminance[i] = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
           i += 1
         end
       else
@@ -362,8 +363,8 @@ module PureJPEG
           width.times do |px|
             pixel = source[px, py]
             r = pixel.r; g = pixel.g; b = pixel.b
-            v = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
-            luminance[row + px] = v < 0 ? 0 : (v > 255 ? 255 : v)
+            # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
+            luminance[row + px] = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
           end
         end
       end
@@ -385,11 +386,11 @@ module PureJPEG
           r = (color >> r_shift) & 0xFF
           g = (color >> g_shift) & 0xFF
           b = (color >> b_shift) & 0xFF
-          v = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
-          y_data[i]  = v < 0 ? 0 : (v > 255 ? 255 : v)
-          v = (FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16
+          # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
+          y_data[i]  = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
+          v = (FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128_HALF) >> 16
           cb_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
-          v = (FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16
+          v = (FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128_HALF) >> 16
           cr_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
           i += 1
         end
@@ -400,11 +401,11 @@ module PureJPEG
             pixel = source[px, py]
             r = pixel.r; g = pixel.g; b = pixel.b
             i = row + px
-            v = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
-            y_data[i]  = v < 0 ? 0 : (v > 255 ? 255 : v)
-            v = (FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16
+            # Y never needs clamping for valid 0-255 RGB inputs (proven exhaustively)
+            y_data[i]  = (FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16
+            v = (FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128_HALF) >> 16
             cb_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
-            v = (FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16
+            v = (FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128_HALF) >> 16
             cr_data[i] = v < 0 ? 0 : (v > 255 ? 255 : v)
           end
         end
