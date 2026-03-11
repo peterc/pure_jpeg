@@ -76,10 +76,10 @@ module PureJPEG
       restart_interval = jfif.restart_interval
       mcu_count = 0
 
-      # Reusable buffers
+      # Reusable buffers (raster eliminated by fused dequantize_unzigzag)
       zigzag = Array.new(64, 0)
-      raster = Array.new(64, 0)
       dequant = Array.new(64, 0)
+      inv_order = Zigzag::INVERSE_ORDER
 
       # Pre-resolve scan references and quant tables (constant per scan)
       scan_refs = jfif.scan_components.map do |sc|
@@ -103,9 +103,8 @@ module PureJPEG
                 # Decode one 8x8 block
                 decode_block(reader, dc_tab, ac_tab, prev_dc, sc.id, zigzag)
 
-                # Inverse pipeline: unzigzag -> dequantize -> IDCT -> level shift
-                Zigzag.unreorder!(zigzag, raster)
-                Quantization.dequantize!(raster, qt, dequant)
+                # Inverse pipeline: fused unzigzag+dequantize -> IDCT -> level shift
+                Quantization.dequantize_unzigzag!(zigzag, qt, dequant, inv_order)
                 DCT.inverse!(dequant)
 
                 # Write block into channel buffer
@@ -206,8 +205,8 @@ module PureJPEG
       end
 
       zigzag = Array.new(64, 0)
-      raster = Array.new(64, 0)
       dequant = Array.new(64, 0)
+      inv_order = Zigzag::INVERSE_ORDER
 
       jfif.components.each do |c|
         qt = fetch_quant_table!(jfif, c)
@@ -220,8 +219,7 @@ module PureJPEG
             offset = (block_y * bx_count + block_x) * 64
             64.times { |i| zigzag[i] = coeff_buf[offset + i] }
 
-            Zigzag.unreorder!(zigzag, raster)
-            Quantization.dequantize!(raster, qt, dequant)
+            Quantization.dequantize_unzigzag!(zigzag, qt, dequant, inv_order)
             DCT.inverse!(dequant)
             write_block(dequant, ch[:data], ch[:width], block_x * 8, block_y * 8)
           end

@@ -194,13 +194,12 @@ module PureJPEG
       padded_h = (height + 7) & ~7
 
       block = Array.new(64, 0)
-      qbuf  = Array.new(64, 0)
       zbuf  = Array.new(64, 0)
 
       (0...padded_h).step(8) do |by|
         (0...padded_w).step(8) do |bx|
           extract_block_into(y_data, width, height, bx, by, block)
-          yield transform_block(block, qbuf, zbuf, qtable)
+          yield transform_block(block, zbuf, qtable)
         end
       end
     end
@@ -264,28 +263,27 @@ module PureJPEG
       mcu_h = (height + 15) & ~15
 
       block = Array.new(64, 0)
-      qbuf  = Array.new(64, 0)
       zbuf  = Array.new(64, 0)
 
       (0...mcu_h).step(16) do |my|
         (0...mcu_w).step(16) do |mx|
           extract_block_into(y_data, width, height, mx, my, block)
-          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my, block)
-          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx, my + 8, block)
-          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my + 8, block)
-          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(cb_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          yield :cb, transform_block(block, qbuf, zbuf, chr_qt)
+          yield :cb, transform_block(block, zbuf, chr_qt)
 
           extract_block_into(cr_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          yield :cr, transform_block(block, qbuf, zbuf, chr_qt)
+          yield :cr, transform_block(block, zbuf, chr_qt)
         end
       end
     end
@@ -310,10 +308,9 @@ module PureJPEG
 
     # --- Shared block pipeline (all buffers pre-allocated) ---
 
-    def transform_block(block, qbuf, zbuf, qtable)
+    def transform_block(block, zbuf, qtable)
       DCT.forward!(block)
-      Quantization.quantize!(block, qtable, qbuf)
-      Zigzag.reorder!(qbuf, zbuf)
+      Quantization.quantize_zigzag!(block, qtable, zbuf, Zigzag::ORDER)
     end
 
     # --- Pixel extraction ---
