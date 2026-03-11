@@ -1,68 +1,68 @@
 # YJIT Disassembly for: Decoder#assemble_color
-# Method: #<Method: PureJPEG::Decoder#assemble_color(width, height, channels, components, max_h, max_v) /Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:517>
+# Method: #<Method: PureJPEG::Decoder#assemble_color(width, height, channels, components, max_h, max_v) /Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:529>
 
-== disasm: #<ISeq:assemble_color@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:517 (517,4)-(575,7)>
+== disasm: #<ISeq:assemble_color@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:529 (529,4)-(588,7)>
 local table (size: 26, argc: 6 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
 [26] width@0<Arg>[25] height@1<Arg>[24] channels@2<Arg>[23] components@3<Arg>[22] max_h@4<Arg>[21] max_v@5<Arg>[20] y_comp@6   [19] cb_comp@7  [18] cr_comp@8  [17] y_ch@9     [16] cb_ch@10   [15] cr_ch@11   [14] y_data@12  [13] cb_data@13 [12] cr_data@14 [11] y_stride@15[10] cb_stride@16[ 9] cr_stride@17[ 8] cb_h@18    [ 7] cb_v@19    [ 6] cr_h@20    [ 5] cr_v@21    [ 4] pixels@22  [ 3] h_shift@23 [ 2] t@24       [ 1] v_shift@25
-0000 putself                                                          ( 519)[LiCa]
+0000 putself                                                          ( 531)[LiCa]
 0001 getlocal_WC_0                          components@3
 0003 opt_send_without_block                 <calldata!mid:resolve_color_components, argc:1, FCALL|ARGS_SIMPLE>
 0005 expandarray                            3, 0
 0008 setlocal_WC_0                          y_comp@6
 0010 setlocal_WC_0                          cb_comp@7
 0012 setlocal_WC_0                          cr_comp@8
-0014 getlocal_WC_0                          channels@2                ( 521)[Li]
+0014 getlocal_WC_0                          channels@2                ( 533)[Li]
 0016 getlocal_WC_0                          y_comp@6
 0018 opt_send_without_block                 <calldata!mid:id, argc:0, ARGS_SIMPLE>
 0020 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0022 setlocal_WC_0                          y_ch@9
-0024 getlocal_WC_0                          channels@2                ( 522)[Li]
+0024 getlocal_WC_0                          channels@2                ( 534)[Li]
 0026 getlocal_WC_0                          cb_comp@7
 0028 opt_send_without_block                 <calldata!mid:id, argc:0, ARGS_SIMPLE>
 0030 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0032 setlocal_WC_0                          cb_ch@10
-0034 getlocal_WC_0                          channels@2                ( 523)[Li]
+0034 getlocal_WC_0                          channels@2                ( 535)[Li]
 0036 getlocal_WC_0                          cr_comp@8
 0038 opt_send_without_block                 <calldata!mid:id, argc:0, ARGS_SIMPLE>
 0040 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0042 setlocal_WC_0                          cr_ch@11
-0044 getlocal_WC_0                          y_ch@9                    ( 525)[Li]
+0044 getlocal_WC_0                          y_ch@9                    ( 537)[Li]
 0046 putobject                              :data
 0048 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0050 setlocal_WC_0                          y_data@12
-0052 getlocal_WC_0                          cb_ch@10                  ( 526)[Li]
+0052 getlocal_WC_0                          cb_ch@10                  ( 538)[Li]
 0054 putobject                              :data
 0056 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0058 setlocal_WC_0                          cb_data@13
-0060 getlocal_WC_0                          cr_ch@11                  ( 527)[Li]
+0060 getlocal_WC_0                          cr_ch@11                  ( 539)[Li]
 0062 putobject                              :data
 0064 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0066 setlocal_WC_0                          cr_data@14
-0068 getlocal_WC_0                          y_ch@9                    ( 528)[Li]
+0068 getlocal_WC_0                          y_ch@9                    ( 540)[Li]
 0070 putobject                              :width
 0072 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0074 setlocal_WC_0                          y_stride@15
-0076 getlocal_WC_0                          cb_ch@10                  ( 529)[Li]
+0076 getlocal_WC_0                          cb_ch@10                  ( 541)[Li]
 0078 putobject                              :width
 0080 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0082 setlocal_WC_0                          cb_stride@16
-0084 getlocal_WC_0                          cr_ch@11                  ( 530)[Li]
+0084 getlocal_WC_0                          cr_ch@11                  ( 542)[Li]
 0086 putobject                              :width
 0088 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0090 setlocal_WC_0                          cr_stride@17
-0092 getlocal_WC_0                          cb_comp@7                 ( 531)[Li]
+0092 getlocal_WC_0                          cb_comp@7                 ( 543)[Li]
 0094 opt_send_without_block                 <calldata!mid:h_sampling, argc:0, ARGS_SIMPLE>
 0096 setlocal_WC_0                          cb_h@18
-0098 getlocal_WC_0                          cb_comp@7                 ( 532)[Li]
+0098 getlocal_WC_0                          cb_comp@7                 ( 544)[Li]
 0100 opt_send_without_block                 <calldata!mid:v_sampling, argc:0, ARGS_SIMPLE>
 0102 setlocal_WC_0                          cb_v@19
-0104 getlocal_WC_0                          cr_comp@8                 ( 533)[Li]
+0104 getlocal_WC_0                          cr_comp@8                 ( 545)[Li]
 0106 opt_send_without_block                 <calldata!mid:h_sampling, argc:0, ARGS_SIMPLE>
 0108 setlocal_WC_0                          cr_h@20
-0110 getlocal_WC_0                          cr_comp@8                 ( 534)[Li]
+0110 getlocal_WC_0                          cr_comp@8                 ( 546)[Li]
 0112 opt_send_without_block                 <calldata!mid:v_sampling, argc:0, ARGS_SIMPLE>
 0114 setlocal_WC_0                          cr_v@21
-0116 opt_getconstant_path                   <ic:1 Array>              ( 536)[Li]
+0116 opt_getconstant_path                   <ic:1 Array>              ( 548)[Li]
 0118 putnil
 0119 swap
 0120 getlocal_WC_0                          width@0
@@ -75,13 +75,13 @@ local table (size: 26, argc: 6 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1
 0135 swap
 0136 pop
 0137 setlocal_WC_0                          pixels@22
-0139 putobject_INT2FIX_0_                                             ( 540)[Li]
+0139 putobject_INT2FIX_0_                                             ( 552)[Li]
 0140 setlocal_WC_0                          h_shift@23
-0142 getlocal_WC_0                          max_h@4                   ( 541)[Li]
+0142 getlocal_WC_0                          max_h@4                   ( 553)[Li]
 0144 getlocal_WC_0                          cb_h@18
 0146 opt_div                                <calldata!mid:/, argc:1, ARGS_SIMPLE>[CcCr]
 0148 setlocal_WC_0                          t@24
-0150 jump                                   170                       ( 542)[Li]
+0150 jump                                   170                       ( 554)[Li]
 0152 putnil
 0153 pop
 0154 jump                                   170
@@ -99,13 +99,13 @@ local table (size: 26, argc: 6 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1
 0175 branchif                               156
 0177 putnil
 0178 pop
-0179 putobject_INT2FIX_0_                                             ( 543)[Li]
+0179 putobject_INT2FIX_0_                                             ( 555)[Li]
 0180 setlocal_WC_0                          v_shift@25
-0182 getlocal_WC_0                          max_v@5                   ( 544)[Li]
+0182 getlocal_WC_0                          max_v@5                   ( 556)[Li]
 0184 getlocal_WC_0                          cb_v@19
 0186 opt_div                                <calldata!mid:/, argc:1, ARGS_SIMPLE>[CcCr]
 0188 setlocal_WC_0                          t@24
-0190 jump                                   210                       ( 545)[Li]
+0190 jump                                   210                       ( 557)[Li]
 0192 putnil
 0193 pop
 0194 jump                                   210
@@ -123,10 +123,10 @@ local table (size: 26, argc: 6 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1
 0215 branchif                               196
 0217 putnil
 0218 pop
-0219 getlocal_WC_0                          height@1                  ( 547)[Li]
+0219 getlocal_WC_0                          height@1                  ( 559)[Li]
 0221 send                                   <calldata!mid:times, argc:0>, block in assemble_color
 0224 pop
-0225 opt_getconstant_path                   <ic:2 Image>              ( 574)[Li]
+0225 opt_getconstant_path                   <ic:2 Image>              ( 587)[Li]
 0227 putnil
 0228 swap
 0229 getlocal_WC_0                          width@0
@@ -139,152 +139,150 @@ local table (size: 26, argc: 6 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1
 0245 opt_send_without_block                 <calldata!mid:new, argc:4, kw:[icc_profile], KWARG>
 0247 swap
 0248 pop
-0249 leave                                                            ( 575)[Re]
+0249 leave                                                            ( 588)[Re]
 
-== disasm: #<ISeq:block in assemble_color@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:547 (547,19)-(572,9)>
+== disasm: #<ISeq:block in assemble_color@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:559 (559,19)-(585,9)>
 local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
 [ 4] py@0<AmbiguousArg>[ 3] dst_row@1  [ 2] y_row@2    [ 1] c_row@3
-0000 getlocal_WC_0                          py@0                      ( 548)[LiBc]
+0000 getlocal_WC_0                          py@0                      ( 560)[LiBc]
 0002 getlocal_WC_1                          width@0
 0004 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
 0006 setlocal_WC_0                          dst_row@1
-0008 getlocal_WC_0                          py@0                      ( 549)[Li]
+0008 getlocal_WC_0                          py@0                      ( 561)[Li]
 0010 getlocal_WC_1                          y_stride@15
 0012 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
 0014 setlocal_WC_0                          y_row@2
-0016 getlocal_WC_0                          py@0                      ( 552)[Li]
+0016 getlocal_WC_0                          py@0                      ( 564)[Li]
 0018 getlocal_WC_1                          v_shift@25
 0020 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
 0022 getlocal_WC_1                          cb_stride@16
 0024 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
 0026 setlocal_WC_0                          c_row@3
-0028 getlocal_WC_1                          width@0                   ( 554)[Li]
+0028 getlocal_WC_1                          width@0                   ( 566)[Li]
 0030 send                                   <calldata!mid:times, argc:0>, block (2 levels) in assemble_color
-0033 leave                                                            ( 572)[Br]
+0033 leave                                                            ( 585)[Br]
 
-== disasm: #<ISeq:block (2 levels) in assemble_color@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:554 (554,20)-(571,11)>
+== disasm: #<ISeq:block (2 levels) in assemble_color@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:566 (566,20)-(584,11)>
 local table (size: 8, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
-[ 8] px@0<AmbiguousArg>[ 7] lum@1      [ 6] cx@2       [ 5] cb_val@3   [ 4] cr_val@4   [ 3] r@5        [ 2] g@6        [ 1] b@7
-0000 getlocal                               y_data@12, 2              ( 555)[LiBc]
+[ 8] px@0<AmbiguousArg>[ 7] lum@1      [ 6] c_idx@2    [ 5] cb_val@3   [ 4] cr_val@4   [ 3] r@5        [ 2] g@6        [ 1] b@7
+0000 getlocal                               y_data@12, 2              ( 567)[LiBc]
 0003 getlocal_WC_1                          y_row@2
 0005 getlocal_WC_0                          px@0
 0007 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
 0009 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0011 setlocal_WC_0                          lum@1
-0013 getlocal_WC_0                          px@0                      ( 557)[Li]
-0015 getlocal                               h_shift@23, 2
-0018 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
-0020 setlocal_WC_0                          cx@2
-0022 getlocal                               cb_data@13, 2             ( 558)[Li]
-0025 getlocal_WC_1                          c_row@3
-0027 getlocal_WC_0                          cx@2
-0029 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0013 getlocal_WC_1                          c_row@3                   ( 570)[Li]
+0015 getlocal_WC_0                          px@0
+0017 getlocal                               h_shift@23, 2
+0020 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
+0022 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0024 setlocal_WC_0                          c_idx@2
+0026 getlocal                               cb_data@13, 2             ( 571)[Li]
+0029 getlocal_WC_0                          c_idx@2
 0031 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0033 putobject                              128
 0035 opt_minus                              <calldata!mid:-, argc:1, ARGS_SIMPLE>[CcCr]
 0037 setlocal_WC_0                          cb_val@3
-0039 getlocal                               cr_data@14, 2             ( 559)[Li]
-0042 getlocal_WC_1                          c_row@3
-0044 getlocal_WC_0                          cx@2
-0046 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
-0048 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
-0050 putobject                              128
-0052 opt_minus                              <calldata!mid:-, argc:1, ARGS_SIMPLE>[CcCr]
-0054 setlocal_WC_0                          cr_val@4
-0056 getlocal_WC_0                          lum@1                     ( 562)[Li]
-0058 opt_getconstant_path                   <ic:0 FP_R_CR>
-0060 getlocal_WC_0                          cr_val@4
-0062 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
-0064 opt_getconstant_path                   <ic:1 FP_HALF>
-0066 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
-0068 putobject                              16
-0070 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
-0072 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
-0074 setlocal_WC_0                          r@5
-0076 getlocal_WC_0                          lum@1                     ( 563)[Li]
-0078 opt_getconstant_path                   <ic:2 FP_G_CB>
-0080 getlocal_WC_0                          cb_val@3
-0082 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
-0084 opt_getconstant_path                   <ic:3 FP_G_CR>
-0086 getlocal_WC_0                          cr_val@4
-0088 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0039 getlocal                               cr_data@14, 2             ( 572)[Li]
+0042 getlocal_WC_0                          c_idx@2
+0044 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0046 putobject                              128
+0048 opt_minus                              <calldata!mid:-, argc:1, ARGS_SIMPLE>[CcCr]
+0050 setlocal_WC_0                          cr_val@4
+0052 getlocal_WC_0                          lum@1                     ( 575)[Li]
+0054 opt_getconstant_path                   <ic:0 FP_R_CR>
+0056 getlocal_WC_0                          cr_val@4
+0058 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0060 opt_getconstant_path                   <ic:1 FP_HALF>
+0062 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0064 putobject                              16
+0066 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
+0068 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0070 setlocal_WC_0                          r@5
+0072 getlocal_WC_0                          lum@1                     ( 576)[Li]
+0074 opt_getconstant_path                   <ic:2 FP_G_CB>
+0076 getlocal_WC_0                          cb_val@3
+0078 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0080 opt_getconstant_path                   <ic:3 FP_G_CR>
+0082 getlocal_WC_0                          cr_val@4
+0084 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0086 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0088 opt_getconstant_path                   <ic:4 FP_HALF>
 0090 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
-0092 opt_getconstant_path                   <ic:4 FP_HALF>
-0094 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
-0096 putobject                              16
-0098 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
-0100 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
-0102 setlocal_WC_0                          g@6
-0104 getlocal_WC_0                          lum@1                     ( 564)[Li]
-0106 opt_getconstant_path                   <ic:5 FP_B_CB>
-0108 getlocal_WC_0                          cb_val@3
-0110 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
-0112 opt_getconstant_path                   <ic:6 FP_HALF>
-0114 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
-0116 putobject                              16
-0118 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
-0120 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
-0122 setlocal_WC_0                          b@7
-0124 getlocal_WC_0                          r@5                       ( 566)[Li]
-0126 putobject_INT2FIX_0_
-0127 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
-0129 branchunless                           134
-0131 putobject_INT2FIX_0_
-0132 jump                                   148
-0134 getlocal_WC_0                          r@5
-0136 putobject                              255
-0138 opt_gt                                 <calldata!mid:>, argc:1, ARGS_SIMPLE>[CcCr]
-0140 branchunless                           146
-0142 putobject                              255
-0144 jump                                   148
-0146 getlocal_WC_0                          r@5
-0148 setlocal_WC_0                          r@5
-0150 getlocal_WC_0                          g@6                       ( 567)[Li]
-0152 putobject_INT2FIX_0_
-0153 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
-0155 branchunless                           160
-0157 putobject_INT2FIX_0_
-0158 jump                                   174
-0160 getlocal_WC_0                          g@6
-0162 putobject                              255
-0164 opt_gt                                 <calldata!mid:>, argc:1, ARGS_SIMPLE>[CcCr]
-0166 branchunless                           172
-0168 putobject                              255
-0170 jump                                   174
-0172 getlocal_WC_0                          g@6
-0174 setlocal_WC_0                          g@6
-0176 getlocal_WC_0                          b@7                       ( 568)[Li]
-0178 putobject_INT2FIX_0_
-0179 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
-0181 branchunless                           186
-0183 putobject_INT2FIX_0_
-0184 jump                                   200
-0186 getlocal_WC_0                          b@7
-0188 putobject                              255
-0190 opt_gt                                 <calldata!mid:>, argc:1, ARGS_SIMPLE>[CcCr]
-0192 branchunless                           198
-0194 putobject                              255
-0196 jump                                   200
-0198 getlocal_WC_0                          b@7
-0200 setlocal_WC_0                          b@7
-0202 putnil                                                           ( 570)[Li]
-0203 getlocal                               pixels@22, 2
-0206 getlocal_WC_1                          dst_row@1
-0208 getlocal_WC_0                          px@0
-0210 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
-0212 getlocal_WC_0                          r@5
-0214 putobject                              16
-0216 opt_ltlt                               <calldata!mid:<<, argc:1, ARGS_SIMPLE>[CcCr]
-0218 getlocal_WC_0                          g@6
-0220 putobject                              8
-0222 opt_ltlt                               <calldata!mid:<<, argc:1, ARGS_SIMPLE>[CcCr]
+0092 putobject                              16
+0094 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
+0096 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0098 setlocal_WC_0                          g@6
+0100 getlocal_WC_0                          lum@1                     ( 577)[Li]
+0102 opt_getconstant_path                   <ic:5 FP_B_CB>
+0104 getlocal_WC_0                          cb_val@3
+0106 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0108 opt_getconstant_path                   <ic:6 FP_HALF>
+0110 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0112 putobject                              16
+0114 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
+0116 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0118 setlocal_WC_0                          b@7
+0120 getlocal_WC_0                          r@5                       ( 579)[Li]
+0122 putobject_INT2FIX_0_
+0123 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0125 branchunless                           130
+0127 putobject_INT2FIX_0_
+0128 jump                                   144
+0130 getlocal_WC_0                          r@5
+0132 putobject                              255
+0134 opt_gt                                 <calldata!mid:>, argc:1, ARGS_SIMPLE>[CcCr]
+0136 branchunless                           142
+0138 putobject                              255
+0140 jump                                   144
+0142 getlocal_WC_0                          r@5
+0144 setlocal_WC_0                          r@5
+0146 getlocal_WC_0                          g@6                       ( 580)[Li]
+0148 putobject_INT2FIX_0_
+0149 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0151 branchunless                           156
+0153 putobject_INT2FIX_0_
+0154 jump                                   170
+0156 getlocal_WC_0                          g@6
+0158 putobject                              255
+0160 opt_gt                                 <calldata!mid:>, argc:1, ARGS_SIMPLE>[CcCr]
+0162 branchunless                           168
+0164 putobject                              255
+0166 jump                                   170
+0168 getlocal_WC_0                          g@6
+0170 setlocal_WC_0                          g@6
+0172 getlocal_WC_0                          b@7                       ( 581)[Li]
+0174 putobject_INT2FIX_0_
+0175 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0177 branchunless                           182
+0179 putobject_INT2FIX_0_
+0180 jump                                   196
+0182 getlocal_WC_0                          b@7
+0184 putobject                              255
+0186 opt_gt                                 <calldata!mid:>, argc:1, ARGS_SIMPLE>[CcCr]
+0188 branchunless                           194
+0190 putobject                              255
+0192 jump                                   196
+0194 getlocal_WC_0                          b@7
+0196 setlocal_WC_0                          b@7
+0198 putnil                                                           ( 583)[Li]
+0199 getlocal                               pixels@22, 2
+0202 getlocal_WC_1                          dst_row@1
+0204 getlocal_WC_0                          px@0
+0206 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0208 getlocal_WC_0                          r@5
+0210 putobject                              16
+0212 opt_ltlt                               <calldata!mid:<<, argc:1, ARGS_SIMPLE>[CcCr]
+0214 getlocal_WC_0                          g@6
+0216 putobject                              8
+0218 opt_ltlt                               <calldata!mid:<<, argc:1, ARGS_SIMPLE>[CcCr]
+0220 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
+0222 getlocal_WC_0                          b@7
 0224 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
-0226 getlocal_WC_0                          b@7
-0228 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
-0230 setn                                   3
-0232 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
-0234 pop
-0235 leave                                                            ( 571)[Br]
+0226 setn                                   3
+0228 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0230 pop
+0231 leave                                                            ( 584)[Br]
 
 NUM BLOCK VERSIONS: 0
 TOTAL INLINE CODE SIZE: 0 bytes

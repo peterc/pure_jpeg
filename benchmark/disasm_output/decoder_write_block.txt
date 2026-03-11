@@ -1,17 +1,17 @@
 # YJIT Disassembly for: Decoder#write_block
-# Method: #<Method: PureJPEG::Decoder#write_block(spatial, channel, ch_width, bx, by) /Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:457>
+# Method: #<Method: PureJPEG::Decoder#write_block(spatial, channel, ch_width, bx, by) /Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:469>
 
-== disasm: #<ISeq:write_block@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:457 (457,4)-(470,7)>
+== disasm: #<ISeq:write_block@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:469 (469,4)-(482,7)>
 local table (size: 5, argc: 5 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
 [ 5] spatial@0<Arg>[ 4] channel@1<Arg>[ 3] ch_width@2<Arg>[ 2] bx@3<Arg>  [ 1] by@4<Arg>
-0000 putobject                              8                         ( 458)[LiCa]
+0000 putobject                              8                         ( 470)[LiCa]
 0002 send                                   <calldata!mid:times, argc:0>, block in write_block
-0005 leave                                                            ( 470)[Re]
+0005 leave                                                            ( 482)[Re]
 
-== disasm: #<ISeq:block in write_block@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:458 (458,14)-(469,9)>
+== disasm: #<ISeq:block in write_block@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:470 (470,14)-(481,9)>
 local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
 [ 4] row@0<AmbiguousArg>[ 3] dst@1      [ 2] r8@2       [ 1] v@3
-0000 getlocal_WC_1                          by@4                      ( 459)[LiBc]
+0000 getlocal_WC_1                          by@4                      ( 471)[LiBc]
 0002 getlocal_WC_0                          row@0
 0004 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
 0006 getlocal_WC_1                          ch_width@2
@@ -19,11 +19,11 @@ local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1,
 0010 getlocal_WC_1                          bx@3
 0012 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
 0014 setlocal_WC_0                          dst@1
-0016 getlocal_WC_0                          row@0                     ( 460)[Li]
+0016 getlocal_WC_0                          row@0                     ( 472)[Li]
 0018 putobject                              3
 0020 opt_ltlt                               <calldata!mid:<<, argc:1, ARGS_SIMPLE>[CcCr]
 0022 setlocal_WC_0                          r8@2
-0024 getlocal_WC_1                          spatial@0                 ( 461)[Li]
+0024 getlocal_WC_1                          spatial@0                 ( 473)[Li]
 0026 getlocal_WC_0                          r8@2
 0028 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
 0030 putobject                              128
@@ -46,7 +46,7 @@ local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1,
 0062 getlocal_WC_0                          v@3
 0064 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
 0066 pop
-0067 getlocal_WC_1                          spatial@0                 ( 462)[Li]
+0067 getlocal_WC_1                          spatial@0                 ( 474)[Li]
 0069 getlocal_WC_0                          r8@2
 0071 putobject_INT2FIX_1_
 0072 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
@@ -73,7 +73,7 @@ local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1,
 0111 getlocal_WC_0                          v@3
 0113 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
 0115 pop
-0116 getlocal_WC_1                          spatial@0                 ( 463)[Li]
+0116 getlocal_WC_1                          spatial@0                 ( 475)[Li]
 0118 getlocal_WC_0                          r8@2
 0120 putobject                              2
 0122 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
@@ -100,7 +100,7 @@ local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1,
 0162 getlocal_WC_0                          v@3
 0164 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
 0166 pop
-0167 getlocal_WC_1                          spatial@0                 ( 464)[Li]
+0167 getlocal_WC_1                          spatial@0                 ( 476)[Li]
 0169 getlocal_WC_0                          r8@2
 0171 putobject                              3
 0173 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
@@ -127,7 +127,7 @@ local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1,
 0213 getlocal_WC_0                          v@3
 0215 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
 0217 pop
-0218 getlocal_WC_1                          spatial@0                 ( 465)[Li]
+0218 getlocal_WC_1                          spatial@0                 ( 477)[Li]
 0220 getlocal_WC_0                          r8@2
 0222 putobject                              4
 0224 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
@@ -154,7 +154,7 @@ local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1,
 0264 getlocal_WC_0                          v@3
 0266 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
 0268 pop
-0269 getlocal_WC_1                          spatial@0                 ( 466)[Li]
+0269 getlocal_WC_1                          spatial@0                 ( 478)[Li]
 0271 getlocal_WC_0                          r8@2
 0273 putobject                              5
 0275 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
@@ -181,7 +181,7 @@ local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1,
 0315 getlocal_WC_0                          v@3
 0317 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
 0319 pop
-0320 getlocal_WC_1                          spatial@0                 ( 467)[Li]
+0320 getlocal_WC_1                          spatial@0                 ( 479)[Li]
 0322 getlocal_WC_0                          r8@2
 0324 putobject                              6
 0326 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
@@ -208,7 +208,7 @@ local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1,
 0366 getlocal_WC_0                          v@3
 0368 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
 0370 pop
-0371 getlocal_WC_1                          spatial@0                 ( 468)[Li]
+0371 getlocal_WC_1                          spatial@0                 ( 480)[Li]
 0373 getlocal_WC_0                          r8@2
 0375 putobject                              7
 0377 opt_or                                 <calldata!mid:|, argc:1, ARGS_SIMPLE>[CcCr]
@@ -237,75 +237,75 @@ local table (size: 4, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1,
 0420 setn                                   3
 0422 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
 0424 pop
-0425 leave                                                            ( 469)[Br]
+0425 leave                                                            ( 481)[Br]
 
 NUM BLOCK VERSIONS: 3
 TOTAL INLINE CODE SIZE: 244 bytes
 == BLOCK 1/3, ISEQ RANGE [0,5), 4 bytes =======================
-  0x1236651d0: mov x9, #0x11
+  0x121144cb0: mov x9, #0x11
 
 == BLOCK 2/3, ISEQ RANGE [2,5), 200 bytes =====================
-  0x1236651d4: add x11, x21, #0x90
-  0x1236651d8: cmp x19, x11
-  0x1236651dc: b.ls #0x123667ee8
-  0x1236651e0: mov x11, #4
-  0x1236651e4: stur x11, [x21, #8]
-  0x1236651e8: add x11, x21, #0
-  0x1236651ec: stur x11, [x19, #8]
-  0x1236651f0: mov x11, #0xb230
-  0x1236651f4: movk x11, #0x70f6, lsl #16
-  0x1236651f8: movk x11, #9, lsl #32
-  0x1236651fc: stur x11, [x19]
-  0x123665200: add x11, x21, #0x28
-  0x123665204: ldr x12, #0x12366520c
-  0x123665208: b #0x123665214
-  0x12366520c: .byte 0x10, 0xed, 0x29, 0x23
-  0x123665210: udf #1
-  0x123665214: stur x12, [x11, #-0x18]
-  0x123665218: ldr x12, #0x123665220
-  0x12366521c: b #0x123665228
-  0x123665220: .byte 0xd0, 0xe7, 0x29, 0x23
-  0x123665224: udf #1
-  0x123665228: stur x12, [x19, #0x28]
-  0x12366522c: add x12, x19, #0x18
-  0x123665230: orr x12, x12, #1
-  0x123665234: stur x12, [x11, #-0x10]
-  0x123665238: mov x12, #3
-  0x12366523c: movk x12, #0x1111, lsl #16
-  0x123665240: stur x12, [x11, #-8]
-  0x123665244: stur x11, [x19, #-0x30]
-  0x123665248: ldr x12, #0x123665250
-  0x12366524c: b #0x123665258
-  0x123665250: .byte 0x20, 0xfe, 0x29, 0x23
-  0x123665254: udf #1
-  0x123665258: stur x12, [x19, #-0x28]
-  0x12366525c: stur x9, [x19, #-0x20]
-  0x123665260: stur xzr, [x19, #-0x10]
-  0x123665264: subs x12, x11, #8
-  0x123665268: stur x12, [x19, #-0x18]
-  0x12366526c: stur x9, [x21]
-  0x123665270: stur x14, [x21, #-0x30]
-  0x123665274: stur x15, [x21, #-0x28]
-  0x123665278: stur x1, [x21, #-0x20]
-  0x12366527c: mov x21, x11
-  0x123665280: mov x11, #0x8234
-  0x123665284: movk x11, #0x2366, lsl #16
-  0x123665288: movk x11, #1, lsl #32
-  0x12366528c: stur x11, [x19, #-8]
-  0x123665290: subs x11, x19, #0x38
-  0x123665294: mov x19, x11
-  0x123665298: stur x19, [x20, #0x10]
+  0x121144cb4: add x11, x21, #0x90
+  0x121144cb8: cmp x19, x11
+  0x121144cbc: b.ls #0x1211476d0
+  0x121144cc0: mov x11, #4
+  0x121144cc4: stur x11, [x21, #8]
+  0x121144cc8: add x11, x21, #0
+  0x121144ccc: stur x11, [x19, #8]
+  0x121144cd0: mov x11, #0xf3f0
+  0x121144cd4: movk x11, #0xaaeb, lsl #16
+  0x121144cd8: movk x11, #0xc, lsl #32
+  0x121144cdc: stur x11, [x19]
+  0x121144ce0: add x11, x21, #0x28
+  0x121144ce4: ldr x12, #0x121144cec
+  0x121144ce8: b #0x121144cf4
+  0x121144cec: .byte 0x10, 0xed, 0xb7, 0x01
+  0x121144cf0: udf #1
+  0x121144cf4: stur x12, [x11, #-0x18]
+  0x121144cf8: ldr x12, #0x121144d00
+  0x121144cfc: b #0x121144d08
+  0x121144d00: .byte 0x00, 0x22, 0xe4, 0x01
+  0x121144d04: udf #1
+  0x121144d08: stur x12, [x19, #0x28]
+  0x121144d0c: add x12, x19, #0x18
+  0x121144d10: orr x12, x12, #1
+  0x121144d14: stur x12, [x11, #-0x10]
+  0x121144d18: mov x12, #3
+  0x121144d1c: movk x12, #0x1111, lsl #16
+  0x121144d20: stur x12, [x11, #-8]
+  0x121144d24: stur x11, [x19, #-0x30]
+  0x121144d28: ldr x12, #0x121144d30
+  0x121144d2c: b #0x121144d38
+  0x121144d30: .byte 0x20, 0xfe, 0xb7, 0x01
+  0x121144d34: udf #1
+  0x121144d38: stur x12, [x19, #-0x28]
+  0x121144d3c: stur x9, [x19, #-0x20]
+  0x121144d40: stur xzr, [x19, #-0x10]
+  0x121144d44: subs x12, x11, #8
+  0x121144d48: stur x12, [x19, #-0x18]
+  0x121144d4c: stur x9, [x21]
+  0x121144d50: stur x14, [x21, #-0x30]
+  0x121144d54: stur x15, [x21, #-0x28]
+  0x121144d58: stur x1, [x21, #-0x20]
+  0x121144d5c: mov x21, x11
+  0x121144d60: mov x11, #0x4fd8
+  0x121144d64: movk x11, #0x2114, lsl #16
+  0x121144d68: movk x11, #1, lsl #32
+  0x121144d6c: stur x11, [x19, #-8]
+  0x121144d70: subs x11, x19, #0x38
+  0x121144d74: mov x19, x11
+  0x121144d78: stur x19, [x20, #0x10]
 
-... 12184 byte gap ...
+... 604 byte gap ...
 == BLOCK 3/3, ISEQ RANGE [5,6), 40 bytes ======================
-  0x123668234: ldur x21, [x19, #8]
-  0x123668238: mov x1, x0
-  0x12366823c: ldur w11, [x20, #0x20]
-  0x123668240: cbnz w11, #0x12366a460
-  0x123668244: adds x11, x19, #0x38
-  0x123668248: mov x19, x11
-  0x12366824c: stur x19, [x20, #0x10]
-  0x123668250: mov x0, x1
-  0x123668254: ldur x11, [x19, #-8]
-  0x123668258: br x11
+  0x121144fd8: ldur x21, [x19, #8]
+  0x121144fdc: mov x1, x0
+  0x121144fe0: ldur w11, [x20, #0x20]
+  0x121144fe4: cbnz w11, #0x121147c18
+  0x121144fe8: adds x11, x19, #0x38
+  0x121144fec: mov x19, x11
+  0x121144ff0: stur x19, [x20, #0x10]
+  0x121144ff4: mov x0, x1
+  0x121144ff8: ldur x11, [x19, #-8]
+  0x121144ffc: br x11
 
