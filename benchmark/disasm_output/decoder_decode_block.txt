@@ -1,0 +1,2434 @@
+# YJIT Disassembly for: Decoder#decode_block
+# Method: #<Method: PureJPEG::Decoder#decode_block(reader, dc_tab, ac_tab, prev_dc, comp_id, out) /Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:418>
+
+== disasm: #<ISeq:decode_block@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:418 (418,4)-(454,7)>
+local table (size: 13, argc: 6 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
+[13] reader@0<Arg>[12] dc_tab@1<Arg>[11] ac_tab@2<Arg>[10] prev_dc@3<Arg>[ 9] comp_id@4<Arg>[ 8] out@5<Arg> [ 7] dc_cat@6   [ 6] dc_diff@7  [ 5] dc_val@8   [ 4] i@9        [ 3] symbol@10  [ 2] run@11     [ 1] size@12
+0000 getlocal_WC_0                          dc_tab@1                  ( 420)[LiCa]
+0002 getlocal_WC_0                          reader@0
+0004 opt_send_without_block                 <calldata!mid:decode, argc:1, ARGS_SIMPLE>
+0006 setlocal_WC_0                          dc_cat@6
+0008 getlocal_WC_0                          reader@0                  ( 421)[Li]
+0010 getlocal_WC_0                          dc_cat@6
+0012 opt_send_without_block                 <calldata!mid:receive_extend, argc:1, ARGS_SIMPLE>
+0014 setlocal_WC_0                          dc_diff@7
+0016 getlocal_WC_0                          prev_dc@3                 ( 422)[Li]
+0018 getlocal_WC_0                          comp_id@4
+0020 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0022 getlocal_WC_0                          dc_diff@7
+0024 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0026 setlocal_WC_0                          dc_val@8
+0028 getlocal_WC_0                          prev_dc@3                 ( 423)[Li]
+0030 getlocal_WC_0                          comp_id@4
+0032 getlocal_WC_0                          dc_val@8
+0034 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0036 pop
+0037 getlocal_WC_0                          out@5                     ( 424)[Li]
+0039 putobject_INT2FIX_0_
+0040 getlocal_WC_0                          dc_val@8
+0042 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0044 pop
+0045 putobject_INT2FIX_1_                                             ( 427)[Li]
+0046 setlocal_WC_0                          i@9
+0048 jump                                   167                       ( 428)[Li]
+0050 putnil
+0051 pop
+0052 jump                                   167
+0054 getlocal_WC_0                          ac_tab@2                  ( 429)[Li]
+0056 getlocal_WC_0                          reader@0
+0058 opt_send_without_block                 <calldata!mid:decode, argc:1, ARGS_SIMPLE>
+0060 setlocal_WC_0                          symbol@10
+0062 getlocal_WC_0                          symbol@10                 ( 430)[Li]
+0064 putobject_INT2FIX_0_
+0065 opt_eq                                 <calldata!mid:==, argc:1, ARGS_SIMPLE>[CcCr]
+0067 branchunless                           105
+0069 jump                                   90                        ( 431)[Li]
+0071 putnil
+0072 pop
+0073 jump                                   90
+0075 getlocal_WC_0                          out@5                     ( 432)[Li]
+0077 getlocal_WC_0                          i@9
+0079 putobject_INT2FIX_0_
+0080 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0082 pop
+0083 getlocal_WC_0                          i@9                       ( 433)[Li]
+0085 putobject_INT2FIX_1_
+0086 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0088 setlocal_WC_0                          i@9
+0090 getlocal_WC_0                          i@9                       ( 431)
+0092 putobject                              64
+0094 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0096 branchif                               75
+0098 putnil
+0099 pop
+0100 putnil                                                           ( 435)[Li]
+0101 jump                                   176
+0103 jump                                   167                       ( 430)
+0105 getlocal_WC_0                          symbol@10                 ( 436)[Li]
+0107 putobject                              240
+0109 opt_eq                                 <calldata!mid:==, argc:1, ARGS_SIMPLE>[CcCr]
+0111 branchunless                           121
+0113 putobject                              16                        ( 437)[Li]
+0115 send                                   <calldata!mid:times, argc:0>, block in decode_block
+0118 pop
+0119 jump                                   167                       ( 436)
+0121 getlocal_WC_0                          symbol@10                 ( 442)[Li]
+0123 putobject                              4
+0125 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
+0127 putobject                              15
+0129 opt_and                                <calldata!mid:&, argc:1, ARGS_SIMPLE>[CcCr]
+0131 setlocal_WC_0                          run@11
+0133 getlocal_WC_0                          symbol@10                 ( 443)[Li]
+0135 putobject                              15
+0137 opt_and                                <calldata!mid:&, argc:1, ARGS_SIMPLE>[CcCr]
+0139 setlocal_WC_0                          size@12
+0141 getlocal_WC_0                          run@11                    ( 444)[Li]
+0143 send                                   <calldata!mid:times, argc:0>, block in decode_block
+0146 pop
+0147 getlocal_WC_0                          out@5                     ( 448)[Li]
+0149 getlocal_WC_0                          i@9
+0151 getlocal_WC_0                          reader@0
+0153 getlocal_WC_0                          size@12
+0155 opt_send_without_block                 <calldata!mid:receive_extend, argc:1, ARGS_SIMPLE>
+0157 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0159 pop
+0160 getlocal_WC_0                          i@9                       ( 449)[Li]
+0162 putobject_INT2FIX_1_
+0163 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0165 setlocal_WC_0                          i@9
+0167 getlocal_WC_0                          i@9                       ( 428)
+0169 putobject                              64
+0171 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0173 branchif                               54
+0175 putnil
+0176 pop
+0177 getlocal_WC_0                          out@5                     ( 453)[Li]
+0179 leave                                                            ( 454)[Re]
+
+== disasm: #<ISeq:block in decode_block@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:437 (437,19)-(440,13)>
+0000 getlocal_WC_1                          out@5                     ( 438)[LiBc]
+0002 getlocal_WC_1                          i@9
+0004 putobject_INT2FIX_0_
+0005 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0007 pop
+0008 getlocal_WC_1                          i@9                       ( 439)[Li]
+0010 putobject_INT2FIX_1_
+0011 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0013 dup
+0014 setlocal_WC_1                          i@9
+0016 leave                                                            ( 440)[Br]
+
+== disasm: #<ISeq:block in decode_block@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/decoder.rb:444 (444,20)-(447,13)>
+0000 getlocal_WC_1                          out@5                     ( 445)[LiBc]
+0002 getlocal_WC_1                          i@9
+0004 putobject_INT2FIX_0_
+0005 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0007 pop
+0008 getlocal_WC_1                          i@9                       ( 446)[Li]
+0010 putobject_INT2FIX_1_
+0011 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0013 dup
+0014 setlocal_WC_1                          i@9
+0016 leave                                                            ( 447)[Br]
+
+NUM BLOCK VERSIONS: 74
+TOTAL INLINE CODE SIZE: 16836 bytes
+== BLOCK 1/74, ISEQ RANGE [0,6), 28 bytes =====================
+  0x12365c5e4: ldur x11, [x19, #0x20]
+  0x12365c5e8: stur x10, [x11, #-0x70]
+  0x12365c5ec: ldur x1, [x11, #-0x70]
+  0x12365c5f0: ldur x11, [x19, #0x20]
+  0x12365c5f4: stur x9, [x11, #-0x78]
+  0x12365c5f8: ldur x11, [x11, #-0x78]
+  0x12365c5fc: stur x11, [x21, #8]
+
+== BLOCK 2/74, ISEQ RANGE [4,6), 312 bytes ====================
+  0x12365c600: tst x1, #7
+  0x12365c604: b.ne #0x12365ea64
+  0x12365c608: nop
+  0x12365c60c: nop
+  0x12365c610: nop
+  0x12365c614: nop
+  0x12365c618: nop
+  0x12365c61c: cmp x1, #0
+  0x12365c620: b.eq #0x12365eaa8
+  0x12365c624: nop
+  0x12365c628: nop
+  0x12365c62c: nop
+  0x12365c630: nop
+  0x12365c634: nop
+  0x12365c638: mov x11, x1
+  0x12365c63c: ldr x12, #0x12365c644
+  0x12365c640: b #0x12365c64c
+  0x12365c644: .byte 0x00, 0xe7, 0x64, 0x2b
+  0x12365c648: udf #1
+  0x12365c64c: ldur x11, [x11, #8]
+  0x12365c650: cmp x11, x12
+  0x12365c654: b.ne #0x12365eaec
+  0x12365c658: nop
+  0x12365c65c: nop
+  0x12365c660: nop
+  0x12365c664: nop
+  0x12365c668: nop
+  0x12365c66c: add x11, x21, #0xb8
+  0x12365c670: cmp x19, x11
+  0x12365c674: b.ls #0x12365eb30
+  0x12365c678: mov x11, #4
+  0x12365c67c: stur x11, [x21, #0x10]
+  0x12365c680: mov x11, #4
+  0x12365c684: stur x11, [x21, #0x18]
+  0x12365c688: add x11, x21, #0
+  0x12365c68c: stur x11, [x19, #8]
+  0x12365c690: mov x11, #0xd238
+  0x12365c694: movk x11, #0x7187, lsl #16
+  0x12365c698: movk x11, #9, lsl #32
+  0x12365c69c: stur x11, [x19]
+  0x12365c6a0: add x11, x21, #0x38
+  0x12365c6a4: ldr x12, #0x12365c6ac
+  0x12365c6a8: b #0x12365c6b4
+  0x12365c6ac: adds w16, w16, w29, lsr #22
+  0x12365c6b0: udf #1
+  0x12365c6b4: stur x12, [x11, #-0x18]
+  0x12365c6b8: stur xzr, [x11, #-0x10]
+  0x12365c6bc: mov x12, #3
+  0x12365c6c0: movk x12, #0x1111, lsl #16
+  0x12365c6c4: stur x12, [x11, #-8]
+  0x12365c6c8: stur x11, [x19, #-0x30]
+  0x12365c6cc: ldr x12, #0x12365c6d4
+  0x12365c6d0: b #0x12365c6dc
+  0x12365c6d4: adds w0, w30, w29, lsr #22
+  0x12365c6d8: udf #1
+  0x12365c6dc: stur x12, [x19, #-0x28]
+  0x12365c6e0: stur x1, [x19, #-0x20]
+  0x12365c6e4: stur xzr, [x19, #-0x10]
+  0x12365c6e8: subs x12, x11, #8
+  0x12365c6ec: stur x12, [x19, #-0x18]
+  0x12365c6f0: stur x1, [x21]
+  0x12365c6f4: stur x9, [x21, #-0x80]
+  0x12365c6f8: stur x10, [x21, #-0x78]
+  0x12365c6fc: stur x14, [x21, #-0x70]
+  0x12365c700: stur x15, [x21, #-0x68]
+  0x12365c704: mov x21, x11
+  0x12365c708: mov x11, #0xc738
+  0x12365c70c: movk x11, #0x2365, lsl #16
+  0x12365c710: movk x11, #1, lsl #32
+  0x12365c714: stur x11, [x19, #-8]
+  0x12365c718: subs x11, x19, #0x38
+  0x12365c71c: mov x19, x11
+  0x12365c720: stur x19, [x20, #0x10]
+  0x12365c724: b #0x123624b84
+  0x12365c728: nop
+  0x12365c72c: nop
+  0x12365c730: nop
+  0x12365c734: nop
+
+== BLOCK 3/74, ISEQ RANGE [6,10), 44 bytes ====================
+  0x12365c738: ldur x21, [x19, #8]
+  0x12365c73c: mov x1, x0
+  0x12365c740: ldur x11, [x21, #-8]
+  0x12365c744: tst x11, #8
+  0x12365c748: b.ne #0x12365ebf4
+  0x12365c74c: nop
+  0x12365c750: nop
+  0x12365c754: nop
+  0x12365c758: nop
+  0x12365c75c: nop
+  0x12365c760: mov x14, x1
+
+== BLOCK 4/74, ISEQ RANGE [8,12), 20 bytes ====================
+  0x12365c764: ldur x1, [x21, #-0x80]
+  0x12365c768: nop
+  0x12365c76c: nop
+  0x12365c770: nop
+  0x12365c774: nop
+
+== BLOCK 5/74, ISEQ RANGE [10,14), 20 bytes ===================
+  0x12365c778: mov x9, x14
+  0x12365c77c: nop
+  0x12365c780: nop
+  0x12365c784: nop
+  0x12365c788: nop
+
+== BLOCK 6/74, ISEQ RANGE [12,14), 296 bytes ==================
+  0x12365c78c: tst x1, #7
+  0x12365c790: b.ne #0x12365ed40
+  0x12365c794: nop
+  0x12365c798: nop
+  0x12365c79c: nop
+  0x12365c7a0: nop
+  0x12365c7a4: nop
+  0x12365c7a8: cmp x1, #0
+  0x12365c7ac: b.eq #0x12365ed7c
+  0x12365c7b0: nop
+  0x12365c7b4: nop
+  0x12365c7b8: nop
+  0x12365c7bc: nop
+  0x12365c7c0: nop
+  0x12365c7c4: mov x11, x1
+  0x12365c7c8: ldr x12, #0x12365c7d0
+  0x12365c7cc: b #0x12365c7d8
+  0x12365c7d0: .byte 0x40, 0x0a, 0x5b, 0x23
+  0x12365c7d4: udf #1
+  0x12365c7d8: ldur x11, [x11, #8]
+  0x12365c7dc: cmp x11, x12
+  0x12365c7e0: b.ne #0x12365edb8
+  0x12365c7e4: nop
+  0x12365c7e8: nop
+  0x12365c7ec: nop
+  0x12365c7f0: nop
+  0x12365c7f4: nop
+  0x12365c7f8: add x11, x21, #0xb0
+  0x12365c7fc: cmp x19, x11
+  0x12365c800: b.ls #0x12365edf4
+  0x12365c804: mov x11, #4
+  0x12365c808: stur x11, [x21, #0x10]
+  0x12365c80c: add x11, x21, #0
+  0x12365c810: stur x11, [x19, #8]
+  0x12365c814: mov x11, #0xd278
+  0x12365c818: movk x11, #0x7187, lsl #16
+  0x12365c81c: movk x11, #9, lsl #32
+  0x12365c820: stur x11, [x19]
+  0x12365c824: add x11, x21, #0x30
+  0x12365c828: ldr x12, #0x12365c830
+  0x12365c82c: b #0x12365c838
+  0x12365c830: adds w0, w0, w29, lsr #31
+  0x12365c834: udf #1
+  0x12365c838: stur x12, [x11, #-0x18]
+  0x12365c83c: stur xzr, [x11, #-0x10]
+  0x12365c840: mov x12, #3
+  0x12365c844: movk x12, #0x1111, lsl #16
+  0x12365c848: stur x12, [x11, #-8]
+  0x12365c84c: stur x11, [x19, #-0x30]
+  0x12365c850: ldr x12, #0x12365c858
+  0x12365c854: b #0x12365c860
+  0x12365c858: adds w16, w19, w29, lsr #31
+  0x12365c85c: udf #1
+  0x12365c860: stur x12, [x19, #-0x28]
+  0x12365c864: stur x1, [x19, #-0x20]
+  0x12365c868: stur xzr, [x19, #-0x10]
+  0x12365c86c: subs x12, x11, #8
+  0x12365c870: stur x12, [x19, #-0x18]
+  0x12365c874: stur x1, [x21]
+  0x12365c878: stur x14, [x21, #-0x50]
+  0x12365c87c: stur x9, [x21, #8]
+  0x12365c880: mov x21, x11
+  0x12365c884: mov x11, #0xc8b4
+  0x12365c888: movk x11, #0x2365, lsl #16
+  0x12365c88c: movk x11, #1, lsl #32
+  0x12365c890: stur x11, [x19, #-8]
+  0x12365c894: subs x11, x19, #0x38
+  0x12365c898: mov x19, x11
+  0x12365c89c: stur x19, [x20, #0x10]
+  0x12365c8a0: b #0x1236286ec
+  0x12365c8a4: nop
+  0x12365c8a8: nop
+  0x12365c8ac: nop
+  0x12365c8b0: nop
+
+== BLOCK 7/74, ISEQ RANGE [14,18), 44 bytes ===================
+  0x12365c8b4: ldur x21, [x19, #8]
+  0x12365c8b8: mov x1, x0
+  0x12365c8bc: ldur x11, [x21, #-8]
+  0x12365c8c0: tst x11, #8
+  0x12365c8c4: b.ne #0x12365eeb0
+  0x12365c8c8: nop
+  0x12365c8cc: nop
+  0x12365c8d0: nop
+  0x12365c8d4: nop
+  0x12365c8d8: nop
+  0x12365c8dc: mov x10, x1
+
+== BLOCK 8/74, ISEQ RANGE [16,20), 20 bytes ===================
+  0x12365c8e0: ldur x1, [x21, #-0x68]
+  0x12365c8e4: nop
+  0x12365c8e8: nop
+  0x12365c8ec: nop
+  0x12365c8f0: nop
+
+== BLOCK 9/74, ISEQ RANGE [18,22), 20 bytes ===================
+  0x12365c8f4: ldur x9, [x21, #-0x60]
+  0x12365c8f8: nop
+  0x12365c8fc: nop
+  0x12365c900: nop
+  0x12365c904: nop
+
+== BLOCK 10/74, ISEQ RANGE [20,22), 176 bytes =================
+  0x12365c908: tst x1, #7
+  0x12365c90c: b.ne #0x12365f03c
+  0x12365c910: nop
+  0x12365c914: nop
+  0x12365c918: nop
+  0x12365c91c: nop
+  0x12365c920: nop
+  0x12365c924: cmp x1, #0
+  0x12365c928: b.eq #0x12365f078
+  0x12365c92c: nop
+  0x12365c930: nop
+  0x12365c934: nop
+  0x12365c938: nop
+  0x12365c93c: nop
+  0x12365c940: mov x11, x1
+  0x12365c944: ldr x12, #0x12365c94c
+  0x12365c948: b #0x12365c954
+  0x12365c94c: .byte 0xc0, 0x06, 0xc5, 0x21
+  0x12365c950: udf #1
+  0x12365c954: ldur x11, [x11, #8]
+  0x12365c958: cmp x11, x12
+  0x12365c95c: b.ne #0x12365f0b4
+  0x12365c960: nop
+  0x12365c964: nop
+  0x12365c968: nop
+  0x12365c96c: nop
+  0x12365c970: nop
+  0x12365c974: mov x11, #0xd2b8
+  0x12365c978: movk x11, #0x7187, lsl #16
+  0x12365c97c: movk x11, #9, lsl #32
+  0x12365c980: stur x11, [x19]
+  0x12365c984: add x11, x21, #0x10
+  0x12365c988: mov x21, x11
+  0x12365c98c: stur x21, [x19, #8]
+  0x12365c990: stur x1, [x21, #-0x10]
+  0x12365c994: stur x9, [x21, #-8]
+  0x12365c998: stur x10, [x21, #-0x58]
+  0x12365c99c: mov x0, x1
+  0x12365c9a0: mov x1, x9
+  0x12365c9a4: mov x16, #0x7f20
+  0x12365c9a8: movk x16, #0x29c, lsl #16
+  0x12365c9ac: movk x16, #1, lsl #32
+  0x12365c9b0: blr x16
+  0x12365c9b4: mov x1, x0
+
+== BLOCK 11/74, ISEQ RANGE [22,26), 20 bytes ==================
+  0x12365c9b8: ldur x9, [x21, #-0x58]
+  0x12365c9bc: nop
+  0x12365c9c0: nop
+  0x12365c9c4: nop
+  0x12365c9c8: nop
+
+== BLOCK 12/74, ISEQ RANGE [24,28), 72 bytes ==================
+  0x12365c9cc: tst x1, #1
+  0x12365c9d0: b.eq #0x12365f200
+  0x12365c9d4: nop
+  0x12365c9d8: nop
+  0x12365c9dc: nop
+  0x12365c9e0: nop
+  0x12365c9e4: nop
+  0x12365c9e8: tst x9, #1
+  0x12365c9ec: b.eq #0x12365f238
+  0x12365c9f0: nop
+  0x12365c9f4: nop
+  0x12365c9f8: nop
+  0x12365c9fc: nop
+  0x12365ca00: nop
+  0x12365ca04: subs x11, x1, #1
+  0x12365ca08: adds x11, x11, x9
+  0x12365ca0c: b.vs #0x12365f1cc
+  0x12365ca10: mov x1, x11
+
+== BLOCK 13/74, ISEQ RANGE [26,30), 20 bytes ==================
+  0x12365ca14: stur x1, [x21, #-0x50]
+  0x12365ca18: nop
+  0x12365ca1c: nop
+  0x12365ca20: nop
+  0x12365ca24: nop
+
+== BLOCK 14/74, ISEQ RANGE [28,32), 20 bytes ==================
+  0x12365ca28: ldur x1, [x21, #-0x78]
+  0x12365ca2c: nop
+  0x12365ca30: nop
+  0x12365ca34: nop
+  0x12365ca38: nop
+
+== BLOCK 15/74, ISEQ RANGE [30,34), 20 bytes ==================
+  0x12365ca3c: ldur x9, [x21, #-0x70]
+  0x12365ca40: nop
+  0x12365ca44: nop
+  0x12365ca48: nop
+  0x12365ca4c: nop
+
+== BLOCK 16/74, ISEQ RANGE [32,36), 20 bytes ==================
+  0x12365ca50: ldur x10, [x21, #-0x50]
+  0x12365ca54: nop
+  0x12365ca58: nop
+  0x12365ca5c: nop
+  0x12365ca60: nop
+
+== BLOCK 17/74, ISEQ RANGE [34,36), 180 bytes =================
+  0x12365ca64: tst x1, #7
+  0x12365ca68: b.ne #0x12365f454
+  0x12365ca6c: nop
+  0x12365ca70: nop
+  0x12365ca74: nop
+  0x12365ca78: nop
+  0x12365ca7c: nop
+  0x12365ca80: cmp x1, #0
+  0x12365ca84: b.eq #0x12365f490
+  0x12365ca88: nop
+  0x12365ca8c: nop
+  0x12365ca90: nop
+  0x12365ca94: nop
+  0x12365ca98: nop
+  0x12365ca9c: mov x11, x1
+  0x12365caa0: ldr x12, #0x12365caa8
+  0x12365caa4: b #0x12365cab0
+  0x12365caa8: .byte 0xc0, 0x06, 0xc5, 0x21
+  0x12365caac: udf #1
+  0x12365cab0: ldur x11, [x11, #8]
+  0x12365cab4: cmp x11, x12
+  0x12365cab8: b.ne #0x12365f4cc
+  0x12365cabc: nop
+  0x12365cac0: nop
+  0x12365cac4: nop
+  0x12365cac8: nop
+  0x12365cacc: nop
+  0x12365cad0: mov x11, #0xd328
+  0x12365cad4: movk x11, #0x7187, lsl #16
+  0x12365cad8: movk x11, #9, lsl #32
+  0x12365cadc: stur x11, [x19]
+  0x12365cae0: add x11, x21, #8
+  0x12365cae4: mov x21, x11
+  0x12365cae8: stur x21, [x19, #8]
+  0x12365caec: stur x1, [x21, #-0x18]
+  0x12365caf0: stur x9, [x21, #-0x10]
+  0x12365caf4: stur x10, [x21, #-8]
+  0x12365caf8: mov x2, x10
+  0x12365cafc: mov x0, x1
+  0x12365cb00: mov x1, x9
+  0x12365cb04: mov x16, #0x8ab8
+  0x12365cb08: movk x16, #0x29c, lsl #16
+  0x12365cb0c: movk x16, #1, lsl #32
+  0x12365cb10: blr x16
+  0x12365cb14: mov x1, x0
+
+== BLOCK 18/74, ISEQ RANGE [36,39), 0 bytes ===================
+== BLOCK 19/74, ISEQ RANGE [37,42), 20 bytes ==================
+  0x12365cb18: ldur x1, [x21, #-0x70]
+  0x12365cb1c: mov x9, #1
+  0x12365cb20: nop
+  0x12365cb24: nop
+  0x12365cb28: nop
+
+== BLOCK 20/74, ISEQ RANGE [40,44), 20 bytes ==================
+  0x12365cb2c: ldur x10, [x21, #-0x58]
+  0x12365cb30: nop
+  0x12365cb34: nop
+  0x12365cb38: nop
+  0x12365cb3c: nop
+
+== BLOCK 21/74, ISEQ RANGE [42,44), 180 bytes =================
+  0x12365cb40: tst x1, #7
+  0x12365cb44: b.ne #0x12365f654
+  0x12365cb48: nop
+  0x12365cb4c: nop
+  0x12365cb50: nop
+  0x12365cb54: nop
+  0x12365cb58: nop
+  0x12365cb5c: cmp x1, #0
+  0x12365cb60: b.eq #0x12365f690
+  0x12365cb64: nop
+  0x12365cb68: nop
+  0x12365cb6c: nop
+  0x12365cb70: nop
+  0x12365cb74: nop
+  0x12365cb78: mov x11, x1
+  0x12365cb7c: ldr x12, #0x12365cb84
+  0x12365cb80: b #0x12365cb8c
+  0x12365cb84: .byte 0x00, 0x09, 0xc5, 0x21
+  0x12365cb88: udf #1
+  0x12365cb8c: ldur x11, [x11, #8]
+  0x12365cb90: cmp x11, x12
+  0x12365cb94: b.ne #0x12365f6cc
+  0x12365cb98: nop
+  0x12365cb9c: nop
+  0x12365cba0: nop
+  0x12365cba4: nop
+  0x12365cba8: nop
+  0x12365cbac: mov x11, #0xd368
+  0x12365cbb0: movk x11, #0x7187, lsl #16
+  0x12365cbb4: movk x11, #9, lsl #32
+  0x12365cbb8: stur x11, [x19]
+  0x12365cbbc: mov x11, x9
+  0x12365cbc0: asr x11, x11, #1
+  0x12365cbc4: stur x1, [x21, #-0x18]
+  0x12365cbc8: stur x9, [x21, #-0x10]
+  0x12365cbcc: stur x10, [x21, #-8]
+  0x12365cbd0: mov x2, x10
+  0x12365cbd4: mov x0, x1
+  0x12365cbd8: mov x1, x11
+  0x12365cbdc: mov x16, #0xa48c
+  0x12365cbe0: movk x16, #0x28d, lsl #16
+  0x12365cbe4: movk x16, #1, lsl #32
+  0x12365cbe8: blr x16
+  0x12365cbec: ldur x11, [x21, #-8]
+  0x12365cbf0: mov x1, x11
+
+== BLOCK 22/74, ISEQ RANGE [44,48), 4 bytes ===================
+  0x12365cbf4: mov x1, #3
+
+== BLOCK 23/74, ISEQ RANGE [46,50), 20 bytes ==================
+  0x12365cbf8: stur x1, [x21, #-0x50]
+  0x12365cbfc: nop
+  0x12365cc00: nop
+  0x12365cc04: nop
+  0x12365cc08: nop
+
+== BLOCK 24/74, ISEQ RANGE [167,173), 20 bytes ================
+  0x12365cc0c: ldur x1, [x21, #-0x50]
+  0x12365cc10: mov x9, #0x81
+  0x12365cc14: nop
+  0x12365cc18: nop
+  0x12365cc1c: nop
+
+== BLOCK 25/74, ISEQ RANGE [171,175), 84 bytes ================
+  0x12365cc20: tst x1, #1
+  0x12365cc24: b.eq #0x12365f884
+  0x12365cc28: nop
+  0x12365cc2c: nop
+  0x12365cc30: nop
+  0x12365cc34: nop
+  0x12365cc38: nop
+  0x12365cc3c: cmp x1, x9
+  0x12365cc40: mov x11, #0x14
+  0x12365cc44: mov x12, #0
+  0x12365cc48: csel x11, x11, x12, lt
+  0x12365cc4c: mov x1, x11
+  0x12365cc50: ldur w11, [x20, #0x20]
+  0x12365cc54: cbnz w11, #0x12365f91c
+  0x12365cc58: tst x1, #-5
+  0x12365cc5c: b.eq #0x123660670
+  0x12365cc60: nop
+  0x12365cc64: nop
+  0x12365cc68: nop
+  0x12365cc6c: nop
+  0x12365cc70: nop
+
+== BLOCK 26/74, ISEQ RANGE [54,58), 20 bytes ==================
+  0x12365cc74: ldur x1, [x21, #-0x88]
+  0x12365cc78: nop
+  0x12365cc7c: nop
+  0x12365cc80: nop
+  0x12365cc84: nop
+
+== BLOCK 27/74, ISEQ RANGE [56,60), 20 bytes ==================
+  0x12365cc88: ldur x9, [x21, #-0x98]
+  0x12365cc8c: nop
+  0x12365cc90: nop
+  0x12365cc94: nop
+  0x12365cc98: nop
+
+== BLOCK 28/74, ISEQ RANGE [58,60), 300 bytes =================
+  0x12365cc9c: tst x1, #7
+  0x12365cca0: b.ne #0x12365fa2c
+  0x12365cca4: nop
+  0x12365cca8: nop
+  0x12365ccac: nop
+  0x12365ccb0: nop
+  0x12365ccb4: nop
+  0x12365ccb8: cmp x1, #0
+  0x12365ccbc: b.eq #0x12365fa64
+  0x12365ccc0: nop
+  0x12365ccc4: nop
+  0x12365ccc8: nop
+  0x12365cccc: nop
+  0x12365ccd0: nop
+  0x12365ccd4: mov x11, x1
+  0x12365ccd8: ldr x12, #0x12365cce0
+  0x12365ccdc: b #0x12365cce8
+  0x12365cce0: .byte 0x00, 0xe7, 0x64, 0x2b
+  0x12365cce4: udf #1
+  0x12365cce8: ldur x11, [x11, #8]
+  0x12365ccec: cmp x11, x12
+  0x12365ccf0: b.ne #0x12365fa9c
+  0x12365ccf4: nop
+  0x12365ccf8: nop
+  0x12365ccfc: nop
+  0x12365cd00: nop
+  0x12365cd04: nop
+  0x12365cd08: add x11, x21, #0xa0
+  0x12365cd0c: cmp x19, x11
+  0x12365cd10: b.ls #0x12365fad4
+  0x12365cd14: mov x11, #4
+  0x12365cd18: stur x11, [x21, #-8]
+  0x12365cd1c: mov x11, #4
+  0x12365cd20: stur x11, [x21]
+  0x12365cd24: sub x11, x21, #0x18
+  0x12365cd28: stur x11, [x19, #8]
+  0x12365cd2c: mov x11, #0xd3e8
+  0x12365cd30: movk x11, #0x7187, lsl #16
+  0x12365cd34: movk x11, #9, lsl #32
+  0x12365cd38: stur x11, [x19]
+  0x12365cd3c: add x11, x21, #0x20
+  0x12365cd40: ldr x12, #0x12365cd48
+  0x12365cd44: b #0x12365cd50
+  0x12365cd48: adds w16, w16, w29, lsr #22
+  0x12365cd4c: udf #1
+  0x12365cd50: stur x12, [x11, #-0x18]
+  0x12365cd54: stur xzr, [x11, #-0x10]
+  0x12365cd58: mov x12, #3
+  0x12365cd5c: movk x12, #0x1111, lsl #16
+  0x12365cd60: stur x12, [x11, #-8]
+  0x12365cd64: stur x11, [x19, #-0x30]
+  0x12365cd68: ldr x12, #0x12365cd70
+  0x12365cd6c: b #0x12365cd78
+  0x12365cd70: adds w0, w30, w29, lsr #22
+  0x12365cd74: udf #1
+  0x12365cd78: stur x12, [x19, #-0x28]
+  0x12365cd7c: stur x1, [x19, #-0x20]
+  0x12365cd80: stur xzr, [x19, #-0x10]
+  0x12365cd84: subs x12, x11, #8
+  0x12365cd88: stur x12, [x19, #-0x18]
+  0x12365cd8c: stur x1, [x21, #-0x18]
+  0x12365cd90: stur x9, [x21, #-0x10]
+  0x12365cd94: mov x21, x11
+  0x12365cd98: mov x11, #0xcdc8
+  0x12365cd9c: movk x11, #0x2365, lsl #16
+  0x12365cda0: movk x11, #1, lsl #32
+  0x12365cda4: stur x11, [x19, #-8]
+  0x12365cda8: subs x11, x19, #0x38
+  0x12365cdac: mov x19, x11
+  0x12365cdb0: stur x19, [x20, #0x10]
+  0x12365cdb4: b #0x123624b84
+  0x12365cdb8: nop
+  0x12365cdbc: nop
+  0x12365cdc0: nop
+  0x12365cdc4: nop
+
+== BLOCK 29/74, ISEQ RANGE [60,64), 44 bytes ==================
+  0x12365cdc8: ldur x21, [x19, #8]
+  0x12365cdcc: mov x1, x0
+  0x12365cdd0: ldur x11, [x21, #-8]
+  0x12365cdd4: tst x11, #8
+  0x12365cdd8: b.ne #0x12365fb8c
+  0x12365cddc: nop
+  0x12365cde0: nop
+  0x12365cde4: nop
+  0x12365cde8: nop
+  0x12365cdec: nop
+  0x12365cdf0: stur x1, [x21, #-0x30]
+
+== BLOCK 30/74, ISEQ RANGE [62,67), 20 bytes ==================
+  0x12365cdf4: ldur x1, [x21, #-0x30]
+  0x12365cdf8: mov x9, #1
+  0x12365cdfc: nop
+  0x12365ce00: nop
+  0x12365ce04: nop
+
+== BLOCK 31/74, ISEQ RANGE [65,67), 48 bytes ==================
+  0x12365ce08: tst x1, #1
+  0x12365ce0c: b.eq #0x12365fc90
+  0x12365ce10: nop
+  0x12365ce14: nop
+  0x12365ce18: nop
+  0x12365ce1c: nop
+  0x12365ce20: nop
+  0x12365ce24: cmp x1, x9
+  0x12365ce28: mov x11, #0x14
+  0x12365ce2c: mov x12, #0
+  0x12365ce30: csel x11, x11, x12, eq
+  0x12365ce34: mov x1, x11
+
+== BLOCK 32/74, ISEQ RANGE [67,69), 28 bytes ==================
+  0x12365ce38: tst x1, #-5
+  0x12365ce3c: b.ne #0x123668284
+  0x12365ce40: nop
+  0x12365ce44: nop
+  0x12365ce48: nop
+  0x12365ce4c: nop
+  0x12365ce50: nop
+
+== BLOCK 33/74, ISEQ RANGE [105,111), 20 bytes ================
+  0x12365ce54: ldur x1, [x21, #-0x30]
+  0x12365ce58: mov x9, #0x1e1
+  0x12365ce5c: nop
+  0x12365ce60: nop
+  0x12365ce64: nop
+
+== BLOCK 34/74, ISEQ RANGE [109,111), 48 bytes ================
+  0x12365ce68: tst x1, #1
+  0x12365ce6c: b.eq #0x12365fdc8
+  0x12365ce70: nop
+  0x12365ce74: nop
+  0x12365ce78: nop
+  0x12365ce7c: nop
+  0x12365ce80: nop
+  0x12365ce84: cmp x1, x9
+  0x12365ce88: mov x11, #0x14
+  0x12365ce8c: mov x12, #0
+  0x12365ce90: csel x11, x11, x12, eq
+  0x12365ce94: mov x1, x11
+
+== BLOCK 35/74, ISEQ RANGE [111,113), 28 bytes ================
+  0x12365ce98: tst x1, #-5
+  0x12365ce9c: b.ne #0x12365fe30
+  0x12365cea0: nop
+  0x12365cea4: nop
+  0x12365cea8: nop
+  0x12365ceac: nop
+  0x12365ceb0: nop
+
+== BLOCK 36/74, ISEQ RANGE [121,127), 20 bytes ================
+  0x12365ceb4: ldur x1, [x21, #-0x30]
+  0x12365ceb8: mov x9, #9
+  0x12365cebc: nop
+  0x12365cec0: nop
+  0x12365cec4: nop
+
+== BLOCK 37/74, ISEQ RANGE [125,127), 68 bytes ================
+  0x12365cec8: tst x1, #1
+  0x12365cecc: b.eq #0x12365fec4
+  0x12365ced0: nop
+  0x12365ced4: nop
+  0x12365ced8: nop
+  0x12365cedc: nop
+  0x12365cee0: nop
+  0x12365cee4: cmp x9, #9
+  0x12365cee8: b.ne #0x12365ff38
+  0x12365ceec: nop
+  0x12365cef0: nop
+  0x12365cef4: nop
+  0x12365cef8: nop
+  0x12365cefc: nop
+  0x12365cf00: asr x11, x1, #4
+  0x12365cf04: orr x11, x11, #1
+  0x12365cf08: mov x1, x11
+
+== BLOCK 38/74, ISEQ RANGE [127,133), 20 bytes ================
+  0x12365cf0c: mov x9, #0x1f
+  0x12365cf10: and x1, x1, x9
+  0x12365cf14: nop
+  0x12365cf18: nop
+  0x12365cf1c: nop
+
+== BLOCK 39/74, ISEQ RANGE [131,135), 12552 bytes =============
+  0x12365cf20: b #0x123660014
+  0x12365cf24: nop
+  0x12365cf28: nop
+  0x12365cf2c: nop
+  0x12365cf30: nop
+  0x12365cf34: udf #0
+  0x12365cf38: udf #0
+  0x12365cf3c: udf #0
+  0x12365cf40: udf #0
+  0x12365cf44: udf #0
+  0x12365cf48: udf #0
+  0x12365cf4c: udf #0
+  0x12365cf50: udf #0
+  0x12365cf54: udf #0
+  0x12365cf58: udf #0
+  0x12365cf5c: udf #0
+  0x12365cf60: udf #0
+  0x12365cf64: udf #0
+  0x12365cf68: udf #0
+  0x12365cf6c: udf #0
+  0x12365cf70: udf #0
+  0x12365cf74: udf #0
+  0x12365cf78: udf #0
+  0x12365cf7c: udf #0
+  0x12365cf80: udf #0
+  0x12365cf84: udf #0
+  0x12365cf88: udf #0
+  0x12365cf8c: udf #0
+  0x12365cf90: udf #0
+  0x12365cf94: udf #0
+  0x12365cf98: udf #0
+  0x12365cf9c: udf #0
+  0x12365cfa0: udf #0
+  0x12365cfa4: udf #0
+  0x12365cfa8: udf #0
+  0x12365cfac: udf #0
+  0x12365cfb0: udf #0
+  0x12365cfb4: udf #0
+  0x12365cfb8: udf #0
+  0x12365cfbc: udf #0
+  0x12365cfc0: udf #0
+  0x12365cfc4: udf #0
+  0x12365cfc8: udf #0
+  0x12365cfcc: udf #0
+  0x12365cfd0: udf #0
+  0x12365cfd4: udf #0
+  0x12365cfd8: udf #0
+  0x12365cfdc: udf #0
+  0x12365cfe0: udf #0
+  0x12365cfe4: udf #0
+  0x12365cfe8: udf #0
+  0x12365cfec: udf #0
+  0x12365cff0: udf #0
+  0x12365cff4: udf #0
+  0x12365cff8: udf #0
+  0x12365cffc: udf #0
+  0x12365d000: udf #0
+  0x12365d004: udf #0
+  0x12365d008: udf #0
+  0x12365d00c: udf #0
+  0x12365d010: udf #0
+  0x12365d014: udf #0
+  0x12365d018: udf #0
+  0x12365d01c: udf #0
+  0x12365d020: udf #0
+  0x12365d024: udf #0
+  0x12365d028: udf #0
+  0x12365d02c: udf #0
+  0x12365d030: udf #0
+  0x12365d034: udf #0
+  0x12365d038: udf #0
+  0x12365d03c: udf #0
+  0x12365d040: udf #0
+  0x12365d044: udf #0
+  0x12365d048: udf #0
+  0x12365d04c: udf #0
+  0x12365d050: udf #0
+  0x12365d054: udf #0
+  0x12365d058: udf #0
+  0x12365d05c: udf #0
+  0x12365d060: udf #0
+  0x12365d064: udf #0
+  0x12365d068: udf #0
+  0x12365d06c: udf #0
+  0x12365d070: udf #0
+  0x12365d074: udf #0
+  0x12365d078: udf #0
+  0x12365d07c: udf #0
+  0x12365d080: udf #0
+  0x12365d084: udf #0
+  0x12365d088: udf #0
+  0x12365d08c: udf #0
+  0x12365d090: udf #0
+  0x12365d094: udf #0
+  0x12365d098: udf #0
+  0x12365d09c: udf #0
+  0x12365d0a0: udf #0
+  0x12365d0a4: udf #0
+  0x12365d0a8: udf #0
+  0x12365d0ac: udf #0
+  0x12365d0b0: udf #0
+  0x12365d0b4: udf #0
+  0x12365d0b8: udf #0
+  0x12365d0bc: udf #0
+  0x12365d0c0: udf #0
+  0x12365d0c4: udf #0
+  0x12365d0c8: udf #0
+  0x12365d0cc: udf #0
+  0x12365d0d0: udf #0
+  0x12365d0d4: udf #0
+  0x12365d0d8: udf #0
+  0x12365d0dc: udf #0
+  0x12365d0e0: udf #0
+  0x12365d0e4: udf #0
+  0x12365d0e8: udf #0
+  0x12365d0ec: udf #0
+  0x12365d0f0: udf #0
+  0x12365d0f4: udf #0
+  0x12365d0f8: udf #0
+  0x12365d0fc: udf #0
+  0x12365d100: udf #0
+  0x12365d104: udf #0
+  0x12365d108: udf #0
+  0x12365d10c: udf #0
+  0x12365d110: udf #0
+  0x12365d114: udf #0
+  0x12365d118: udf #0
+  0x12365d11c: udf #0
+  0x12365d120: udf #0
+  0x12365d124: udf #0
+  0x12365d128: udf #0
+  0x12365d12c: udf #0
+  0x12365d130: udf #0
+  0x12365d134: udf #0
+  0x12365d138: udf #0
+  0x12365d13c: udf #0
+  0x12365d140: udf #0
+  0x12365d144: udf #0
+  0x12365d148: udf #0
+  0x12365d14c: udf #0
+  0x12365d150: udf #0
+  0x12365d154: udf #0
+  0x12365d158: udf #0
+  0x12365d15c: udf #0
+  0x12365d160: udf #0
+  0x12365d164: udf #0
+  0x12365d168: udf #0
+  0x12365d16c: udf #0
+  0x12365d170: udf #0
+  0x12365d174: udf #0
+  0x12365d178: udf #0
+  0x12365d17c: udf #0
+  0x12365d180: udf #0
+  0x12365d184: udf #0
+  0x12365d188: udf #0
+  0x12365d18c: udf #0
+  0x12365d190: udf #0
+  0x12365d194: udf #0
+  0x12365d198: udf #0
+  0x12365d19c: udf #0
+  0x12365d1a0: udf #0
+  0x12365d1a4: udf #0
+  0x12365d1a8: udf #0
+  0x12365d1ac: udf #0
+  0x12365d1b0: udf #0
+  0x12365d1b4: udf #0
+  0x12365d1b8: udf #0
+  0x12365d1bc: udf #0
+  0x12365d1c0: udf #0
+  0x12365d1c4: udf #0
+  0x12365d1c8: udf #0
+  0x12365d1cc: udf #0
+  0x12365d1d0: udf #0
+  0x12365d1d4: udf #0
+  0x12365d1d8: udf #0
+  0x12365d1dc: udf #0
+  0x12365d1e0: udf #0
+  0x12365d1e4: udf #0
+  0x12365d1e8: udf #0
+  0x12365d1ec: udf #0
+  0x12365d1f0: udf #0
+  0x12365d1f4: udf #0
+  0x12365d1f8: udf #0
+  0x12365d1fc: udf #0
+  0x12365d200: udf #0
+  0x12365d204: udf #0
+  0x12365d208: udf #0
+  0x12365d20c: udf #0
+  0x12365d210: udf #0
+  0x12365d214: udf #0
+  0x12365d218: udf #0
+  0x12365d21c: udf #0
+  0x12365d220: udf #0
+  0x12365d224: udf #0
+  0x12365d228: udf #0
+  0x12365d22c: udf #0
+  0x12365d230: udf #0
+  0x12365d234: udf #0
+  0x12365d238: udf #0
+  0x12365d23c: udf #0
+  0x12365d240: udf #0
+  0x12365d244: udf #0
+  0x12365d248: udf #0
+  0x12365d24c: udf #0
+  0x12365d250: udf #0
+  0x12365d254: udf #0
+  0x12365d258: udf #0
+  0x12365d25c: udf #0
+  0x12365d260: udf #0
+  0x12365d264: udf #0
+  0x12365d268: udf #0
+  0x12365d26c: udf #0
+  0x12365d270: udf #0
+  0x12365d274: udf #0
+  0x12365d278: udf #0
+  0x12365d27c: udf #0
+  0x12365d280: udf #0
+  0x12365d284: udf #0
+  0x12365d288: udf #0
+  0x12365d28c: udf #0
+  0x12365d290: udf #0
+  0x12365d294: udf #0
+  0x12365d298: udf #0
+  0x12365d29c: udf #0
+  0x12365d2a0: udf #0
+  0x12365d2a4: udf #0
+  0x12365d2a8: udf #0
+  0x12365d2ac: udf #0
+  0x12365d2b0: udf #0
+  0x12365d2b4: udf #0
+  0x12365d2b8: udf #0
+  0x12365d2bc: udf #0
+  0x12365d2c0: udf #0
+  0x12365d2c4: udf #0
+  0x12365d2c8: udf #0
+  0x12365d2cc: udf #0
+  0x12365d2d0: udf #0
+  0x12365d2d4: udf #0
+  0x12365d2d8: udf #0
+  0x12365d2dc: udf #0
+  0x12365d2e0: udf #0
+  0x12365d2e4: udf #0
+  0x12365d2e8: udf #0
+  0x12365d2ec: udf #0
+  0x12365d2f0: udf #0
+  0x12365d2f4: udf #0
+  0x12365d2f8: udf #0
+  0x12365d2fc: udf #0
+  0x12365d300: udf #0
+  0x12365d304: udf #0
+  0x12365d308: udf #0
+  0x12365d30c: udf #0
+  0x12365d310: udf #0
+  0x12365d314: udf #0
+  0x12365d318: udf #0
+  0x12365d31c: udf #0
+  0x12365d320: udf #0
+  0x12365d324: udf #0
+  0x12365d328: udf #0
+  0x12365d32c: udf #0
+  0x12365d330: udf #0
+  0x12365d334: udf #0
+  0x12365d338: udf #0
+  0x12365d33c: udf #0
+  0x12365d340: udf #0
+  0x12365d344: udf #0
+  0x12365d348: udf #0
+  0x12365d34c: udf #0
+  0x12365d350: udf #0
+  0x12365d354: udf #0
+  0x12365d358: udf #0
+  0x12365d35c: udf #0
+  0x12365d360: udf #0
+  0x12365d364: udf #0
+  0x12365d368: udf #0
+  0x12365d36c: udf #0
+  0x12365d370: udf #0
+  0x12365d374: udf #0
+  0x12365d378: udf #0
+  0x12365d37c: udf #0
+  0x12365d380: udf #0
+  0x12365d384: udf #0
+  0x12365d388: udf #0
+  0x12365d38c: udf #0
+  0x12365d390: udf #0
+  0x12365d394: udf #0
+  0x12365d398: udf #0
+  0x12365d39c: udf #0
+  0x12365d3a0: udf #0
+  0x12365d3a4: udf #0
+  0x12365d3a8: udf #0
+  0x12365d3ac: udf #0
+  0x12365d3b0: udf #0
+  0x12365d3b4: udf #0
+  0x12365d3b8: udf #0
+  0x12365d3bc: udf #0
+  0x12365d3c0: udf #0
+  0x12365d3c4: udf #0
+  0x12365d3c8: udf #0
+  0x12365d3cc: udf #0
+  0x12365d3d0: udf #0
+  0x12365d3d4: udf #0
+  0x12365d3d8: udf #0
+  0x12365d3dc: udf #0
+  0x12365d3e0: udf #0
+  0x12365d3e4: udf #0
+  0x12365d3e8: udf #0
+  0x12365d3ec: udf #0
+  0x12365d3f0: udf #0
+  0x12365d3f4: udf #0
+  0x12365d3f8: udf #0
+  0x12365d3fc: udf #0
+  0x12365d400: udf #0
+  0x12365d404: udf #0
+  0x12365d408: udf #0
+  0x12365d40c: udf #0
+  0x12365d410: udf #0
+  0x12365d414: udf #0
+  0x12365d418: udf #0
+  0x12365d41c: udf #0
+  0x12365d420: udf #0
+  0x12365d424: udf #0
+  0x12365d428: udf #0
+  0x12365d42c: udf #0
+  0x12365d430: udf #0
+  0x12365d434: udf #0
+  0x12365d438: udf #0
+  0x12365d43c: udf #0
+  0x12365d440: udf #0
+  0x12365d444: udf #0
+  0x12365d448: udf #0
+  0x12365d44c: udf #0
+  0x12365d450: udf #0
+  0x12365d454: udf #0
+  0x12365d458: udf #0
+  0x12365d45c: udf #0
+  0x12365d460: udf #0
+  0x12365d464: udf #0
+  0x12365d468: udf #0
+  0x12365d46c: udf #0
+  0x12365d470: udf #0
+  0x12365d474: udf #0
+  0x12365d478: udf #0
+  0x12365d47c: udf #0
+  0x12365d480: udf #0
+  0x12365d484: udf #0
+  0x12365d488: udf #0
+  0x12365d48c: udf #0
+  0x12365d490: udf #0
+  0x12365d494: udf #0
+  0x12365d498: udf #0
+  0x12365d49c: udf #0
+  0x12365d4a0: udf #0
+  0x12365d4a4: udf #0
+  0x12365d4a8: udf #0
+  0x12365d4ac: udf #0
+  0x12365d4b0: udf #0
+  0x12365d4b4: udf #0
+  0x12365d4b8: udf #0
+  0x12365d4bc: udf #0
+  0x12365d4c0: udf #0
+  0x12365d4c4: udf #0
+  0x12365d4c8: udf #0
+  0x12365d4cc: udf #0
+  0x12365d4d0: udf #0
+  0x12365d4d4: udf #0
+  0x12365d4d8: udf #0
+  0x12365d4dc: udf #0
+  0x12365d4e0: udf #0
+  0x12365d4e4: udf #0
+  0x12365d4e8: udf #0
+  0x12365d4ec: udf #0
+  0x12365d4f0: udf #0
+  0x12365d4f4: udf #0
+  0x12365d4f8: udf #0
+  0x12365d4fc: udf #0
+  0x12365d500: udf #0
+  0x12365d504: udf #0
+  0x12365d508: udf #0
+  0x12365d50c: udf #0
+  0x12365d510: udf #0
+  0x12365d514: udf #0
+  0x12365d518: udf #0
+  0x12365d51c: udf #0
+  0x12365d520: udf #0
+  0x12365d524: udf #0
+  0x12365d528: udf #0
+  0x12365d52c: udf #0
+  0x12365d530: udf #0
+  0x12365d534: udf #0
+  0x12365d538: udf #0
+  0x12365d53c: udf #0
+  0x12365d540: udf #0
+  0x12365d544: udf #0
+  0x12365d548: udf #0
+  0x12365d54c: udf #0
+  0x12365d550: udf #0
+  0x12365d554: udf #0
+  0x12365d558: udf #0
+  0x12365d55c: udf #0
+  0x12365d560: udf #0
+  0x12365d564: udf #0
+  0x12365d568: udf #0
+  0x12365d56c: udf #0
+  0x12365d570: udf #0
+  0x12365d574: udf #0
+  0x12365d578: udf #0
+  0x12365d57c: udf #0
+  0x12365d580: udf #0
+  0x12365d584: udf #0
+  0x12365d588: udf #0
+  0x12365d58c: udf #0
+  0x12365d590: udf #0
+  0x12365d594: udf #0
+  0x12365d598: udf #0
+  0x12365d59c: udf #0
+  0x12365d5a0: udf #0
+  0x12365d5a4: udf #0
+  0x12365d5a8: udf #0
+  0x12365d5ac: udf #0
+  0x12365d5b0: udf #0
+  0x12365d5b4: udf #0
+  0x12365d5b8: udf #0
+  0x12365d5bc: udf #0
+  0x12365d5c0: udf #0
+  0x12365d5c4: udf #0
+  0x12365d5c8: udf #0
+  0x12365d5cc: udf #0
+  0x12365d5d0: udf #0
+  0x12365d5d4: udf #0
+  0x12365d5d8: udf #0
+  0x12365d5dc: udf #0
+  0x12365d5e0: udf #0
+  0x12365d5e4: udf #0
+  0x12365d5e8: udf #0
+  0x12365d5ec: udf #0
+  0x12365d5f0: udf #0
+  0x12365d5f4: udf #0
+  0x12365d5f8: udf #0
+  0x12365d5fc: udf #0
+  0x12365d600: udf #0
+  0x12365d604: udf #0
+  0x12365d608: udf #0
+  0x12365d60c: udf #0
+  0x12365d610: udf #0
+  0x12365d614: udf #0
+  0x12365d618: udf #0
+  0x12365d61c: udf #0
+  0x12365d620: udf #0
+  0x12365d624: udf #0
+  0x12365d628: udf #0
+  0x12365d62c: udf #0
+  0x12365d630: udf #0
+  0x12365d634: udf #0
+  0x12365d638: udf #0
+  0x12365d63c: udf #0
+  0x12365d640: udf #0
+  0x12365d644: udf #0
+  0x12365d648: udf #0
+  0x12365d64c: udf #0
+  0x12365d650: udf #0
+  0x12365d654: udf #0
+  0x12365d658: udf #0
+  0x12365d65c: udf #0
+  0x12365d660: udf #0
+  0x12365d664: udf #0
+  0x12365d668: udf #0
+  0x12365d66c: udf #0
+  0x12365d670: udf #0
+  0x12365d674: udf #0
+  0x12365d678: udf #0
+  0x12365d67c: udf #0
+  0x12365d680: udf #0
+  0x12365d684: udf #0
+  0x12365d688: udf #0
+  0x12365d68c: udf #0
+  0x12365d690: udf #0
+  0x12365d694: udf #0
+  0x12365d698: udf #0
+  0x12365d69c: udf #0
+  0x12365d6a0: udf #0
+  0x12365d6a4: udf #0
+  0x12365d6a8: udf #0
+  0x12365d6ac: udf #0
+  0x12365d6b0: udf #0
+  0x12365d6b4: udf #0
+  0x12365d6b8: udf #0
+  0x12365d6bc: udf #0
+  0x12365d6c0: udf #0
+  0x12365d6c4: udf #0
+  0x12365d6c8: udf #0
+  0x12365d6cc: udf #0
+  0x12365d6d0: udf #0
+  0x12365d6d4: udf #0
+  0x12365d6d8: udf #0
+  0x12365d6dc: udf #0
+  0x12365d6e0: udf #0
+  0x12365d6e4: udf #0
+  0x12365d6e8: udf #0
+  0x12365d6ec: udf #0
+  0x12365d6f0: udf #0
+  0x12365d6f4: udf #0
+  0x12365d6f8: udf #0
+  0x12365d6fc: udf #0
+  0x12365d700: udf #0
+  0x12365d704: udf #0
+  0x12365d708: udf #0
+  0x12365d70c: udf #0
+  0x12365d710: udf #0
+  0x12365d714: udf #0
+  0x12365d718: udf #0
+  0x12365d71c: udf #0
+  0x12365d720: udf #0
+  0x12365d724: udf #0
+  0x12365d728: udf #0
+  0x12365d72c: udf #0
+  0x12365d730: udf #0
+  0x12365d734: udf #0
+  0x12365d738: udf #0
+  0x12365d73c: udf #0
+  0x12365d740: udf #0
+  0x12365d744: udf #0
+  0x12365d748: udf #0
+  0x12365d74c: udf #0
+  0x12365d750: udf #0
+  0x12365d754: udf #0
+  0x12365d758: udf #0
+  0x12365d75c: udf #0
+  0x12365d760: udf #0
+  0x12365d764: udf #0
+  0x12365d768: udf #0
+  0x12365d76c: udf #0
+  0x12365d770: udf #0
+  0x12365d774: udf #0
+  0x12365d778: udf #0
+  0x12365d77c: udf #0
+  0x12365d780: udf #0
+  0x12365d784: udf #0
+  0x12365d788: udf #0
+  0x12365d78c: udf #0
+  0x12365d790: udf #0
+  0x12365d794: udf #0
+  0x12365d798: udf #0
+  0x12365d79c: udf #0
+  0x12365d7a0: udf #0
+  0x12365d7a4: udf #0
+  0x12365d7a8: udf #0
+  0x12365d7ac: udf #0
+  0x12365d7b0: udf #0
+  0x12365d7b4: udf #0
+  0x12365d7b8: udf #0
+  0x12365d7bc: udf #0
+  0x12365d7c0: udf #0
+  0x12365d7c4: udf #0
+  0x12365d7c8: udf #0
+  0x12365d7cc: udf #0
+  0x12365d7d0: udf #0
+  0x12365d7d4: udf #0
+  0x12365d7d8: udf #0
+  0x12365d7dc: udf #0
+  0x12365d7e0: udf #0
+  0x12365d7e4: udf #0
+  0x12365d7e8: udf #0
+  0x12365d7ec: udf #0
+  0x12365d7f0: udf #0
+  0x12365d7f4: udf #0
+  0x12365d7f8: udf #0
+  0x12365d7fc: udf #0
+  0x12365d800: udf #0
+  0x12365d804: udf #0
+  0x12365d808: udf #0
+  0x12365d80c: udf #0
+  0x12365d810: udf #0
+  0x12365d814: udf #0
+  0x12365d818: udf #0
+  0x12365d81c: udf #0
+  0x12365d820: udf #0
+  0x12365d824: udf #0
+  0x12365d828: udf #0
+  0x12365d82c: udf #0
+  0x12365d830: udf #0
+  0x12365d834: udf #0
+  0x12365d838: udf #0
+  0x12365d83c: udf #0
+  0x12365d840: udf #0
+  0x12365d844: udf #0
+  0x12365d848: udf #0
+  0x12365d84c: udf #0
+  0x12365d850: udf #0
+  0x12365d854: udf #0
+  0x12365d858: udf #0
+  0x12365d85c: udf #0
+  0x12365d860: udf #0
+  0x12365d864: udf #0
+  0x12365d868: udf #0
+  0x12365d86c: udf #0
+  0x12365d870: udf #0
+  0x12365d874: udf #0
+  0x12365d878: udf #0
+  0x12365d87c: udf #0
+  0x12365d880: udf #0
+  0x12365d884: udf #0
+  0x12365d888: udf #0
+  0x12365d88c: udf #0
+  0x12365d890: udf #0
+  0x12365d894: udf #0
+  0x12365d898: udf #0
+  0x12365d89c: udf #0
+  0x12365d8a0: udf #0
+  0x12365d8a4: udf #0
+  0x12365d8a8: udf #0
+  0x12365d8ac: udf #0
+  0x12365d8b0: udf #0
+  0x12365d8b4: udf #0
+  0x12365d8b8: udf #0
+  0x12365d8bc: udf #0
+  0x12365d8c0: udf #0
+  0x12365d8c4: udf #0
+  0x12365d8c8: udf #0
+  0x12365d8cc: udf #0
+  0x12365d8d0: udf #0
+  0x12365d8d4: udf #0
+  0x12365d8d8: udf #0
+  0x12365d8dc: udf #0
+  0x12365d8e0: udf #0
+  0x12365d8e4: udf #0
+  0x12365d8e8: udf #0
+  0x12365d8ec: udf #0
+  0x12365d8f0: udf #0
+  0x12365d8f4: udf #0
+  0x12365d8f8: udf #0
+  0x12365d8fc: udf #0
+  0x12365d900: udf #0
+  0x12365d904: udf #0
+  0x12365d908: udf #0
+  0x12365d90c: udf #0
+  0x12365d910: udf #0
+  0x12365d914: udf #0
+  0x12365d918: udf #0
+  0x12365d91c: udf #0
+  0x12365d920: udf #0
+  0x12365d924: udf #0
+  0x12365d928: udf #0
+  0x12365d92c: udf #0
+  0x12365d930: udf #0
+  0x12365d934: udf #0
+  0x12365d938: udf #0
+  0x12365d93c: udf #0
+  0x12365d940: udf #0
+  0x12365d944: udf #0
+  0x12365d948: udf #0
+  0x12365d94c: udf #0
+  0x12365d950: udf #0
+  0x12365d954: udf #0
+  0x12365d958: udf #0
+  0x12365d95c: udf #0
+  0x12365d960: udf #0
+  0x12365d964: udf #0
+  0x12365d968: udf #0
+  0x12365d96c: udf #0
+  0x12365d970: udf #0
+  0x12365d974: udf #0
+  0x12365d978: udf #0
+  0x12365d97c: udf #0
+  0x12365d980: udf #0
+  0x12365d984: udf #0
+  0x12365d988: udf #0
+  0x12365d98c: udf #0
+  0x12365d990: udf #0
+  0x12365d994: udf #0
+  0x12365d998: udf #0
+  0x12365d99c: udf #0
+  0x12365d9a0: udf #0
+  0x12365d9a4: udf #0
+  0x12365d9a8: udf #0
+  0x12365d9ac: udf #0
+  0x12365d9b0: udf #0
+  0x12365d9b4: udf #0
+  0x12365d9b8: udf #0
+  0x12365d9bc: udf #0
+  0x12365d9c0: udf #0
+  0x12365d9c4: udf #0
+  0x12365d9c8: udf #0
+  0x12365d9cc: udf #0
+  0x12365d9d0: udf #0
+  0x12365d9d4: udf #0
+  0x12365d9d8: udf #0
+  0x12365d9dc: udf #0
+  0x12365d9e0: udf #0
+  0x12365d9e4: udf #0
+  0x12365d9e8: udf #0
+  0x12365d9ec: udf #0
+  0x12365d9f0: udf #0
+  0x12365d9f4: udf #0
+  0x12365d9f8: udf #0
+  0x12365d9fc: udf #0
+  0x12365da00: udf #0
+  0x12365da04: udf #0
+  0x12365da08: udf #0
+  0x12365da0c: udf #0
+  0x12365da10: udf #0
+  0x12365da14: udf #0
+  0x12365da18: udf #0
+  0x12365da1c: udf #0
+  0x12365da20: udf #0
+  0x12365da24: udf #0
+  0x12365da28: udf #0
+  0x12365da2c: udf #0
+  0x12365da30: udf #0
+  0x12365da34: udf #0
+  0x12365da38: udf #0
+  0x12365da3c: udf #0
+  0x12365da40: udf #0
+  0x12365da44: udf #0
+  0x12365da48: udf #0
+  0x12365da4c: udf #0
+  0x12365da50: udf #0
+  0x12365da54: udf #0
+  0x12365da58: udf #0
+  0x12365da5c: udf #0
+  0x12365da60: udf #0
+  0x12365da64: udf #0
+  0x12365da68: udf #0
+  0x12365da6c: udf #0
+  0x12365da70: udf #0
+  0x12365da74: udf #0
+  0x12365da78: udf #0
+  0x12365da7c: udf #0
+  0x12365da80: udf #0
+  0x12365da84: udf #0
+  0x12365da88: udf #0
+  0x12365da8c: udf #0
+  0x12365da90: udf #0
+  0x12365da94: udf #0
+  0x12365da98: udf #0
+  0x12365da9c: udf #0
+  0x12365daa0: udf #0
+  0x12365daa4: udf #0
+  0x12365daa8: udf #0
+  0x12365daac: udf #0
+  0x12365dab0: udf #0
+  0x12365dab4: udf #0
+  0x12365dab8: udf #0
+  0x12365dabc: udf #0
+  0x12365dac0: udf #0
+  0x12365dac4: udf #0
+  0x12365dac8: udf #0
+  0x12365dacc: udf #0
+  0x12365dad0: udf #0
+  0x12365dad4: udf #0
+  0x12365dad8: udf #0
+  0x12365dadc: udf #0
+  0x12365dae0: udf #0
+  0x12365dae4: udf #0
+  0x12365dae8: udf #0
+  0x12365daec: udf #0
+  0x12365daf0: udf #0
+  0x12365daf4: udf #0
+  0x12365daf8: udf #0
+  0x12365dafc: udf #0
+  0x12365db00: udf #0
+  0x12365db04: udf #0
+  0x12365db08: udf #0
+  0x12365db0c: udf #0
+  0x12365db10: udf #0
+  0x12365db14: udf #0
+  0x12365db18: udf #0
+  0x12365db1c: udf #0
+  0x12365db20: udf #0
+  0x12365db24: udf #0
+  0x12365db28: udf #0
+  0x12365db2c: udf #0
+  0x12365db30: udf #0
+  0x12365db34: udf #0
+  0x12365db38: udf #0
+  0x12365db3c: udf #0
+  0x12365db40: udf #0
+  0x12365db44: udf #0
+  0x12365db48: udf #0
+  0x12365db4c: udf #0
+  0x12365db50: udf #0
+  0x12365db54: udf #0
+  0x12365db58: udf #0
+  0x12365db5c: udf #0
+  0x12365db60: udf #0
+  0x12365db64: udf #0
+  0x12365db68: udf #0
+  0x12365db6c: udf #0
+  0x12365db70: udf #0
+  0x12365db74: udf #0
+  0x12365db78: udf #0
+  0x12365db7c: udf #0
+  0x12365db80: udf #0
+  0x12365db84: udf #0
+  0x12365db88: udf #0
+  0x12365db8c: udf #0
+  0x12365db90: udf #0
+  0x12365db94: udf #0
+  0x12365db98: udf #0
+  0x12365db9c: udf #0
+  0x12365dba0: udf #0
+  0x12365dba4: udf #0
+  0x12365dba8: udf #0
+  0x12365dbac: udf #0
+  0x12365dbb0: udf #0
+  0x12365dbb4: udf #0
+  0x12365dbb8: udf #0
+  0x12365dbbc: udf #0
+  0x12365dbc0: udf #0
+  0x12365dbc4: udf #0
+  0x12365dbc8: udf #0
+  0x12365dbcc: udf #0
+  0x12365dbd0: udf #0
+  0x12365dbd4: udf #0
+  0x12365dbd8: udf #0
+  0x12365dbdc: udf #0
+  0x12365dbe0: udf #0
+  0x12365dbe4: udf #0
+  0x12365dbe8: udf #0
+  0x12365dbec: udf #0
+  0x12365dbf0: udf #0
+  0x12365dbf4: udf #0
+  0x12365dbf8: udf #0
+  0x12365dbfc: udf #0
+  0x12365dc00: udf #0
+  0x12365dc04: udf #0
+  0x12365dc08: udf #0
+  0x12365dc0c: udf #0
+  0x12365dc10: udf #0
+  0x12365dc14: udf #0
+  0x12365dc18: udf #0
+  0x12365dc1c: udf #0
+  0x12365dc20: udf #0
+  0x12365dc24: udf #0
+  0x12365dc28: udf #0
+  0x12365dc2c: udf #0
+  0x12365dc30: udf #0
+  0x12365dc34: udf #0
+  0x12365dc38: udf #0
+  0x12365dc3c: udf #0
+  0x12365dc40: udf #0
+  0x12365dc44: udf #0
+  0x12365dc48: udf #0
+  0x12365dc4c: udf #0
+  0x12365dc50: udf #0
+  0x12365dc54: udf #0
+  0x12365dc58: udf #0
+  0x12365dc5c: udf #0
+  0x12365dc60: udf #0
+  0x12365dc64: udf #0
+  0x12365dc68: udf #0
+  0x12365dc6c: udf #0
+  0x12365dc70: udf #0
+  0x12365dc74: udf #0
+  0x12365dc78: udf #0
+  0x12365dc7c: udf #0
+  0x12365dc80: udf #0
+  0x12365dc84: udf #0
+  0x12365dc88: udf #0
+  0x12365dc8c: udf #0
+  0x12365dc90: udf #0
+  0x12365dc94: udf #0
+  0x12365dc98: udf #0
+  0x12365dc9c: udf #0
+  0x12365dca0: udf #0
+  0x12365dca4: udf #0
+  0x12365dca8: udf #0
+  0x12365dcac: udf #0
+  0x12365dcb0: udf #0
+  0x12365dcb4: udf #0
+  0x12365dcb8: udf #0
+  0x12365dcbc: udf #0
+  0x12365dcc0: udf #0
+  0x12365dcc4: udf #0
+  0x12365dcc8: udf #0
+  0x12365dccc: udf #0
+  0x12365dcd0: udf #0
+  0x12365dcd4: udf #0
+  0x12365dcd8: udf #0
+  0x12365dcdc: udf #0
+  0x12365dce0: udf #0
+  0x12365dce4: udf #0
+  0x12365dce8: udf #0
+  0x12365dcec: udf #0
+  0x12365dcf0: udf #0
+  0x12365dcf4: udf #0
+  0x12365dcf8: udf #0
+  0x12365dcfc: udf #0
+  0x12365dd00: udf #0
+  0x12365dd04: udf #0
+  0x12365dd08: udf #0
+  0x12365dd0c: udf #0
+  0x12365dd10: udf #0
+  0x12365dd14: udf #0
+  0x12365dd18: udf #0
+  0x12365dd1c: udf #0
+  0x12365dd20: udf #0
+  0x12365dd24: udf #0
+  0x12365dd28: udf #0
+  0x12365dd2c: udf #0
+  0x12365dd30: udf #0
+  0x12365dd34: udf #0
+  0x12365dd38: udf #0
+  0x12365dd3c: udf #0
+  0x12365dd40: udf #0
+  0x12365dd44: udf #0
+  0x12365dd48: udf #0
+  0x12365dd4c: udf #0
+  0x12365dd50: udf #0
+  0x12365dd54: udf #0
+  0x12365dd58: udf #0
+  0x12365dd5c: udf #0
+  0x12365dd60: udf #0
+  0x12365dd64: udf #0
+  0x12365dd68: udf #0
+  0x12365dd6c: udf #0
+  0x12365dd70: udf #0
+  0x12365dd74: udf #0
+  0x12365dd78: udf #0
+  0x12365dd7c: udf #0
+  0x12365dd80: udf #0
+  0x12365dd84: udf #0
+  0x12365dd88: udf #0
+  0x12365dd8c: udf #0
+  0x12365dd90: udf #0
+  0x12365dd94: udf #0
+  0x12365dd98: udf #0
+  0x12365dd9c: udf #0
+  0x12365dda0: udf #0
+  0x12365dda4: udf #0
+  0x12365dda8: udf #0
+  0x12365ddac: udf #0
+  0x12365ddb0: udf #0
+  0x12365ddb4: udf #0
+  0x12365ddb8: udf #0
+  0x12365ddbc: udf #0
+  0x12365ddc0: udf #0
+  0x12365ddc4: udf #0
+  0x12365ddc8: udf #0
+  0x12365ddcc: udf #0
+  0x12365ddd0: udf #0
+  0x12365ddd4: udf #0
+  0x12365ddd8: udf #0
+  0x12365dddc: udf #0
+  0x12365dde0: udf #0
+  0x12365dde4: udf #0
+  0x12365dde8: udf #0
+  0x12365ddec: udf #0
+  0x12365ddf0: udf #0
+  0x12365ddf4: udf #0
+  0x12365ddf8: udf #0
+  0x12365ddfc: udf #0
+  0x12365de00: udf #0
+  0x12365de04: udf #0
+  0x12365de08: udf #0
+  0x12365de0c: udf #0
+  0x12365de10: udf #0
+  0x12365de14: udf #0
+  0x12365de18: udf #0
+  0x12365de1c: udf #0
+  0x12365de20: udf #0
+  0x12365de24: udf #0
+  0x12365de28: udf #0
+  0x12365de2c: udf #0
+  0x12365de30: udf #0
+  0x12365de34: udf #0
+  0x12365de38: udf #0
+  0x12365de3c: udf #0
+  0x12365de40: udf #0
+  0x12365de44: udf #0
+  0x12365de48: udf #0
+  0x12365de4c: udf #0
+  0x12365de50: udf #0
+  0x12365de54: udf #0
+  0x12365de58: udf #0
+  0x12365de5c: udf #0
+  0x12365de60: udf #0
+  0x12365de64: udf #0
+  0x12365de68: udf #0
+  0x12365de6c: udf #0
+  0x12365de70: udf #0
+  0x12365de74: udf #0
+  0x12365de78: udf #0
+  0x12365de7c: udf #0
+  0x12365de80: udf #0
+  0x12365de84: udf #0
+  0x12365de88: udf #0
+  0x12365de8c: udf #0
+  0x12365de90: udf #0
+  0x12365de94: udf #0
+  0x12365de98: udf #0
+  0x12365de9c: udf #0
+  0x12365dea0: udf #0
+  0x12365dea4: udf #0
+  0x12365dea8: udf #0
+  0x12365deac: udf #0
+  0x12365deb0: udf #0
+  0x12365deb4: udf #0
+  0x12365deb8: udf #0
+  0x12365debc: udf #0
+  0x12365dec0: udf #0
+  0x12365dec4: udf #0
+  0x12365dec8: udf #0
+  0x12365decc: udf #0
+  0x12365ded0: udf #0
+  0x12365ded4: udf #0
+  0x12365ded8: udf #0
+  0x12365dedc: udf #0
+  0x12365dee0: udf #0
+  0x12365dee4: udf #0
+  0x12365dee8: udf #0
+  0x12365deec: udf #0
+  0x12365def0: udf #0
+  0x12365def4: udf #0
+  0x12365def8: udf #0
+  0x12365defc: udf #0
+  0x12365df00: udf #0
+  0x12365df04: udf #0
+  0x12365df08: udf #0
+  0x12365df0c: udf #0
+  0x12365df10: udf #0
+  0x12365df14: udf #0
+  0x12365df18: udf #0
+  0x12365df1c: udf #0
+  0x12365df20: udf #0
+  0x12365df24: udf #0
+  0x12365df28: udf #0
+  0x12365df2c: udf #0
+  0x12365df30: udf #0
+  0x12365df34: udf #0
+  0x12365df38: udf #0
+  0x12365df3c: udf #0
+  0x12365df40: udf #0
+  0x12365df44: udf #0
+  0x12365df48: udf #0
+  0x12365df4c: udf #0
+  0x12365df50: udf #0
+  0x12365df54: udf #0
+  0x12365df58: udf #0
+  0x12365df5c: udf #0
+  0x12365df60: udf #0
+  0x12365df64: udf #0
+  0x12365df68: udf #0
+  0x12365df6c: udf #0
+  0x12365df70: udf #0
+  0x12365df74: udf #0
+  0x12365df78: udf #0
+  0x12365df7c: udf #0
+  0x12365df80: udf #0
+  0x12365df84: udf #0
+  0x12365df88: udf #0
+  0x12365df8c: udf #0
+  0x12365df90: udf #0
+  0x12365df94: udf #0
+  0x12365df98: udf #0
+  0x12365df9c: udf #0
+  0x12365dfa0: udf #0
+  0x12365dfa4: udf #0
+  0x12365dfa8: udf #0
+  0x12365dfac: udf #0
+  0x12365dfb0: udf #0
+  0x12365dfb4: udf #0
+  0x12365dfb8: udf #0
+  0x12365dfbc: udf #0
+  0x12365dfc0: udf #0
+  0x12365dfc4: udf #0
+  0x12365dfc8: udf #0
+  0x12365dfcc: udf #0
+  0x12365dfd0: udf #0
+  0x12365dfd4: udf #0
+  0x12365dfd8: udf #0
+  0x12365dfdc: udf #0
+  0x12365dfe0: udf #0
+  0x12365dfe4: udf #0
+  0x12365dfe8: udf #0
+
+  0x123660014: stur x1, [x21, #-0x28]
+  0x123660018: nop
+  0x12366001c: nop
+  0x123660020: nop
+  0x123660024: nop
+
+== BLOCK 40/74, ISEQ RANGE [133,139), 20 bytes ================
+  0x123660028: ldur x1, [x21, #-0x30]
+  0x12366002c: mov x9, #0x1f
+  0x123660030: nop
+  0x123660034: nop
+  0x123660038: nop
+
+== BLOCK 41/74, ISEQ RANGE [137,141), 32 bytes ================
+  0x12366003c: tst x1, #1
+  0x123660040: b.eq #0x123662110
+  0x123660044: nop
+  0x123660048: nop
+  0x12366004c: nop
+  0x123660050: nop
+  0x123660054: nop
+  0x123660058: and x1, x1, x9
+
+== BLOCK 42/74, ISEQ RANGE [139,143), 20 bytes ================
+  0x12366005c: stur x1, [x21, #-0x20]
+  0x123660060: nop
+  0x123660064: nop
+  0x123660068: nop
+  0x12366006c: nop
+
+== BLOCK 43/74, ISEQ RANGE [141,146), 20 bytes ================
+  0x123660070: ldur x1, [x21, #-0x28]
+  0x123660074: nop
+  0x123660078: nop
+  0x12366007c: nop
+  0x123660080: nop
+
+== BLOCK 44/74, ISEQ RANGE [143,146), 216 bytes ===============
+  0x123660084: tst x1, #1
+  0x123660088: b.eq #0x123662244
+  0x12366008c: nop
+  0x123660090: nop
+  0x123660094: nop
+  0x123660098: nop
+  0x12366009c: nop
+  0x1236600a0: add x11, x21, #0x90
+  0x1236600a4: cmp x19, x11
+  0x1236600a8: b.ls #0x123662278
+  0x1236600ac: mov x11, #4
+  0x1236600b0: stur x11, [x21, #8]
+  0x1236600b4: add x11, x21, #0
+  0x1236600b8: stur x11, [x19, #8]
+  0x1236600bc: mov x11, #0xd698
+  0x1236600c0: movk x11, #0x7187, lsl #16
+  0x1236600c4: movk x11, #9, lsl #32
+  0x1236600c8: stur x11, [x19]
+  0x1236600cc: add x11, x21, #0x28
+  0x1236600d0: ldr x12, #0x1236600d8
+  0x1236600d4: b #0x1236600e0
+  0x1236600d8: .byte 0x10, 0xed, 0x29, 0x23
+  0x1236600dc: udf #1
+  0x1236600e0: stur x12, [x11, #-0x18]
+  0x1236600e4: ldr x12, #0x1236600ec
+  0x1236600e8: b #0x1236600f4
+  0x1236600ec: .byte 0x60, 0xe8, 0x29, 0x23
+  0x1236600f0: udf #1
+  0x1236600f4: stur x12, [x19, #0x28]
+  0x1236600f8: add x12, x19, #0x18
+  0x1236600fc: orr x12, x12, #1
+  0x123660100: stur x12, [x11, #-0x10]
+  0x123660104: mov x12, #3
+  0x123660108: movk x12, #0x1111, lsl #16
+  0x12366010c: stur x12, [x11, #-8]
+  0x123660110: stur x11, [x19, #-0x30]
+  0x123660114: ldr x12, #0x12366011c
+  0x123660118: b #0x123660124
+  0x12366011c: .byte 0x20, 0xfe, 0x29, 0x23
+  0x123660120: udf #1
+  0x123660124: stur x12, [x19, #-0x28]
+  0x123660128: stur x1, [x19, #-0x20]
+  0x12366012c: stur xzr, [x19, #-0x10]
+  0x123660130: subs x12, x11, #8
+  0x123660134: stur x12, [x19, #-0x18]
+  0x123660138: stur x1, [x21]
+  0x12366013c: mov x21, x11
+  0x123660140: mov x11, #0x218
+  0x123660144: movk x11, #0x2366, lsl #16
+  0x123660148: movk x11, #1, lsl #32
+  0x12366014c: stur x11, [x19, #-8]
+  0x123660150: subs x11, x19, #0x38
+  0x123660154: mov x19, x11
+  0x123660158: stur x19, [x20, #0x10]
+
+... 188 byte gap ...
+== BLOCK 45/74, ISEQ RANGE [146,149), 8 bytes =================
+  0x123660218: ldur x21, [x19, #8]
+  0x12366021c: mov x1, x0
+
+== BLOCK 46/74, ISEQ RANGE [147,151), 20 bytes ================
+  0x123660220: ldur x1, [x21, #-0x58]
+  0x123660224: nop
+  0x123660228: nop
+  0x12366022c: nop
+  0x123660230: nop
+
+== BLOCK 47/74, ISEQ RANGE [149,153), 20 bytes ================
+  0x123660234: ldur x9, [x21, #-0x38]
+  0x123660238: nop
+  0x12366023c: nop
+  0x123660240: nop
+  0x123660244: nop
+
+== BLOCK 48/74, ISEQ RANGE [151,155), 20 bytes ================
+  0x123660248: ldur x10, [x21, #-0x80]
+  0x12366024c: nop
+  0x123660250: nop
+  0x123660254: nop
+  0x123660258: nop
+
+== BLOCK 49/74, ISEQ RANGE [153,157), 20 bytes ================
+  0x12366025c: ldur x14, [x21, #-0x20]
+  0x123660260: nop
+  0x123660264: nop
+  0x123660268: nop
+  0x12366026c: nop
+
+== BLOCK 50/74, ISEQ RANGE [155,157), 300 bytes ===============
+  0x123660270: tst x10, #7
+  0x123660274: b.ne #0x1236626f4
+  0x123660278: nop
+  0x12366027c: nop
+  0x123660280: nop
+  0x123660284: nop
+  0x123660288: nop
+  0x12366028c: cmp x10, #0
+  0x123660290: b.eq #0x123662734
+  0x123660294: nop
+  0x123660298: nop
+  0x12366029c: nop
+  0x1236602a0: nop
+  0x1236602a4: nop
+  0x1236602a8: mov x11, x10
+  0x1236602ac: ldr x12, #0x1236602b4
+  0x1236602b0: b #0x1236602bc
+  0x1236602b4: .byte 0x40, 0x0a, 0x5b, 0x23
+  0x1236602b8: udf #1
+  0x1236602bc: ldur x11, [x11, #8]
+  0x1236602c0: cmp x11, x12
+  0x1236602c4: b.ne #0x123662774
+  0x1236602c8: nop
+  0x1236602cc: nop
+  0x1236602d0: nop
+  0x1236602d4: nop
+  0x1236602d8: nop
+  0x1236602dc: add x11, x21, #0xc0
+  0x1236602e0: cmp x19, x11
+  0x1236602e4: b.ls #0x1236627b4
+  0x1236602e8: mov x11, #4
+  0x1236602ec: stur x11, [x21, #0x20]
+  0x1236602f0: add x11, x21, #0x10
+  0x1236602f4: stur x11, [x19, #8]
+  0x1236602f8: mov x11, #0xd6f0
+  0x1236602fc: movk x11, #0x7187, lsl #16
+  0x123660300: movk x11, #9, lsl #32
+  0x123660304: stur x11, [x19]
+  0x123660308: add x11, x21, #0x40
+  0x12366030c: ldr x12, #0x123660314
+  0x123660310: b #0x12366031c
+  0x123660314: adds w0, w0, w29, lsr #31
+  0x123660318: udf #1
+  0x12366031c: stur x12, [x11, #-0x18]
+  0x123660320: stur xzr, [x11, #-0x10]
+  0x123660324: mov x12, #3
+  0x123660328: movk x12, #0x1111, lsl #16
+  0x12366032c: stur x12, [x11, #-8]
+  0x123660330: stur x11, [x19, #-0x30]
+  0x123660334: ldr x12, #0x12366033c
+  0x123660338: b #0x123660344
+  0x12366033c: adds w16, w19, w29, lsr #31
+  0x123660340: udf #1
+  0x123660344: stur x12, [x19, #-0x28]
+  0x123660348: stur x10, [x19, #-0x20]
+  0x12366034c: stur xzr, [x19, #-0x10]
+  0x123660350: subs x12, x11, #8
+  0x123660354: stur x12, [x19, #-0x18]
+  0x123660358: stur x1, [x21]
+  0x12366035c: stur x9, [x21, #8]
+  0x123660360: stur x10, [x21, #0x10]
+  0x123660364: stur x14, [x21, #0x18]
+  0x123660368: mov x21, x11
+  0x12366036c: mov x11, #0x39c
+  0x123660370: movk x11, #0x2366, lsl #16
+  0x123660374: movk x11, #1, lsl #32
+  0x123660378: stur x11, [x19, #-8]
+  0x12366037c: subs x11, x19, #0x38
+  0x123660380: mov x19, x11
+  0x123660384: stur x19, [x20, #0x10]
+  0x123660388: b #0x1236286ec
+  0x12366038c: nop
+  0x123660390: nop
+  0x123660394: nop
+  0x123660398: nop
+
+== BLOCK 51/74, ISEQ RANGE [157,159), 232 bytes ===============
+  0x12366039c: ldur x21, [x19, #8]
+  0x1236603a0: mov x10, x0
+  0x1236603a4: ldur x11, [x21, #-0x10]
+  0x1236603a8: tst x11, #7
+  0x1236603ac: b.ne #0x123662834
+  0x1236603b0: nop
+  0x1236603b4: nop
+  0x1236603b8: nop
+  0x1236603bc: nop
+  0x1236603c0: nop
+  0x1236603c4: ldur x11, [x21, #-0x10]
+  0x1236603c8: cmp x11, #0
+  0x1236603cc: b.eq #0x123662868
+  0x1236603d0: nop
+  0x1236603d4: nop
+  0x1236603d8: nop
+  0x1236603dc: nop
+  0x1236603e0: nop
+  0x1236603e4: ldur x11, [x21, #-0x10]
+  0x1236603e8: ldr x12, #0x1236603f0
+  0x1236603ec: b #0x1236603f8
+  0x1236603f0: .byte 0x00, 0x09, 0xc5, 0x21
+  0x1236603f4: udf #1
+  0x1236603f8: ldur x11, [x11, #8]
+  0x1236603fc: cmp x11, x12
+  0x123660400: b.ne #0x12366289c
+  0x123660404: nop
+  0x123660408: nop
+  0x12366040c: nop
+  0x123660410: nop
+  0x123660414: nop
+  0x123660418: ldur x11, [x21, #-8]
+  0x12366041c: tst x11, #1
+  0x123660420: b.eq #0x1236628d0
+  0x123660424: nop
+  0x123660428: nop
+  0x12366042c: nop
+  0x123660430: nop
+  0x123660434: nop
+  0x123660438: mov x11, #0xd700
+  0x12366043c: movk x11, #0x7187, lsl #16
+  0x123660440: movk x11, #9, lsl #32
+  0x123660444: stur x11, [x19]
+  0x123660448: add x11, x21, #8
+  0x12366044c: mov x21, x11
+  0x123660450: stur x21, [x19, #8]
+  0x123660454: ldur x11, [x21, #-0x10]
+  0x123660458: asr x11, x11, #1
+  0x12366045c: stur x10, [x21, #-8]
+  0x123660460: mov x2, x10
+  0x123660464: mov x1, x11
+  0x123660468: ldur x0, [x21, #-0x18]
+  0x12366046c: mov x16, #0xa48c
+  0x123660470: movk x16, #0x28d, lsl #16
+  0x123660474: movk x16, #1, lsl #32
+  0x123660478: blr x16
+  0x12366047c: ldur x11, [x21, #-8]
+  0x123660480: mov x1, x11
+
+== BLOCK 52/74, ISEQ RANGE [159,162), 0 bytes =================
+== BLOCK 53/74, ISEQ RANGE [160,165), 20 bytes ================
+  0x123660484: ldur x1, [x21, #-0x50]
+  0x123660488: mov x9, #3
+  0x12366048c: nop
+  0x123660490: nop
+  0x123660494: nop
+
+== BLOCK 54/74, ISEQ RANGE [163,167), 44 bytes ================
+  0x123660498: tst x1, #1
+  0x12366049c: b.eq #0x123662a14
+  0x1236604a0: nop
+  0x1236604a4: nop
+  0x1236604a8: nop
+  0x1236604ac: nop
+  0x1236604b0: nop
+  0x1236604b4: subs x11, x1, #1
+  0x1236604b8: adds x11, x11, x9
+  0x1236604bc: b.vs #0x1236629d8
+  0x1236604c0: mov x1, x11
+
+== BLOCK 55/74, ISEQ RANGE [165,169), 40 bytes ================
+  0x1236604c4: stur x1, [x21, #-0x50]
+  0x1236604c8: nop
+  0x1236604cc: nop
+  0x1236604d0: nop
+  0x1236604d4: nop
+  0x1236604d8: b #0x12365cc0c
+  0x1236604dc: nop
+  0x1236604e0: nop
+  0x1236604e4: nop
+  0x1236604e8: nop
+
+... 388 byte gap ...
+== BLOCK 56/74, ISEQ RANGE [175,179), 4 bytes =================
+  0x123660670: mov x1, #4
+
+== BLOCK 57/74, ISEQ RANGE [177,180), 36 bytes ================
+  0x123660674: ldur x1, [x21, #-0x70]
+  0x123660678: ldur w11, [x20, #0x20]
+  0x12366067c: cbnz w11, #0x123662dd4
+  0x123660680: adds x11, x19, #0x38
+  0x123660684: mov x19, x11
+  0x123660688: stur x19, [x20, #0x10]
+  0x12366068c: mov x0, x1
+  0x123660690: ldur x11, [x19, #-8]
+  0x123660694: br x11
+
+... 31724 byte gap ...
+== BLOCK 58/74, ISEQ RANGE [69,71), 0 bytes ===================
+== BLOCK 59/74, ISEQ RANGE [90,96), 20 bytes ==================
+  0x123668284: ldur x1, [x21, #-0x38]
+  0x123668288: mov x9, #0x81
+  0x12366828c: nop
+  0x123668290: nop
+  0x123668294: nop
+
+== BLOCK 60/74, ISEQ RANGE [94,98), 84 bytes ==================
+  0x123668298: tst x1, #1
+  0x12366829c: b.eq #0x12366a5a0
+  0x1236682a0: nop
+  0x1236682a4: nop
+  0x1236682a8: nop
+  0x1236682ac: nop
+  0x1236682b0: nop
+  0x1236682b4: cmp x1, x9
+  0x1236682b8: mov x11, #0x14
+  0x1236682bc: mov x12, #0
+  0x1236682c0: csel x11, x11, x12, lt
+  0x1236682c4: mov x1, x11
+  0x1236682c8: ldur w11, [x20, #0x20]
+  0x1236682cc: cbnz w11, #0x12366a638
+  0x1236682d0: tst x1, #-5
+  0x1236682d4: b.eq #0x12366a608
+  0x1236682d8: nop
+  0x1236682dc: nop
+  0x1236682e0: nop
+  0x1236682e4: nop
+  0x1236682e8: nop
+
+== BLOCK 61/74, ISEQ RANGE [75,79), 20 bytes ==================
+  0x1236682ec: ldur x1, [x21, #-0x58]
+  0x1236682f0: nop
+  0x1236682f4: nop
+  0x1236682f8: nop
+  0x1236682fc: nop
+
+== BLOCK 62/74, ISEQ RANGE [77,82), 20 bytes ==================
+  0x123668300: ldur x9, [x21, #-0x38]
+  0x123668304: mov x10, #1
+  0x123668308: nop
+  0x12366830c: nop
+  0x123668310: nop
+
+== BLOCK 63/74, ISEQ RANGE [80,82), 220 bytes =================
+  0x123668314: tst x1, #7
+  0x123668318: b.ne #0x12366a744
+  0x12366831c: nop
+  0x123668320: nop
+  0x123668324: nop
+  0x123668328: nop
+  0x12366832c: nop
+  0x123668330: cmp x1, #0
+  0x123668334: b.eq #0x12366a780
+  0x123668338: nop
+  0x12366833c: nop
+  0x123668340: nop
+  0x123668344: nop
+  0x123668348: nop
+  0x12366834c: mov x11, x1
+  0x123668350: ldr x12, #0x123668358
+  0x123668354: b #0x123668360
+  0x123668358: .byte 0x00, 0x09, 0xc5, 0x21
+  0x12366835c: udf #1
+  0x123668360: ldur x11, [x11, #8]
+  0x123668364: cmp x11, x12
+  0x123668368: b.ne #0x12366a7bc
+  0x12366836c: nop
+  0x123668370: nop
+  0x123668374: nop
+  0x123668378: nop
+  0x12366837c: nop
+  0x123668380: tst x9, #1
+  0x123668384: b.eq #0x12366a7f8
+  0x123668388: nop
+  0x12366838c: nop
+  0x123668390: nop
+  0x123668394: nop
+  0x123668398: nop
+  0x12366839c: mov x11, #0xd498
+  0x1236683a0: movk x11, #0x7187, lsl #16
+  0x1236683a4: movk x11, #9, lsl #32
+  0x1236683a8: stur x11, [x19]
+  0x1236683ac: add x11, x21, #0x18
+  0x1236683b0: mov x21, x11
+  0x1236683b4: stur x21, [x19, #8]
+  0x1236683b8: mov x11, x9
+  0x1236683bc: asr x11, x11, #1
+  0x1236683c0: stur x1, [x21, #-0x18]
+  0x1236683c4: stur x9, [x21, #-0x10]
+  0x1236683c8: stur x10, [x21, #-8]
+  0x1236683cc: mov x2, x10
+  0x1236683d0: mov x0, x1
+  0x1236683d4: mov x1, x11
+  0x1236683d8: mov x16, #0xa48c
+  0x1236683dc: movk x16, #0x28d, lsl #16
+  0x1236683e0: movk x16, #1, lsl #32
+  0x1236683e4: blr x16
+  0x1236683e8: ldur x11, [x21, #-8]
+  0x1236683ec: mov x1, x11
+
+== BLOCK 64/74, ISEQ RANGE [82,85), 0 bytes ===================
+== BLOCK 65/74, ISEQ RANGE [83,88), 20 bytes ==================
+  0x1236683f0: ldur x1, [x21, #-0x50]
+  0x1236683f4: mov x9, #3
+  0x1236683f8: nop
+  0x1236683fc: nop
+  0x123668400: nop
+
+== BLOCK 66/74, ISEQ RANGE [86,90), 44 bytes ==================
+  0x123668404: tst x1, #1
+  0x123668408: b.eq #0x12366a944
+  0x12366840c: nop
+  0x123668410: nop
+  0x123668414: nop
+  0x123668418: nop
+  0x12366841c: nop
+  0x123668420: subs x11, x1, #1
+  0x123668424: adds x11, x11, x9
+  0x123668428: b.vs #0x12366a908
+  0x12366842c: mov x1, x11
+
+== BLOCK 67/74, ISEQ RANGE [88,92), 20 bytes ==================
+  0x123668430: stur x1, [x21, #-0x50]
+  0x123668434: nop
+  0x123668438: nop
+  0x12366843c: nop
+  0x123668440: nop
+
+== BLOCK 68/74, ISEQ RANGE [90,96), 20 bytes ==================
+  0x123668444: ldur x1, [x21, #-0x50]
+  0x123668448: mov x9, #0x81
+  0x12366844c: nop
+  0x123668450: nop
+  0x123668454: nop
+
+== BLOCK 69/74, ISEQ RANGE [94,98), 84 bytes ==================
+  0x123668458: tst x1, #1
+  0x12366845c: b.eq #0x12366aac0
+  0x123668460: nop
+  0x123668464: nop
+  0x123668468: nop
+  0x12366846c: nop
+  0x123668470: nop
+  0x123668474: cmp x1, x9
+  0x123668478: mov x11, #0x14
+  0x12366847c: mov x12, #0
+  0x123668480: csel x11, x11, x12, lt
+  0x123668484: mov x1, x11
+  0x123668488: ldur w11, [x20, #0x20]
+  0x12366848c: cbnz w11, #0x12366ab58
+  0x123668490: tst x1, #-5
+  0x123668494: b.ne #0x1236684c8
+  0x123668498: nop
+  0x12366849c: nop
+  0x1236684a0: nop
+  0x1236684a4: nop
+  0x1236684a8: nop
+
+== BLOCK 70/74, ISEQ RANGE [98,103), 8 bytes ==================
+  0x1236684ac: mov x1, #4
+  0x1236684b0: mov x1, #4
+
+== BLOCK 71/74, ISEQ RANGE [176,179), 20 bytes ================
+  0x1236684b4: b #0x123660674
+  0x1236684b8: nop
+  0x1236684bc: nop
+  0x1236684c0: nop
+  0x1236684c4: nop
+
+== BLOCK 72/74, ISEQ RANGE [75,79), 20 bytes ==================
+  0x1236684c8: ldur x1, [x21, #-0x70]
+  0x1236684cc: nop
+  0x1236684d0: nop
+  0x1236684d4: nop
+  0x1236684d8: nop
+
+== BLOCK 73/74, ISEQ RANGE [77,82), 20 bytes ==================
+  0x1236684dc: ldur x9, [x21, #-0x50]
+  0x1236684e0: mov x10, #1
+  0x1236684e4: nop
+  0x1236684e8: nop
+  0x1236684ec: nop
+
+== BLOCK 74/74, ISEQ RANGE [80,82), 228 bytes =================
+  0x1236684f0: tst x1, #7
+  0x1236684f4: b.ne #0x12366ac6c
+  0x1236684f8: nop
+  0x1236684fc: nop
+  0x123668500: nop
+  0x123668504: nop
+  0x123668508: nop
+  0x12366850c: cmp x1, #0
+  0x123668510: b.eq #0x12366aca8
+  0x123668514: nop
+  0x123668518: nop
+  0x12366851c: nop
+  0x123668520: nop
+  0x123668524: nop
+  0x123668528: mov x11, x1
+  0x12366852c: ldr x12, #0x123668534
+  0x123668530: b #0x12366853c
+  0x123668534: .byte 0x00, 0x09, 0xc5, 0x21
+  0x123668538: udf #1
+  0x12366853c: ldur x11, [x11, #8]
+  0x123668540: cmp x11, x12
+  0x123668544: b.ne #0x12366ace4
+  0x123668548: nop
+  0x12366854c: nop
+  0x123668550: nop
+  0x123668554: nop
+  0x123668558: nop
+  0x12366855c: tst x9, #1
+  0x123668560: b.eq #0x12366ad20
+  0x123668564: nop
+  0x123668568: nop
+  0x12366856c: nop
+  0x123668570: nop
+  0x123668574: nop
+  0x123668578: mov x11, #0xd498
+  0x12366857c: movk x11, #0x7187, lsl #16
+  0x123668580: movk x11, #9, lsl #32
+  0x123668584: stur x11, [x19]
+  0x123668588: mov x11, x9
+  0x12366858c: asr x11, x11, #1
+  0x123668590: stur x1, [x21, #-0x18]
+  0x123668594: stur x9, [x21, #-0x10]
+  0x123668598: stur x10, [x21, #-8]
+  0x12366859c: mov x2, x10
+  0x1236685a0: mov x0, x1
+  0x1236685a4: mov x1, x11
+  0x1236685a8: mov x16, #0xa48c
+  0x1236685ac: movk x16, #0x28d, lsl #16
+  0x1236685b0: movk x16, #1, lsl #32
+  0x1236685b4: blr x16
+  0x1236685b8: ldur x11, [x21, #-8]
+  0x1236685bc: mov x1, x11
+  0x1236685c0: b #0x1236683f0
+  0x1236685c4: nop
+  0x1236685c8: nop
+  0x1236685cc: nop
+  0x1236685d0: nop
+

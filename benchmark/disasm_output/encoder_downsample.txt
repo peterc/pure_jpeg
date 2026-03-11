@@ -1,0 +1,1400 @@
+# YJIT Disassembly for: Encoder#downsample
+# Method: #<Method: PureJPEG::Encoder#downsample(data, src_w, src_h, dst_w, dst_h) /Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/encoder.rb:416>
+
+== disasm: #<ISeq:downsample@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/encoder.rb:416 (416,4)-(434,7)>
+local table (size: 8, argc: 5 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
+[ 8] data@0<Arg>[ 7] src_w@1<Arg>[ 6] src_h@2<Arg>[ 5] dst_w@3<Arg>[ 4] dst_h@4<Arg>[ 3] out@5      [ 2] max_x@6    [ 1] max_y@7
+0000 opt_getconstant_path                   <ic:0 Array>              ( 417)[LiCa]
+0002 putnil
+0003 swap
+0004 getlocal_WC_0                          dst_w@3
+0006 getlocal_WC_0                          dst_h@4
+0008 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0010 opt_new                                <calldata!mid:new, argc:1, ARGS_SIMPLE>, 17
+0013 opt_send_without_block                 <calldata!mid:initialize, argc:1, FCALL|ARGS_SIMPLE>
+0015 jump                                   20
+0017 opt_send_without_block                 <calldata!mid:new, argc:1, ARGS_SIMPLE>
+0019 swap
+0020 pop
+0021 setlocal_WC_0                          out@5
+0023 getlocal_WC_0                          src_w@1                   ( 418)[Li]
+0025 putobject_INT2FIX_1_
+0026 opt_minus                              <calldata!mid:-, argc:1, ARGS_SIMPLE>[CcCr]
+0028 setlocal_WC_0                          max_x@6
+0030 getlocal_WC_0                          src_h@2                   ( 419)[Li]
+0032 putobject_INT2FIX_1_
+0033 opt_minus                              <calldata!mid:-, argc:1, ARGS_SIMPLE>[CcCr]
+0035 setlocal_WC_0                          max_y@7
+0037 getlocal_WC_0                          dst_h@4                   ( 420)[Li]
+0039 send                                   <calldata!mid:times, argc:0>, block in downsample
+0042 pop
+0043 getlocal_WC_0                          out@5                     ( 433)[Li]
+0045 leave                                                            ( 434)[Re]
+
+== disasm: #<ISeq:block in downsample@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/encoder.rb:420 (420,18)-(432,9)>
+local table (size: 6, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
+[ 6] dy@0<AmbiguousArg>[ 5] sy@1       [ 4] y1@2       [ 3] row0@3     [ 2] row1@4     [ 1] dst_row@5
+0000 getlocal_WC_0                          dy@0                      ( 421)[LiBc]
+0002 putobject_INT2FIX_1_
+0003 opt_ltlt                               <calldata!mid:<<, argc:1, ARGS_SIMPLE>[CcCr]
+0005 setlocal_WC_0                          sy@1
+0007 getlocal_WC_0                          sy@1                      ( 422)[Li]
+0009 getlocal_WC_1                          max_y@7
+0011 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0013 branchunless                           22
+0015 getlocal_WC_0                          sy@1
+0017 putobject_INT2FIX_1_
+0018 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0020 jump                                   24
+0022 getlocal_WC_1                          max_y@7
+0024 setlocal_WC_0                          y1@2
+0026 getlocal_WC_0                          sy@1                      ( 423)[Li]
+0028 getlocal_WC_1                          src_w@1
+0030 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0032 setlocal_WC_0                          row0@3
+0034 getlocal_WC_0                          y1@2                      ( 424)[Li]
+0036 getlocal_WC_1                          src_w@1
+0038 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0040 setlocal_WC_0                          row1@4
+0042 getlocal_WC_0                          dy@0                      ( 425)[Li]
+0044 getlocal_WC_1                          dst_w@3
+0046 opt_mult                               <calldata!mid:*, argc:1, ARGS_SIMPLE>[CcCr]
+0048 setlocal_WC_0                          dst_row@5
+0050 getlocal_WC_1                          dst_w@3                   ( 426)[Li]
+0052 send                                   <calldata!mid:times, argc:0>, block (2 levels) in downsample
+0055 leave                                                            ( 432)[Br]
+
+== disasm: #<ISeq:block (2 levels) in downsample@/Users/ufuk/src/github.com/peterc/pure_jpeg/lib/pure_jpeg/encoder.rb:426 (426,20)-(431,11)>
+local table (size: 3, argc: 1 [opts: 0, rest: -1, post: 0, block: -1, kw: -1@-1, kwrest: -1])
+[ 3] dx@0<AmbiguousArg>[ 2] sx@1       [ 1] x1@2
+0000 getlocal_WC_0                          dx@0                      ( 427)[LiBc]
+0002 putobject_INT2FIX_1_
+0003 opt_ltlt                               <calldata!mid:<<, argc:1, ARGS_SIMPLE>[CcCr]
+0005 setlocal_WC_0                          sx@1
+0007 getlocal_WC_0                          sx@1                      ( 428)[Li]
+0009 getlocal                               max_x@6, 2
+0012 opt_lt                                 <calldata!mid:<, argc:1, ARGS_SIMPLE>[CcCr]
+0014 branchunless                           23
+0016 getlocal_WC_0                          sx@1
+0018 putobject_INT2FIX_1_
+0019 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0021 jump                                   26
+0023 getlocal                               max_x@6, 2
+0026 setlocal_WC_0                          x1@2
+0028 putnil                                                           ( 429)[Li]
+0029 getlocal                               out@5, 2
+0032 getlocal_WC_1                          dst_row@5
+0034 getlocal_WC_0                          dx@0
+0036 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0038 getlocal                               data@0, 2
+0041 getlocal_WC_1                          row0@3
+0043 getlocal_WC_0                          sx@1
+0045 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0047 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0049 getlocal                               data@0, 2
+0052 getlocal_WC_1                          row0@3
+0054 getlocal_WC_0                          x1@2
+0056 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0058 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0060 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0062 getlocal                               data@0, 2                 ( 430)
+0065 getlocal_WC_1                          row1@4
+0067 getlocal_WC_0                          sx@1
+0069 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0071 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0073 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>( 429)[CcCr]
+0075 getlocal                               data@0, 2                 ( 430)
+0078 getlocal_WC_1                          row1@4
+0080 getlocal_WC_0                          x1@2
+0082 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0084 opt_aref                               <calldata!mid:[], argc:1, ARGS_SIMPLE>[CcCr]
+0086 opt_plus                               <calldata!mid:+, argc:1, ARGS_SIMPLE>[CcCr]
+0088 putobject                              2
+0090 opt_send_without_block                 <calldata!mid:>>, argc:1, ARGS_SIMPLE>
+0092 setn                                   3                         ( 429)
+0094 opt_aset                               <calldata!mid:[]=, argc:2, ARGS_SIMPLE>[CcCr]
+0096 pop
+0097 leave                                                            ( 431)[Br]
+
+NUM BLOCK VERSIONS: 19
+TOTAL INLINE CODE SIZE: 13192 bytes
+== BLOCK 1/19, ISEQ RANGE [0,2), 20 bytes =====================
+  0x12369903c: ldr x11, #0x123699044
+  0x123699040: b #0x12369904c
+  0x123699044: .byte 0x00, 0x09, 0xc5, 0x21
+  0x123699048: udf #1
+  0x12369904c: mov x1, x11
+
+== BLOCK 2/19, ISEQ RANGE [2,6), 20 bytes =====================
+  0x123699050: mov x9, #4
+  0x123699054: mov x11, x9
+  0x123699058: mov x12, x1
+  0x12369905c: mov x9, x12
+  0x123699060: mov x1, x11
+
+== BLOCK 3/19, ISEQ RANGE [4,8), 12228 bytes ==================
+  0x123699064: b #0x12369c014
+  0x123699068: nop
+  0x12369906c: nop
+  0x123699070: nop
+  0x123699074: nop
+  0x123699078: udf #0
+  0x12369907c: udf #0
+  0x123699080: udf #0
+  0x123699084: udf #0
+  0x123699088: udf #0
+  0x12369908c: udf #0
+  0x123699090: udf #0
+  0x123699094: udf #0
+  0x123699098: udf #0
+  0x12369909c: udf #0
+  0x1236990a0: udf #0
+  0x1236990a4: udf #0
+  0x1236990a8: udf #0
+  0x1236990ac: udf #0
+  0x1236990b0: udf #0
+  0x1236990b4: udf #0
+  0x1236990b8: udf #0
+  0x1236990bc: udf #0
+  0x1236990c0: udf #0
+  0x1236990c4: udf #0
+  0x1236990c8: udf #0
+  0x1236990cc: udf #0
+  0x1236990d0: udf #0
+  0x1236990d4: udf #0
+  0x1236990d8: udf #0
+  0x1236990dc: udf #0
+  0x1236990e0: udf #0
+  0x1236990e4: udf #0
+  0x1236990e8: udf #0
+  0x1236990ec: udf #0
+  0x1236990f0: udf #0
+  0x1236990f4: udf #0
+  0x1236990f8: udf #0
+  0x1236990fc: udf #0
+  0x123699100: udf #0
+  0x123699104: udf #0
+  0x123699108: udf #0
+  0x12369910c: udf #0
+  0x123699110: udf #0
+  0x123699114: udf #0
+  0x123699118: udf #0
+  0x12369911c: udf #0
+  0x123699120: udf #0
+  0x123699124: udf #0
+  0x123699128: udf #0
+  0x12369912c: udf #0
+  0x123699130: udf #0
+  0x123699134: udf #0
+  0x123699138: udf #0
+  0x12369913c: udf #0
+  0x123699140: udf #0
+  0x123699144: udf #0
+  0x123699148: udf #0
+  0x12369914c: udf #0
+  0x123699150: udf #0
+  0x123699154: udf #0
+  0x123699158: udf #0
+  0x12369915c: udf #0
+  0x123699160: udf #0
+  0x123699164: udf #0
+  0x123699168: udf #0
+  0x12369916c: udf #0
+  0x123699170: udf #0
+  0x123699174: udf #0
+  0x123699178: udf #0
+  0x12369917c: udf #0
+  0x123699180: udf #0
+  0x123699184: udf #0
+  0x123699188: udf #0
+  0x12369918c: udf #0
+  0x123699190: udf #0
+  0x123699194: udf #0
+  0x123699198: udf #0
+  0x12369919c: udf #0
+  0x1236991a0: udf #0
+  0x1236991a4: udf #0
+  0x1236991a8: udf #0
+  0x1236991ac: udf #0
+  0x1236991b0: udf #0
+  0x1236991b4: udf #0
+  0x1236991b8: udf #0
+  0x1236991bc: udf #0
+  0x1236991c0: udf #0
+  0x1236991c4: udf #0
+  0x1236991c8: udf #0
+  0x1236991cc: udf #0
+  0x1236991d0: udf #0
+  0x1236991d4: udf #0
+  0x1236991d8: udf #0
+  0x1236991dc: udf #0
+  0x1236991e0: udf #0
+  0x1236991e4: udf #0
+  0x1236991e8: udf #0
+  0x1236991ec: udf #0
+  0x1236991f0: udf #0
+  0x1236991f4: udf #0
+  0x1236991f8: udf #0
+  0x1236991fc: udf #0
+  0x123699200: udf #0
+  0x123699204: udf #0
+  0x123699208: udf #0
+  0x12369920c: udf #0
+  0x123699210: udf #0
+  0x123699214: udf #0
+  0x123699218: udf #0
+  0x12369921c: udf #0
+  0x123699220: udf #0
+  0x123699224: udf #0
+  0x123699228: udf #0
+  0x12369922c: udf #0
+  0x123699230: udf #0
+  0x123699234: udf #0
+  0x123699238: udf #0
+  0x12369923c: udf #0
+  0x123699240: udf #0
+  0x123699244: udf #0
+  0x123699248: udf #0
+  0x12369924c: udf #0
+  0x123699250: udf #0
+  0x123699254: udf #0
+  0x123699258: udf #0
+  0x12369925c: udf #0
+  0x123699260: udf #0
+  0x123699264: udf #0
+  0x123699268: udf #0
+  0x12369926c: udf #0
+  0x123699270: udf #0
+  0x123699274: udf #0
+  0x123699278: udf #0
+  0x12369927c: udf #0
+  0x123699280: udf #0
+  0x123699284: udf #0
+  0x123699288: udf #0
+  0x12369928c: udf #0
+  0x123699290: udf #0
+  0x123699294: udf #0
+  0x123699298: udf #0
+  0x12369929c: udf #0
+  0x1236992a0: udf #0
+  0x1236992a4: udf #0
+  0x1236992a8: udf #0
+  0x1236992ac: udf #0
+  0x1236992b0: udf #0
+  0x1236992b4: udf #0
+  0x1236992b8: udf #0
+  0x1236992bc: udf #0
+  0x1236992c0: udf #0
+  0x1236992c4: udf #0
+  0x1236992c8: udf #0
+  0x1236992cc: udf #0
+  0x1236992d0: udf #0
+  0x1236992d4: udf #0
+  0x1236992d8: udf #0
+  0x1236992dc: udf #0
+  0x1236992e0: udf #0
+  0x1236992e4: udf #0
+  0x1236992e8: udf #0
+  0x1236992ec: udf #0
+  0x1236992f0: udf #0
+  0x1236992f4: udf #0
+  0x1236992f8: udf #0
+  0x1236992fc: udf #0
+  0x123699300: udf #0
+  0x123699304: udf #0
+  0x123699308: udf #0
+  0x12369930c: udf #0
+  0x123699310: udf #0
+  0x123699314: udf #0
+  0x123699318: udf #0
+  0x12369931c: udf #0
+  0x123699320: udf #0
+  0x123699324: udf #0
+  0x123699328: udf #0
+  0x12369932c: udf #0
+  0x123699330: udf #0
+  0x123699334: udf #0
+  0x123699338: udf #0
+  0x12369933c: udf #0
+  0x123699340: udf #0
+  0x123699344: udf #0
+  0x123699348: udf #0
+  0x12369934c: udf #0
+  0x123699350: udf #0
+  0x123699354: udf #0
+  0x123699358: udf #0
+  0x12369935c: udf #0
+  0x123699360: udf #0
+  0x123699364: udf #0
+  0x123699368: udf #0
+  0x12369936c: udf #0
+  0x123699370: udf #0
+  0x123699374: udf #0
+  0x123699378: udf #0
+  0x12369937c: udf #0
+  0x123699380: udf #0
+  0x123699384: udf #0
+  0x123699388: udf #0
+  0x12369938c: udf #0
+  0x123699390: udf #0
+  0x123699394: udf #0
+  0x123699398: udf #0
+  0x12369939c: udf #0
+  0x1236993a0: udf #0
+  0x1236993a4: udf #0
+  0x1236993a8: udf #0
+  0x1236993ac: udf #0
+  0x1236993b0: udf #0
+  0x1236993b4: udf #0
+  0x1236993b8: udf #0
+  0x1236993bc: udf #0
+  0x1236993c0: udf #0
+  0x1236993c4: udf #0
+  0x1236993c8: udf #0
+  0x1236993cc: udf #0
+  0x1236993d0: udf #0
+  0x1236993d4: udf #0
+  0x1236993d8: udf #0
+  0x1236993dc: udf #0
+  0x1236993e0: udf #0
+  0x1236993e4: udf #0
+  0x1236993e8: udf #0
+  0x1236993ec: udf #0
+  0x1236993f0: udf #0
+  0x1236993f4: udf #0
+  0x1236993f8: udf #0
+  0x1236993fc: udf #0
+  0x123699400: udf #0
+  0x123699404: udf #0
+  0x123699408: udf #0
+  0x12369940c: udf #0
+  0x123699410: udf #0
+  0x123699414: udf #0
+  0x123699418: udf #0
+  0x12369941c: udf #0
+  0x123699420: udf #0
+  0x123699424: udf #0
+  0x123699428: udf #0
+  0x12369942c: udf #0
+  0x123699430: udf #0
+  0x123699434: udf #0
+  0x123699438: udf #0
+  0x12369943c: udf #0
+  0x123699440: udf #0
+  0x123699444: udf #0
+  0x123699448: udf #0
+  0x12369944c: udf #0
+  0x123699450: udf #0
+  0x123699454: udf #0
+  0x123699458: udf #0
+  0x12369945c: udf #0
+  0x123699460: udf #0
+  0x123699464: udf #0
+  0x123699468: udf #0
+  0x12369946c: udf #0
+  0x123699470: udf #0
+  0x123699474: udf #0
+  0x123699478: udf #0
+  0x12369947c: udf #0
+  0x123699480: udf #0
+  0x123699484: udf #0
+  0x123699488: udf #0
+  0x12369948c: udf #0
+  0x123699490: udf #0
+  0x123699494: udf #0
+  0x123699498: udf #0
+  0x12369949c: udf #0
+  0x1236994a0: udf #0
+  0x1236994a4: udf #0
+  0x1236994a8: udf #0
+  0x1236994ac: udf #0
+  0x1236994b0: udf #0
+  0x1236994b4: udf #0
+  0x1236994b8: udf #0
+  0x1236994bc: udf #0
+  0x1236994c0: udf #0
+  0x1236994c4: udf #0
+  0x1236994c8: udf #0
+  0x1236994cc: udf #0
+  0x1236994d0: udf #0
+  0x1236994d4: udf #0
+  0x1236994d8: udf #0
+  0x1236994dc: udf #0
+  0x1236994e0: udf #0
+  0x1236994e4: udf #0
+  0x1236994e8: udf #0
+  0x1236994ec: udf #0
+  0x1236994f0: udf #0
+  0x1236994f4: udf #0
+  0x1236994f8: udf #0
+  0x1236994fc: udf #0
+  0x123699500: udf #0
+  0x123699504: udf #0
+  0x123699508: udf #0
+  0x12369950c: udf #0
+  0x123699510: udf #0
+  0x123699514: udf #0
+  0x123699518: udf #0
+  0x12369951c: udf #0
+  0x123699520: udf #0
+  0x123699524: udf #0
+  0x123699528: udf #0
+  0x12369952c: udf #0
+  0x123699530: udf #0
+  0x123699534: udf #0
+  0x123699538: udf #0
+  0x12369953c: udf #0
+  0x123699540: udf #0
+  0x123699544: udf #0
+  0x123699548: udf #0
+  0x12369954c: udf #0
+  0x123699550: udf #0
+  0x123699554: udf #0
+  0x123699558: udf #0
+  0x12369955c: udf #0
+  0x123699560: udf #0
+  0x123699564: udf #0
+  0x123699568: udf #0
+  0x12369956c: udf #0
+  0x123699570: udf #0
+  0x123699574: udf #0
+  0x123699578: udf #0
+  0x12369957c: udf #0
+  0x123699580: udf #0
+  0x123699584: udf #0
+  0x123699588: udf #0
+  0x12369958c: udf #0
+  0x123699590: udf #0
+  0x123699594: udf #0
+  0x123699598: udf #0
+  0x12369959c: udf #0
+  0x1236995a0: udf #0
+  0x1236995a4: udf #0
+  0x1236995a8: udf #0
+  0x1236995ac: udf #0
+  0x1236995b0: udf #0
+  0x1236995b4: udf #0
+  0x1236995b8: udf #0
+  0x1236995bc: udf #0
+  0x1236995c0: udf #0
+  0x1236995c4: udf #0
+  0x1236995c8: udf #0
+  0x1236995cc: udf #0
+  0x1236995d0: udf #0
+  0x1236995d4: udf #0
+  0x1236995d8: udf #0
+  0x1236995dc: udf #0
+  0x1236995e0: udf #0
+  0x1236995e4: udf #0
+  0x1236995e8: udf #0
+  0x1236995ec: udf #0
+  0x1236995f0: udf #0
+  0x1236995f4: udf #0
+  0x1236995f8: udf #0
+  0x1236995fc: udf #0
+  0x123699600: udf #0
+  0x123699604: udf #0
+  0x123699608: udf #0
+  0x12369960c: udf #0
+  0x123699610: udf #0
+  0x123699614: udf #0
+  0x123699618: udf #0
+  0x12369961c: udf #0
+  0x123699620: udf #0
+  0x123699624: udf #0
+  0x123699628: udf #0
+  0x12369962c: udf #0
+  0x123699630: udf #0
+  0x123699634: udf #0
+  0x123699638: udf #0
+  0x12369963c: udf #0
+  0x123699640: udf #0
+  0x123699644: udf #0
+  0x123699648: udf #0
+  0x12369964c: udf #0
+  0x123699650: udf #0
+  0x123699654: udf #0
+  0x123699658: udf #0
+  0x12369965c: udf #0
+  0x123699660: udf #0
+  0x123699664: udf #0
+  0x123699668: udf #0
+  0x12369966c: udf #0
+  0x123699670: udf #0
+  0x123699674: udf #0
+  0x123699678: udf #0
+  0x12369967c: udf #0
+  0x123699680: udf #0
+  0x123699684: udf #0
+  0x123699688: udf #0
+  0x12369968c: udf #0
+  0x123699690: udf #0
+  0x123699694: udf #0
+  0x123699698: udf #0
+  0x12369969c: udf #0
+  0x1236996a0: udf #0
+  0x1236996a4: udf #0
+  0x1236996a8: udf #0
+  0x1236996ac: udf #0
+  0x1236996b0: udf #0
+  0x1236996b4: udf #0
+  0x1236996b8: udf #0
+  0x1236996bc: udf #0
+  0x1236996c0: udf #0
+  0x1236996c4: udf #0
+  0x1236996c8: udf #0
+  0x1236996cc: udf #0
+  0x1236996d0: udf #0
+  0x1236996d4: udf #0
+  0x1236996d8: udf #0
+  0x1236996dc: udf #0
+  0x1236996e0: udf #0
+  0x1236996e4: udf #0
+  0x1236996e8: udf #0
+  0x1236996ec: udf #0
+  0x1236996f0: udf #0
+  0x1236996f4: udf #0
+  0x1236996f8: udf #0
+  0x1236996fc: udf #0
+  0x123699700: udf #0
+  0x123699704: udf #0
+  0x123699708: udf #0
+  0x12369970c: udf #0
+  0x123699710: udf #0
+  0x123699714: udf #0
+  0x123699718: udf #0
+  0x12369971c: udf #0
+  0x123699720: udf #0
+  0x123699724: udf #0
+  0x123699728: udf #0
+  0x12369972c: udf #0
+  0x123699730: udf #0
+  0x123699734: udf #0
+  0x123699738: udf #0
+  0x12369973c: udf #0
+  0x123699740: udf #0
+  0x123699744: udf #0
+  0x123699748: udf #0
+  0x12369974c: udf #0
+  0x123699750: udf #0
+  0x123699754: udf #0
+  0x123699758: udf #0
+  0x12369975c: udf #0
+  0x123699760: udf #0
+  0x123699764: udf #0
+  0x123699768: udf #0
+  0x12369976c: udf #0
+  0x123699770: udf #0
+  0x123699774: udf #0
+  0x123699778: udf #0
+  0x12369977c: udf #0
+  0x123699780: udf #0
+  0x123699784: udf #0
+  0x123699788: udf #0
+  0x12369978c: udf #0
+  0x123699790: udf #0
+  0x123699794: udf #0
+  0x123699798: udf #0
+  0x12369979c: udf #0
+  0x1236997a0: udf #0
+  0x1236997a4: udf #0
+  0x1236997a8: udf #0
+  0x1236997ac: udf #0
+  0x1236997b0: udf #0
+  0x1236997b4: udf #0
+  0x1236997b8: udf #0
+  0x1236997bc: udf #0
+  0x1236997c0: udf #0
+  0x1236997c4: udf #0
+  0x1236997c8: udf #0
+  0x1236997cc: udf #0
+  0x1236997d0: udf #0
+  0x1236997d4: udf #0
+  0x1236997d8: udf #0
+  0x1236997dc: udf #0
+  0x1236997e0: udf #0
+  0x1236997e4: udf #0
+  0x1236997e8: udf #0
+  0x1236997ec: udf #0
+  0x1236997f0: udf #0
+  0x1236997f4: udf #0
+  0x1236997f8: udf #0
+  0x1236997fc: udf #0
+  0x123699800: udf #0
+  0x123699804: udf #0
+  0x123699808: udf #0
+  0x12369980c: udf #0
+  0x123699810: udf #0
+  0x123699814: udf #0
+  0x123699818: udf #0
+  0x12369981c: udf #0
+  0x123699820: udf #0
+  0x123699824: udf #0
+  0x123699828: udf #0
+  0x12369982c: udf #0
+  0x123699830: udf #0
+  0x123699834: udf #0
+  0x123699838: udf #0
+  0x12369983c: udf #0
+  0x123699840: udf #0
+  0x123699844: udf #0
+  0x123699848: udf #0
+  0x12369984c: udf #0
+  0x123699850: udf #0
+  0x123699854: udf #0
+  0x123699858: udf #0
+  0x12369985c: udf #0
+  0x123699860: udf #0
+  0x123699864: udf #0
+  0x123699868: udf #0
+  0x12369986c: udf #0
+  0x123699870: udf #0
+  0x123699874: udf #0
+  0x123699878: udf #0
+  0x12369987c: udf #0
+  0x123699880: udf #0
+  0x123699884: udf #0
+  0x123699888: udf #0
+  0x12369988c: udf #0
+  0x123699890: udf #0
+  0x123699894: udf #0
+  0x123699898: udf #0
+  0x12369989c: udf #0
+  0x1236998a0: udf #0
+  0x1236998a4: udf #0
+  0x1236998a8: udf #0
+  0x1236998ac: udf #0
+  0x1236998b0: udf #0
+  0x1236998b4: udf #0
+  0x1236998b8: udf #0
+  0x1236998bc: udf #0
+  0x1236998c0: udf #0
+  0x1236998c4: udf #0
+  0x1236998c8: udf #0
+  0x1236998cc: udf #0
+  0x1236998d0: udf #0
+  0x1236998d4: udf #0
+  0x1236998d8: udf #0
+  0x1236998dc: udf #0
+  0x1236998e0: udf #0
+  0x1236998e4: udf #0
+  0x1236998e8: udf #0
+  0x1236998ec: udf #0
+  0x1236998f0: udf #0
+  0x1236998f4: udf #0
+  0x1236998f8: udf #0
+  0x1236998fc: udf #0
+  0x123699900: udf #0
+  0x123699904: udf #0
+  0x123699908: udf #0
+  0x12369990c: udf #0
+  0x123699910: udf #0
+  0x123699914: udf #0
+  0x123699918: udf #0
+  0x12369991c: udf #0
+  0x123699920: udf #0
+  0x123699924: udf #0
+  0x123699928: udf #0
+  0x12369992c: udf #0
+  0x123699930: udf #0
+  0x123699934: udf #0
+  0x123699938: udf #0
+  0x12369993c: udf #0
+  0x123699940: udf #0
+  0x123699944: udf #0
+  0x123699948: udf #0
+  0x12369994c: udf #0
+  0x123699950: udf #0
+  0x123699954: udf #0
+  0x123699958: udf #0
+  0x12369995c: udf #0
+  0x123699960: udf #0
+  0x123699964: udf #0
+  0x123699968: udf #0
+  0x12369996c: udf #0
+  0x123699970: udf #0
+  0x123699974: udf #0
+  0x123699978: udf #0
+  0x12369997c: udf #0
+  0x123699980: udf #0
+  0x123699984: udf #0
+  0x123699988: udf #0
+  0x12369998c: udf #0
+  0x123699990: udf #0
+  0x123699994: udf #0
+  0x123699998: udf #0
+  0x12369999c: udf #0
+  0x1236999a0: udf #0
+  0x1236999a4: udf #0
+  0x1236999a8: udf #0
+  0x1236999ac: udf #0
+  0x1236999b0: udf #0
+  0x1236999b4: udf #0
+  0x1236999b8: udf #0
+  0x1236999bc: udf #0
+  0x1236999c0: udf #0
+  0x1236999c4: udf #0
+  0x1236999c8: udf #0
+  0x1236999cc: udf #0
+  0x1236999d0: udf #0
+  0x1236999d4: udf #0
+  0x1236999d8: udf #0
+  0x1236999dc: udf #0
+  0x1236999e0: udf #0
+  0x1236999e4: udf #0
+  0x1236999e8: udf #0
+  0x1236999ec: udf #0
+  0x1236999f0: udf #0
+  0x1236999f4: udf #0
+  0x1236999f8: udf #0
+  0x1236999fc: udf #0
+  0x123699a00: udf #0
+  0x123699a04: udf #0
+  0x123699a08: udf #0
+  0x123699a0c: udf #0
+  0x123699a10: udf #0
+  0x123699a14: udf #0
+  0x123699a18: udf #0
+  0x123699a1c: udf #0
+  0x123699a20: udf #0
+  0x123699a24: udf #0
+  0x123699a28: udf #0
+  0x123699a2c: udf #0
+  0x123699a30: udf #0
+  0x123699a34: udf #0
+  0x123699a38: udf #0
+  0x123699a3c: udf #0
+  0x123699a40: udf #0
+  0x123699a44: udf #0
+  0x123699a48: udf #0
+  0x123699a4c: udf #0
+  0x123699a50: udf #0
+  0x123699a54: udf #0
+  0x123699a58: udf #0
+  0x123699a5c: udf #0
+  0x123699a60: udf #0
+  0x123699a64: udf #0
+  0x123699a68: udf #0
+  0x123699a6c: udf #0
+  0x123699a70: udf #0
+  0x123699a74: udf #0
+  0x123699a78: udf #0
+  0x123699a7c: udf #0
+  0x123699a80: udf #0
+  0x123699a84: udf #0
+  0x123699a88: udf #0
+  0x123699a8c: udf #0
+  0x123699a90: udf #0
+  0x123699a94: udf #0
+  0x123699a98: udf #0
+  0x123699a9c: udf #0
+  0x123699aa0: udf #0
+  0x123699aa4: udf #0
+  0x123699aa8: udf #0
+  0x123699aac: udf #0
+  0x123699ab0: udf #0
+  0x123699ab4: udf #0
+  0x123699ab8: udf #0
+  0x123699abc: udf #0
+  0x123699ac0: udf #0
+  0x123699ac4: udf #0
+  0x123699ac8: udf #0
+  0x123699acc: udf #0
+  0x123699ad0: udf #0
+  0x123699ad4: udf #0
+  0x123699ad8: udf #0
+  0x123699adc: udf #0
+  0x123699ae0: udf #0
+  0x123699ae4: udf #0
+  0x123699ae8: udf #0
+  0x123699aec: udf #0
+  0x123699af0: udf #0
+  0x123699af4: udf #0
+  0x123699af8: udf #0
+  0x123699afc: udf #0
+  0x123699b00: udf #0
+  0x123699b04: udf #0
+  0x123699b08: udf #0
+  0x123699b0c: udf #0
+  0x123699b10: udf #0
+  0x123699b14: udf #0
+  0x123699b18: udf #0
+  0x123699b1c: udf #0
+  0x123699b20: udf #0
+  0x123699b24: udf #0
+  0x123699b28: udf #0
+  0x123699b2c: udf #0
+  0x123699b30: udf #0
+  0x123699b34: udf #0
+  0x123699b38: udf #0
+  0x123699b3c: udf #0
+  0x123699b40: udf #0
+  0x123699b44: udf #0
+  0x123699b48: udf #0
+  0x123699b4c: udf #0
+  0x123699b50: udf #0
+  0x123699b54: udf #0
+  0x123699b58: udf #0
+  0x123699b5c: udf #0
+  0x123699b60: udf #0
+  0x123699b64: udf #0
+  0x123699b68: udf #0
+  0x123699b6c: udf #0
+  0x123699b70: udf #0
+  0x123699b74: udf #0
+  0x123699b78: udf #0
+  0x123699b7c: udf #0
+  0x123699b80: udf #0
+  0x123699b84: udf #0
+  0x123699b88: udf #0
+  0x123699b8c: udf #0
+  0x123699b90: udf #0
+  0x123699b94: udf #0
+  0x123699b98: udf #0
+  0x123699b9c: udf #0
+  0x123699ba0: udf #0
+  0x123699ba4: udf #0
+  0x123699ba8: udf #0
+  0x123699bac: udf #0
+  0x123699bb0: udf #0
+  0x123699bb4: udf #0
+  0x123699bb8: udf #0
+  0x123699bbc: udf #0
+  0x123699bc0: udf #0
+  0x123699bc4: udf #0
+  0x123699bc8: udf #0
+  0x123699bcc: udf #0
+  0x123699bd0: udf #0
+  0x123699bd4: udf #0
+  0x123699bd8: udf #0
+  0x123699bdc: udf #0
+  0x123699be0: udf #0
+  0x123699be4: udf #0
+  0x123699be8: udf #0
+  0x123699bec: udf #0
+  0x123699bf0: udf #0
+  0x123699bf4: udf #0
+  0x123699bf8: udf #0
+  0x123699bfc: udf #0
+  0x123699c00: udf #0
+  0x123699c04: udf #0
+  0x123699c08: udf #0
+  0x123699c0c: udf #0
+  0x123699c10: udf #0
+  0x123699c14: udf #0
+  0x123699c18: udf #0
+  0x123699c1c: udf #0
+  0x123699c20: udf #0
+  0x123699c24: udf #0
+  0x123699c28: udf #0
+  0x123699c2c: udf #0
+  0x123699c30: udf #0
+  0x123699c34: udf #0
+  0x123699c38: udf #0
+  0x123699c3c: udf #0
+  0x123699c40: udf #0
+  0x123699c44: udf #0
+  0x123699c48: udf #0
+  0x123699c4c: udf #0
+  0x123699c50: udf #0
+  0x123699c54: udf #0
+  0x123699c58: udf #0
+  0x123699c5c: udf #0
+  0x123699c60: udf #0
+  0x123699c64: udf #0
+  0x123699c68: udf #0
+  0x123699c6c: udf #0
+  0x123699c70: udf #0
+  0x123699c74: udf #0
+  0x123699c78: udf #0
+  0x123699c7c: udf #0
+  0x123699c80: udf #0
+  0x123699c84: udf #0
+  0x123699c88: udf #0
+  0x123699c8c: udf #0
+  0x123699c90: udf #0
+  0x123699c94: udf #0
+  0x123699c98: udf #0
+  0x123699c9c: udf #0
+  0x123699ca0: udf #0
+  0x123699ca4: udf #0
+  0x123699ca8: udf #0
+  0x123699cac: udf #0
+  0x123699cb0: udf #0
+  0x123699cb4: udf #0
+  0x123699cb8: udf #0
+  0x123699cbc: udf #0
+  0x123699cc0: udf #0
+  0x123699cc4: udf #0
+  0x123699cc8: udf #0
+  0x123699ccc: udf #0
+  0x123699cd0: udf #0
+  0x123699cd4: udf #0
+  0x123699cd8: udf #0
+  0x123699cdc: udf #0
+  0x123699ce0: udf #0
+  0x123699ce4: udf #0
+  0x123699ce8: udf #0
+  0x123699cec: udf #0
+  0x123699cf0: udf #0
+  0x123699cf4: udf #0
+  0x123699cf8: udf #0
+  0x123699cfc: udf #0
+  0x123699d00: udf #0
+  0x123699d04: udf #0
+  0x123699d08: udf #0
+  0x123699d0c: udf #0
+  0x123699d10: udf #0
+  0x123699d14: udf #0
+  0x123699d18: udf #0
+  0x123699d1c: udf #0
+  0x123699d20: udf #0
+  0x123699d24: udf #0
+  0x123699d28: udf #0
+  0x123699d2c: udf #0
+  0x123699d30: udf #0
+  0x123699d34: udf #0
+  0x123699d38: udf #0
+  0x123699d3c: udf #0
+  0x123699d40: udf #0
+  0x123699d44: udf #0
+  0x123699d48: udf #0
+  0x123699d4c: udf #0
+  0x123699d50: udf #0
+  0x123699d54: udf #0
+  0x123699d58: udf #0
+  0x123699d5c: udf #0
+  0x123699d60: udf #0
+  0x123699d64: udf #0
+  0x123699d68: udf #0
+  0x123699d6c: udf #0
+  0x123699d70: udf #0
+  0x123699d74: udf #0
+  0x123699d78: udf #0
+  0x123699d7c: udf #0
+  0x123699d80: udf #0
+  0x123699d84: udf #0
+  0x123699d88: udf #0
+  0x123699d8c: udf #0
+  0x123699d90: udf #0
+  0x123699d94: udf #0
+  0x123699d98: udf #0
+  0x123699d9c: udf #0
+  0x123699da0: udf #0
+  0x123699da4: udf #0
+  0x123699da8: udf #0
+  0x123699dac: udf #0
+  0x123699db0: udf #0
+  0x123699db4: udf #0
+  0x123699db8: udf #0
+  0x123699dbc: udf #0
+  0x123699dc0: udf #0
+  0x123699dc4: udf #0
+  0x123699dc8: udf #0
+  0x123699dcc: udf #0
+  0x123699dd0: udf #0
+  0x123699dd4: udf #0
+  0x123699dd8: udf #0
+  0x123699ddc: udf #0
+  0x123699de0: udf #0
+  0x123699de4: udf #0
+  0x123699de8: udf #0
+  0x123699dec: udf #0
+  0x123699df0: udf #0
+  0x123699df4: udf #0
+  0x123699df8: udf #0
+  0x123699dfc: udf #0
+  0x123699e00: udf #0
+  0x123699e04: udf #0
+  0x123699e08: udf #0
+  0x123699e0c: udf #0
+  0x123699e10: udf #0
+  0x123699e14: udf #0
+  0x123699e18: udf #0
+  0x123699e1c: udf #0
+  0x123699e20: udf #0
+  0x123699e24: udf #0
+  0x123699e28: udf #0
+  0x123699e2c: udf #0
+  0x123699e30: udf #0
+  0x123699e34: udf #0
+  0x123699e38: udf #0
+  0x123699e3c: udf #0
+  0x123699e40: udf #0
+  0x123699e44: udf #0
+  0x123699e48: udf #0
+  0x123699e4c: udf #0
+  0x123699e50: udf #0
+  0x123699e54: udf #0
+  0x123699e58: udf #0
+  0x123699e5c: udf #0
+  0x123699e60: udf #0
+  0x123699e64: udf #0
+  0x123699e68: udf #0
+  0x123699e6c: udf #0
+  0x123699e70: udf #0
+  0x123699e74: udf #0
+  0x123699e78: udf #0
+  0x123699e7c: udf #0
+  0x123699e80: udf #0
+  0x123699e84: udf #0
+  0x123699e88: udf #0
+  0x123699e8c: udf #0
+  0x123699e90: udf #0
+  0x123699e94: udf #0
+  0x123699e98: udf #0
+  0x123699e9c: udf #0
+  0x123699ea0: udf #0
+  0x123699ea4: udf #0
+  0x123699ea8: udf #0
+  0x123699eac: udf #0
+  0x123699eb0: udf #0
+  0x123699eb4: udf #0
+  0x123699eb8: udf #0
+  0x123699ebc: udf #0
+  0x123699ec0: udf #0
+  0x123699ec4: udf #0
+  0x123699ec8: udf #0
+  0x123699ecc: udf #0
+  0x123699ed0: udf #0
+  0x123699ed4: udf #0
+  0x123699ed8: udf #0
+  0x123699edc: udf #0
+  0x123699ee0: udf #0
+  0x123699ee4: udf #0
+  0x123699ee8: udf #0
+  0x123699eec: udf #0
+  0x123699ef0: udf #0
+  0x123699ef4: udf #0
+  0x123699ef8: udf #0
+  0x123699efc: udf #0
+  0x123699f00: udf #0
+  0x123699f04: udf #0
+  0x123699f08: udf #0
+  0x123699f0c: udf #0
+  0x123699f10: udf #0
+  0x123699f14: udf #0
+  0x123699f18: udf #0
+  0x123699f1c: udf #0
+  0x123699f20: udf #0
+  0x123699f24: udf #0
+  0x123699f28: udf #0
+  0x123699f2c: udf #0
+  0x123699f30: udf #0
+  0x123699f34: udf #0
+  0x123699f38: udf #0
+  0x123699f3c: udf #0
+  0x123699f40: udf #0
+  0x123699f44: udf #0
+  0x123699f48: udf #0
+  0x123699f4c: udf #0
+  0x123699f50: udf #0
+  0x123699f54: udf #0
+  0x123699f58: udf #0
+  0x123699f5c: udf #0
+  0x123699f60: udf #0
+  0x123699f64: udf #0
+  0x123699f68: udf #0
+  0x123699f6c: udf #0
+  0x123699f70: udf #0
+  0x123699f74: udf #0
+  0x123699f78: udf #0
+  0x123699f7c: udf #0
+  0x123699f80: udf #0
+  0x123699f84: udf #0
+  0x123699f88: udf #0
+  0x123699f8c: udf #0
+  0x123699f90: udf #0
+  0x123699f94: udf #0
+  0x123699f98: udf #0
+  0x123699f9c: udf #0
+  0x123699fa0: udf #0
+  0x123699fa4: udf #0
+  0x123699fa8: udf #0
+  0x123699fac: udf #0
+  0x123699fb0: udf #0
+  0x123699fb4: udf #0
+  0x123699fb8: udf #0
+  0x123699fbc: udf #0
+  0x123699fc0: udf #0
+  0x123699fc4: udf #0
+  0x123699fc8: udf #0
+  0x123699fcc: udf #0
+  0x123699fd0: udf #0
+  0x123699fd4: udf #0
+  0x123699fd8: udf #0
+  0x123699fdc: udf #0
+  0x123699fe0: udf #0
+  0x123699fe4: udf #0
+  0x123699fe8: udf #0
+
+  0x12369c014: ldur x10, [x21, #-0x40]
+  0x12369c018: nop
+  0x12369c01c: nop
+  0x12369c020: nop
+  0x12369c024: nop
+
+== BLOCK 4/19, ISEQ RANGE [6,10), 20 bytes ====================
+  0x12369c028: ldur x14, [x21, #-0x38]
+  0x12369c02c: nop
+  0x12369c030: nop
+  0x12369c034: nop
+  0x12369c038: nop
+
+== BLOCK 5/19, ISEQ RANGE [8,13), 112 bytes ===================
+  0x12369c03c: tst x10, #1
+  0x12369c040: b.eq #0x12369e14c
+  0x12369c044: nop
+  0x12369c048: nop
+  0x12369c04c: nop
+  0x12369c050: nop
+  0x12369c054: nop
+  0x12369c058: tst x14, #1
+  0x12369c05c: b.eq #0x12369e18c
+  0x12369c060: nop
+  0x12369c064: nop
+  0x12369c068: nop
+  0x12369c06c: nop
+  0x12369c070: nop
+  0x12369c074: asr x11, x10, #1
+  0x12369c078: subs x12, x14, #1
+  0x12369c07c: smulh x16, x11, x12
+  0x12369c080: mul x11, x11, x12
+  0x12369c084: asr x17, x11, #0x3f
+  0x12369c088: cmp x16, x17
+  0x12369c08c: b.ne #0x12369e1cc
+  0x12369c090: nop
+  0x12369c094: nop
+  0x12369c098: nop
+  0x12369c09c: nop
+  0x12369c0a0: nop
+  0x12369c0a4: adds x11, x11, #1
+  0x12369c0a8: mov x10, x11
+
+== BLOCK 6/19, ISEQ RANGE [10,13), 44 bytes ===================
+  0x12369c0ac: ldr x11, #0x12369c0b4
+  0x12369c0b0: b #0x12369c0bc
+  0x12369c0b4: .byte 0x00, 0x09, 0xc5, 0x21
+  0x12369c0b8: udf #1
+  0x12369c0bc: cmp x9, x11
+  0x12369c0c0: b.ne #0x12369e248
+  0x12369c0c4: nop
+  0x12369c0c8: nop
+  0x12369c0cc: nop
+  0x12369c0d0: nop
+  0x12369c0d4: nop
+
+== BLOCK 7/19, ISEQ RANGE [17,19), 236 bytes ==================
+  0x12369c0d8: ldr x11, #0x12369c0e0
+  0x12369c0dc: b #0x12369c0e8
+  0x12369c0e0: .byte 0x00, 0x09, 0xc5, 0x21
+  0x12369c0e4: udf #1
+  0x12369c0e8: cmp x9, x11
+  0x12369c0ec: b.ne #0x12369e2c0
+  0x12369c0f0: nop
+  0x12369c0f4: nop
+  0x12369c0f8: nop
+  0x12369c0fc: nop
+  0x12369c100: nop
+  0x12369c104: ldur w11, [x20, #0x20]
+  0x12369c108: cbnz w11, #0x12369e2fc
+  0x12369c10c: add x11, x21, #0xa8
+  0x12369c110: cmp x19, x11
+  0x12369c114: b.ls #0x12369e2fc
+  0x12369c118: mov x11, #0x80a0
+  0x12369c11c: movk x11, #0x70f9, lsl #16
+  0x12369c120: movk x11, #9, lsl #32
+  0x12369c124: stur x11, [x19]
+  0x12369c128: add x11, x21, #0x30
+  0x12369c12c: ldr x12, #0x12369c134
+  0x12369c130: b #0x12369c13c
+  0x12369c134: .byte 0x50, 0xc5, 0xc7, 0x21
+  0x12369c138: udf #1
+  0x12369c13c: stur x12, [x11, #-0x18]
+  0x12369c140: stur xzr, [x11, #-0x10]
+  0x12369c144: mov x12, #0x83
+  0x12369c148: movk x12, #0x5555, lsl #16
+  0x12369c14c: stur x12, [x11, #-8]
+  0x12369c150: mov x12, #0xffff
+  0x12369c154: movk x12, #0xffff, lsl #16
+  0x12369c158: movk x12, #0xffff, lsl #32
+  0x12369c15c: movk x12, #0xffff, lsl #48
+  0x12369c160: stur x12, [x19, #-0x38]
+  0x12369c164: stur x11, [x19, #-0x30]
+  0x12369c168: stur xzr, [x19, #-0x28]
+  0x12369c16c: stur x9, [x19, #-0x20]
+  0x12369c170: stur xzr, [x19, #-0x10]
+  0x12369c174: subs x11, x11, #8
+  0x12369c178: stur x11, [x19, #-0x18]
+  0x12369c17c: sub x11, x19, #0x38
+  0x12369c180: stur x11, [x20, #0x10]
+  0x12369c184: add x11, x21, #8
+  0x12369c188: mov x21, x11
+  0x12369c18c: stur x21, [x19, #8]
+  0x12369c190: add x11, x21, #8
+  0x12369c194: stur x1, [x21, #-8]
+  0x12369c198: stur x9, [x21]
+  0x12369c19c: stur x10, [x21, #8]
+  0x12369c1a0: mov x2, x9
+  0x12369c1a4: mov x1, x11
+  0x12369c1a8: mov x0, #1
+  0x12369c1ac: mov x16, #0x1338
+  0x12369c1b0: movk x16, #0x28e, lsl #16
+  0x12369c1b4: movk x16, #1, lsl #32
+  0x12369c1b8: blr x16
+  0x12369c1bc: mov x9, x0
+  0x12369c1c0: stur x19, [x20, #0x10]
+
+== BLOCK 8/19, ISEQ RANGE [19,23), 16 bytes ===================
+  0x12369c1c4: mov x11, x9
+  0x12369c1c8: ldur x12, [x21, #-8]
+  0x12369c1cc: mov x9, x12
+  0x12369c1d0: stur x11, [x21, #-8]
+
+== BLOCK 9/19, ISEQ RANGE [21,25), 36 bytes ===================
+  0x12369c1d4: ldur x11, [x21, #-0x10]
+  0x12369c1d8: tst x11, #8
+  0x12369c1dc: b.ne #0x12369e398
+  0x12369c1e0: nop
+  0x12369c1e4: nop
+  0x12369c1e8: nop
+  0x12369c1ec: nop
+  0x12369c1f0: nop
+  0x12369c1f4: ldur x15, [x21, #-8]
+
+== BLOCK 10/19, ISEQ RANGE [23,28), 20 bytes ==================
+  0x12369c1f8: ldur x1, [x21, #-0x58]
+  0x12369c1fc: mov x9, #3
+  0x12369c200: nop
+  0x12369c204: nop
+  0x12369c208: nop
+
+== BLOCK 11/19, ISEQ RANGE [26,30), 44 bytes ==================
+  0x12369c20c: tst x1, #1
+  0x12369c210: b.eq #0x12369e4b4
+  0x12369c214: nop
+  0x12369c218: nop
+  0x12369c21c: nop
+  0x12369c220: nop
+  0x12369c224: nop
+  0x12369c228: subs x11, x1, x9
+  0x12369c22c: b.vs #0x12369e474
+  0x12369c230: adds x11, x11, #1
+  0x12369c234: mov x1, x11
+
+== BLOCK 12/19, ISEQ RANGE [28,32), 20 bytes ==================
+  0x12369c238: mov x14, x1
+  0x12369c23c: nop
+  0x12369c240: nop
+  0x12369c244: nop
+  0x12369c248: nop
+
+== BLOCK 13/19, ISEQ RANGE [30,35), 20 bytes ==================
+  0x12369c24c: ldur x1, [x21, #-0x50]
+  0x12369c250: mov x9, #3
+  0x12369c254: nop
+  0x12369c258: nop
+  0x12369c25c: nop
+
+== BLOCK 14/19, ISEQ RANGE [33,37), 44 bytes ==================
+  0x12369c260: tst x1, #1
+  0x12369c264: b.eq #0x12369e654
+  0x12369c268: nop
+  0x12369c26c: nop
+  0x12369c270: nop
+  0x12369c274: nop
+  0x12369c278: nop
+  0x12369c27c: subs x11, x1, x9
+  0x12369c280: b.vs #0x12369e610
+  0x12369c284: adds x11, x11, #1
+  0x12369c288: mov x1, x11
+
+== BLOCK 15/19, ISEQ RANGE [35,39), 20 bytes ==================
+  0x12369c28c: mov x10, x1
+  0x12369c290: nop
+  0x12369c294: nop
+  0x12369c298: nop
+  0x12369c29c: nop
+
+== BLOCK 16/19, ISEQ RANGE [37,42), 20 bytes ==================
+  0x12369c2a0: ldur x1, [x21, #-0x40]
+  0x12369c2a4: nop
+  0x12369c2a8: nop
+  0x12369c2ac: nop
+  0x12369c2b0: nop
+
+== BLOCK 17/19, ISEQ RANGE [39,42), 228 bytes =================
+  0x12369c2b4: tst x1, #1
+  0x12369c2b8: b.eq #0x12369e7c4
+  0x12369c2bc: nop
+  0x12369c2c0: nop
+  0x12369c2c4: nop
+  0x12369c2c8: nop
+  0x12369c2cc: nop
+  0x12369c2d0: add x11, x21, #0x88
+  0x12369c2d4: cmp x19, x11
+  0x12369c2d8: b.ls #0x12369e804
+  0x12369c2dc: mov x11, #4
+  0x12369c2e0: stur x11, [x21]
+  0x12369c2e4: sub x11, x21, #8
+  0x12369c2e8: stur x11, [x19, #8]
+  0x12369c2ec: mov x11, #0x8158
+  0x12369c2f0: movk x11, #0x70f9, lsl #16
+  0x12369c2f4: movk x11, #9, lsl #32
+  0x12369c2f8: stur x11, [x19]
+  0x12369c2fc: add x11, x21, #0x20
+  0x12369c300: ldr x12, #0x12369c308
+  0x12369c304: b #0x12369c310
+  0x12369c308: .byte 0x10, 0xed, 0x29, 0x23
+  0x12369c30c: udf #1
+  0x12369c310: stur x12, [x11, #-0x18]
+  0x12369c314: ldr x12, #0x12369c31c
+  0x12369c318: b #0x12369c324
+  0x12369c31c: .byte 0xf0, 0x55, 0x2f, 0x23
+  0x12369c320: udf #1
+  0x12369c324: stur x12, [x19, #0x28]
+  0x12369c328: add x12, x19, #0x18
+  0x12369c32c: orr x12, x12, #1
+  0x12369c330: stur x12, [x11, #-0x10]
+  0x12369c334: mov x12, #3
+  0x12369c338: movk x12, #0x1111, lsl #16
+  0x12369c33c: stur x12, [x11, #-8]
+  0x12369c340: stur x11, [x19, #-0x30]
+  0x12369c344: ldr x12, #0x12369c34c
+  0x12369c348: b #0x12369c354
+  0x12369c34c: .byte 0x20, 0xfe, 0x29, 0x23
+  0x12369c350: udf #1
+  0x12369c354: stur x12, [x19, #-0x28]
+  0x12369c358: stur x1, [x19, #-0x20]
+  0x12369c35c: stur xzr, [x19, #-0x10]
+  0x12369c360: subs x12, x11, #8
+  0x12369c364: stur x12, [x19, #-0x18]
+  0x12369c368: stur x1, [x21, #-8]
+  0x12369c36c: stur x15, [x21, #-0x38]
+  0x12369c370: stur x14, [x21, #-0x30]
+  0x12369c374: stur x10, [x21, #-0x28]
+  0x12369c378: mov x21, x11
+  0x12369c37c: mov x11, #0xc604
+  0x12369c380: movk x11, #0x2369, lsl #16
+  0x12369c384: movk x11, #1, lsl #32
+  0x12369c388: stur x11, [x19, #-8]
+  0x12369c38c: subs x11, x19, #0x38
+  0x12369c390: mov x19, x11
+  0x12369c394: stur x19, [x20, #0x10]
+
+... 620 byte gap ...
+== BLOCK 18/19, ISEQ RANGE [42,45), 8 bytes ===================
+  0x12369c604: ldur x21, [x19, #8]
+  0x12369c608: mov x1, x0
+
+== BLOCK 19/19, ISEQ RANGE [43,46), 36 bytes ==================
+  0x12369c60c: ldur x1, [x21, #-0x30]
+  0x12369c610: ldur w11, [x20, #0x20]
+  0x12369c614: cbnz w11, #0x12369eda0
+  0x12369c618: adds x11, x19, #0x38
+  0x12369c61c: mov x19, x11
+  0x12369c620: stur x19, [x20, #0x10]
+  0x12369c624: mov x0, x1
+  0x12369c628: ldur x11, [x19, #-8]
+  0x12369c62c: br x11
+
