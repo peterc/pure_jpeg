@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 require_relative "../lib/pure_jpeg"
 
+# This script is unfairly called Kodak as my memory failed me.
+# This actually recreates the gritty effect of the Casio QV-10.
+
 if ARGV.length < 1
   $stderr.puts "Usage: #{$0} INPUT.(jpg|png) [OUTPUT.jpg] [quality]"
   exit 1
