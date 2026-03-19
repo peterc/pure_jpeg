@@ -5,28 +5,51 @@ Rake::TestTask.new(:test) do |t|
   t.test_files = FileList["test/test_*.rb"]
 end
 
-desc "Benchmark encoding (3 runs, uses examples/a.png)"
+desc "Benchmark encoding and decoding (3 runs each)"
 task :benchmark do
   require "chunky_png"
   require_relative "lib/pure_jpeg"
 
+  runs = 3
+
+  def bench(label, runs, &block)
+    # Warmup
+    block.call
+
+    times = runs.times.map do
+      t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      block.call
+      Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0
+    end
+
+    avg = times.sum / times.length
+    puts "  #{label}: #{times.map { |t| '%.3fs' % t }.join(', ')} (avg #{'%.3fs' % avg})"
+  end
+
+  # Encode
   image = ChunkyPNG::Image.from_file(File.expand_path("examples/a.png", __dir__))
   source = PureJPEG::Source::ChunkyPNGSource.new(image)
 
-  # Warmup
-  PureJPEG.encode(source, quality: 85).write("/tmp/bench_output.jpg")
-
-  times = 3.times.map do
-    t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+  puts "Encode #{image.width}x#{image.height} (color, q85):"
+  bench("Encode", runs) do
     PureJPEG.encode(source, quality: 85).write("/tmp/bench_output.jpg")
-    Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0
   end
 
-  avg = times.sum / times.length
-  puts "Image: #{image.width}x#{image.height}"
-  puts "Output: #{File.size('/tmp/bench_output.jpg')} bytes"
-  puts "Times: #{times.map { |t| '%.3fs' % t }.join(', ')}"
-  puts "Average: #{'%.3fs' % avg}"
+  # Decode baseline
+  baseline_path = File.expand_path("examples/a.jpg", __dir__)
+  info = PureJPEG.info(baseline_path)
+  puts "\nDecode baseline #{info.width}x#{info.height}:"
+  bench("Decode", runs) do
+    PureJPEG::Decoder.decode(baseline_path)
+  end
+
+  # Decode progressive
+  progressive_path = File.expand_path("examples/a-progressive.jpg", __dir__)
+  info = PureJPEG.info(progressive_path)
+  puts "\nDecode progressive #{info.width}x#{info.height}:"
+  bench("Decode", runs) do
+    PureJPEG::Decoder.decode(progressive_path)
+  end
 end
 
 desc "Profile encoding with StackProf (requires stackprof gem)"
