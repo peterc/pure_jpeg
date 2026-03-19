@@ -27,8 +27,7 @@ module PureJPEG
       def initialize(width, height, &block)
         @width = width
         @height = height
-        black = Pixel.new(0, 0, 0)
-        @pixels = Array.new(width * height, black)
+        @pixels = Array.new(width * height) { Pixel.new(0, 0, 0) }
 
         if block
           height.times do |y|

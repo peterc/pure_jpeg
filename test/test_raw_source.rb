@@ -46,6 +46,15 @@ class TestRawSource < Minitest::Test
     assert_equal 0, pixel.b
   end
 
+  def test_default_pixels_are_not_shared
+    source = PureJPEG::Source::RawSource.new(2, 2)
+
+    source[0, 0].r = 7
+
+    assert_equal 7, source[0, 0].r
+    assert_equal 0, source[1, 1].r
+  end
+
   def test_pixel_responds_to_rgb
     source = PureJPEG::Source::RawSource.new(1, 1) { |_x, _y| [1, 2, 3] }
     pixel = source[0, 0]
