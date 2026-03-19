@@ -198,12 +198,13 @@ Possible future improvements: AAN/fixed-point DCT (but it's a LOT of work), ICC 
 
 ## Performance
 
-On a 1024x1024 image (Ruby 4.0.1 on my M1 Max):
+On a 1024x1024 image (Ruby 4.0.1 on my M5):
 
 | Operation | Time |
 |-----------|------|
-| Encode (color, q85) | ~1.7s |
-| Decode (color) | ~1.8s |
+| Encode (color, q85) | ~1.2s |
+| Decode (baseline) | ~1.2s |
+| Decode (progressive) | ~1.3s |
 
 Both the encoder and decoder use a separable DCT with a precomputed cosine matrix and reuse all per-block buffers to minimize GC pressure. Pixel data is stored as packed integers internally to avoid per-pixel object allocation.
 
@@ -212,7 +213,7 @@ Both the encoder and decoder use a separable DCT with a precomputed cosine matri
 ```
 bundle install
 rake test        # run the test suite
-rake benchmark   # benchmark encoding (3 runs against examples/a.png)
+rake benchmark   # benchmark encoding and decoding (3 runs each)
 rake profile     # CPU profile with StackProf (requires the stackprof gem)
 ```
 
