@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+Fixes:
+
+- Fixed shared `Pixel` instance bug in decoder that could corrupt pixel data
+- Encoder validates return values from `quantization_modifier` blocks
+
 ## 0.3.0
 
 New features:
