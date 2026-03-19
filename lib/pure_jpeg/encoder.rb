@@ -76,17 +76,27 @@ module PureJPEG
 
     def build_lum_qtable
       table = @luminance_table || Quantization.scale_table(Quantization::LUMINANCE_BASE, quality)
-      table = @quantization_modifier.call(table, :luminance) if @quantization_modifier
+      table = apply_quantization_modifier(table, :luminance) if @quantization_modifier
       table
     end
 
     def build_chr_qtable
       table = @chrominance_table || Quantization.scale_table(Quantization::CHROMINANCE_BASE, @chroma_quality)
-      table = @quantization_modifier.call(table, :chrominance) if @quantization_modifier
+      table = apply_quantization_modifier(table, :chrominance) if @quantization_modifier
       table
     end
 
+    def apply_quantization_modifier(table, channel)
+      modified = @quantization_modifier.call(table, channel)
+      validate_qtable!(modified, "quantization_modifier result for #{channel}")
+      modified
+    end
+
     def validate_qtable!(table, name)
+      unless table.respond_to?(:length) && table.respond_to?(:all?)
+        raise ArgumentError, "#{name} must be a 64-element array of integers between 1 and 255"
+      end
+
       raise ArgumentError, "#{name} must have exactly 64 elements (got #{table.length})" unless table.length == 64
       unless table.all? { |v| v.is_a?(Integer) && v >= 1 && v <= 255 }
         raise ArgumentError, "#{name} elements must be integers between 1 and 255"

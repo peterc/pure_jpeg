@@ -51,6 +51,22 @@ class TestCreative < Minitest::Test
     assert_includes channels_seen, :chrominance
   end
 
+  def test_quantization_modifier_rejects_nil_result
+    error = assert_raises(ArgumentError) do
+      PureJPEG.encode(@source, quantization_modifier: ->(_table, _channel) { nil }).to_bytes
+    end
+
+    assert_match(/quantization_modifier result/, error.message)
+  end
+
+  def test_quantization_modifier_rejects_malformed_result
+    error = assert_raises(ArgumentError) do
+      PureJPEG.encode(@source, quantization_modifier: ->(_table, _channel) { [1, 2, 3] }).to_bytes
+    end
+
+    assert_match(/must have exactly 64 elements/, error.message)
+  end
+
   def test_all_creative_outputs_decodable
     encodings = [
       { quality: 20, scramble_quantization: true },
