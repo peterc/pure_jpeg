@@ -23,7 +23,7 @@ gem "pure_jpeg"
 gem install pure_jpeg
 ```
 
-There are no runtime dependencies. [ChunkyPNG](https://github.com/wvanbergen/chunky_png) is optional (though quite useful) if you want to use `from_chunky_png`. I have a pure PNG encoder/decoder not far behind this that will ultimately plug in nicely too to get 100% pure Ruby graphical bliss ;-)
+There are no runtime dependencies. [ChunkyPNG](https://github.com/wvanbergen/chunky_png) is optional (though quite useful) if you want to use `from_chunky_png`.
 
 `examples/` contains some useful example scripts for basic JPEG to PNG and PNG to JPEG conversion if you want to do some quick tests without writing code.
 
