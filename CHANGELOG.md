@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.2
+
+Performance:
+
+- Replaced matrix-multiply float DCT with integer-scaled AAN (Arai-Agui-Nakajima) DCT from the IJG reference implementation -- all-integer, no Float allocations
+- Fixed-point integer arithmetic for RGB/YCbCr color space conversion in both encoder and decoder
+- Eliminated short-lived Array allocations in Huffman encoder (`category_and_bits` split into separate methods)
+- `String#<<` with Integer instead of `byte.chr` to avoid String allocations in bit writer
+- DCT inner loop unrolling to eliminate nested block invocations
+- Unrolled `write_block` and `extract_block_into` inner loops
+- Integer rounding division in quantization (no more Float division + round)
+- Hoisted hash lookups and method calls out of per-pixel loops in decoder
+
+Result: ~2.9x faster encode, ~4.6x faster decode on Ruby 4.0.2 with YJIT.
+
+Credits: [Ufuk Kayserilioglu](https://github.com/paracycle)
+
 ## 0.3.1
 
 Fixes:
