@@ -425,7 +425,6 @@ module PureJPEG
             cb_data[i] = clamp255((FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16)
             cr_data[i] = clamp255((FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16)
           end
-          py += 1
         end
       end
 
