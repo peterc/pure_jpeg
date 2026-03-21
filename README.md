@@ -194,19 +194,19 @@ Decoding:
 
 Not supported: arithmetic coding, 12-bit precision, EXIF/ICC profile preservation, adding a default background for transparent sources (see what happens above!). Largely because I don't need these, but they are all do-able, especially with how loosely coupled this library is internally. Raise an issue if you really care about them!
 
-Possible future improvements: AAN/fixed-point DCT (but it's a LOT of work), ICC profile rendering/conversion.
+Possible future improvements: ICC profile rendering/conversion.
 
 ## Performance
 
-On a 1024x1024 image (Ruby 4.0.1 on my M5):
+On a 1024x1024 image (Ruby 4.0.2 with YJIT on an M5):
 
 | Operation | Time |
 |-----------|------|
-| Encode (color, q85) | ~1.2s |
-| Decode (baseline) | ~1.2s |
-| Decode (progressive) | ~1.3s |
+| Encode (color, q85) | ~0.16s |
+| Decode (baseline) | ~0.14s |
+| Decode (progressive) | ~0.18s |
 
-Both the encoder and decoder use a separable DCT with a precomputed cosine matrix and reuse all per-block buffers to minimize GC pressure. Pixel data is stored as packed integers internally to avoid per-pixel object allocation.
+The encoder and decoder use an integer-scaled AAN (Arai-Agui-Nakajima) DCT with fixed-point arithmetic throughout — no Float operations in the hot path. Color space conversion uses fixed-point integer math, and pixel data is stored as packed integers to avoid per-pixel object allocation.
 
 ## Some useful `rake` tasks
 
@@ -232,6 +232,10 @@ rake profile     # CPU profile with StackProf (requires the stackprof gem)
 **The overall experience was good.** I enjoyed this project, but CC clearly requires an experienced developer to keep it on the rails and to not end up with a bunch of buggy half-working crap. Getting to the basic 'turn a PNG into a JPEG' took only twenty minutes, but the rest of making it actually widely useful took several hours more.
 
 **The final 10% still takes 90% of the time.** As mentioned above, the first run was quick, but getting things right has taken much longer. v0.1->0.2 has taken longer than 0.1 did! But we now have progressive JPEG support, even more optimizations, better tests, etc. etc.
+
+## Credits
+
+- [Ufuk Kayserilioglu](https://github.com/paracycle) - Major performance optimizations including integer-scaled AAN DCT, fixed-point color space conversion, and YJIT-targeted improvements.
 
 ## License
 
