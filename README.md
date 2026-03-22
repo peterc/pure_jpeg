@@ -6,7 +6,7 @@
 
 Convert PNG or other pixel data to JPEG. Or the other way! Implements baseline JPEG encoding (DCT, Huffman, 4:2:0 chroma subsampling) and decodes both baseline and progressive JPEGs. Exposes a variety of encoding options to adjust parts of the JPEG pipeline not normally available (I needed this to recreate the JPEG compression styles of older digital cameras - don't ask..)
 
-It works on CRuby 3.0+, TruffleRuby 33.0, and JRuby 10.0.
+It works on CRuby 3.0+, TruffleRuby 33.0, and JRuby 10.0. There's *almost* 100% test coverage - I need to find some "broken" JPEGs to do the rest (hit me up if you have any sources..)
 
 > [!NOTE]
 > Rubyists might find the [AI Disclosure](#ai-disclosure) section below of interest.
