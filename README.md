@@ -208,6 +208,9 @@ On a 1024x1024 image (Ruby 4.0.2 with YJIT on an M5):
 
 The encoder and decoder use an integer-scaled AAN (Arai-Agui-Nakajima) DCT with fixed-point arithmetic throughout — no Float operations in the hot path. Color space conversion uses fixed-point integer math, and pixel data is stored as packed integers to avoid per-pixel object allocation.
 
+> [!TIP]
+> Amazingly, TruffleRuby runs the test suite (which is pretty long) 6x faster than CRuby. I've not directly benchmarked on it yet, but it could slash down the time above even more if you can use it!
+
 ## Some useful `rake` tasks
 
 ```
