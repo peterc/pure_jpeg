@@ -5,18 +5,18 @@ Rake::TestTask.new(:test) do |t|
   t.test_files = FileList["test/test_*.rb"]
 end
 
-desc "Benchmark encoding and decoding (3 runs each)"
+desc "Benchmark encoding and decoding (5 runs each after warmup)"
 task :benchmark do
   RubyVM::YJIT.enable if defined?(RubyVM::YJIT)
 
   require "chunky_png"
   require_relative "lib/pure_jpeg"
 
-  runs = 3
+  runs = 5
+  warmup = Integer(ENV.fetch("WARMUP", 3))
 
-  def bench(label, runs, &block)
-    # Warmup
-    block.call
+  def bench(label, runs, warmup, &block)
+    warmup.times { block.call }
 
     times = runs.times.map do
       t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -33,7 +33,7 @@ task :benchmark do
   source = PureJPEG::Source::ChunkyPNGSource.new(image)
 
   puts "Encode #{image.width}x#{image.height} (color, q85):"
-  bench("Encode", runs) do
+  bench("Encode", runs, warmup) do
     PureJPEG.encode(source, quality: 85).write("/tmp/bench_output.jpg")
   end
 
@@ -41,7 +41,7 @@ task :benchmark do
   baseline_path = File.expand_path("examples/a.jpg", __dir__)
   info = PureJPEG.info(baseline_path)
   puts "\nDecode baseline #{info.width}x#{info.height}:"
-  bench("Decode", runs) do
+  bench("Decode", runs, warmup) do
     PureJPEG::Decoder.decode(baseline_path)
   end
 
@@ -49,7 +49,7 @@ task :benchmark do
   progressive_path = File.expand_path("examples/a-progressive.jpg", __dir__)
   info = PureJPEG.info(progressive_path)
   puts "\nDecode progressive #{info.width}x#{info.height}:"
-  bench("Decode", runs) do
+  bench("Decode", runs, warmup) do
     PureJPEG::Decoder.decode(progressive_path)
   end
 end

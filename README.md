@@ -198,25 +198,22 @@ Possible future improvements: ICC profile rendering/conversion.
 
 ## Performance
 
-On a 1024x1024 image (Ruby 4.0.2 with YJIT on an M5):
+On a 1024x1024 image (Apple M5, 5 runs after warmup):
 
-| Operation | Time |
-|-----------|------|
-| Encode (color, q85) | ~0.16s |
-| Decode (baseline) | ~0.14s |
-| Decode (progressive) | ~0.18s |
+| Operation | CRuby 4.0.2 (YJIT) | TruffleRuby 33.0.1 |
+|-----------|---------------------|---------------------|
+| Encode (color, q85) | ~0.16s | ~0.08s |
+| Decode (baseline) | ~0.14s | ~0.05s |
+| Decode (progressive) | ~0.18s | ~0.09s |
 
-The encoder and decoder use an integer-scaled AAN (Arai-Agui-Nakajima) DCT with fixed-point arithmetic throughout — no Float operations in the hot path. Color space conversion uses fixed-point integer math, and pixel data is stored as packed integers to avoid per-pixel object allocation.
-
-> [!TIP]
-> Amazingly, TruffleRuby runs the test suite (which is pretty long) 6x faster than CRuby. I've not directly benchmarked on it yet, but it could slash down the time above even more if you can use it!
+The encoder and decoder use an integer-scaled AAN (Arai-Agui-Nakajima) DCT with fixed-point arithmetic throughout — no Float operations in the hot path. Color space conversion uses fixed-point integer math, and pixel data is stored as packed integers to avoid per-pixel object allocation. TruffleRuby's Graal JIT compiler can optimize these tight integer loops particularly well, resulting in 2-3x faster performance once warmed up.
 
 ## Some useful `rake` tasks
 
 ```
 bundle install
 rake test        # run the test suite
-rake benchmark   # benchmark encoding and decoding (3 runs each)
+rake benchmark   # benchmark encoding and decoding (5 runs after warmup)
 rake profile     # CPU profile with StackProf (requires the stackprof gem)
 ```
 
