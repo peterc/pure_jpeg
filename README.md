@@ -217,6 +217,46 @@ rake benchmark   # benchmark encoding and decoding (5 runs after warmup)
 rake profile     # CPU profile with StackProf (requires the stackprof gem)
 ```
 
+## Example scripts
+
+The `examples/` directory contains ready-to-run scripts. All accept JPEG or PNG input (PNG requires the `chunky_png` gem).
+
+**`png_to_jpeg.rb`** -- Convert a PNG to JPEG.
+
+```
+ruby examples/png_to_jpeg.rb [--grayscale] INPUT.png OUTPUT.jpg [quality]
+```
+
+**`jpeg_to_png.rb`** -- Convert a JPEG to PNG.
+
+```
+ruby examples/jpeg_to_png.rb INPUT.jpg OUTPUT.png
+```
+
+**`kodak.rb`** -- Apply the "scrambled quantization" effect that recreates the gritty look of early digicams like the Casio QV-10. See `CREATIVE.md` for more on this.
+
+```
+ruby examples/kodak.rb INPUT.(jpg|png) [OUTPUT.jpg] [quality]
+```
+
+**`lumacrush.rb`** -- Crush luminance while preserving chrominance. Produces a soft, oil-painting quality where detail is blocky but colors remain accurate.
+
+```
+ruby examples/lumacrush.rb INPUT.(jpg|png) [OUTPUT.jpg] [luma_quality] [chroma_quality]
+```
+
+**`chromacrush.rb`** -- The opposite: sharp detail with collapsed, blocky color patches.
+
+```
+ruby examples/chromacrush.rb INPUT.(jpg|png) [OUTPUT.jpg] [luma_quality] [chroma_quality]
+```
+
+**`loopy.rb`** -- Re-encode a JPEG through multiple passes to see how artifacts accumulate.
+
+```
+ruby examples/loopy.rb INPUT.jpg [quality] [iterations]
+```
+
 ## AI Disclosure
 
 **Claude Code did the majority of the work.** The math of JPEG encoding/decoding is beyond me, except 'getting it' at a high level. I understand it like I understand the engine in my car :-) *Later update: OpenAI Codex is also reviewing and adding features now. It feels stronger in many areas.*
