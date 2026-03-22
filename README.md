@@ -236,6 +236,7 @@ rake profile     # CPU profile with StackProf (requires the stackprof gem)
 ## Credits
 
 - [Ufuk Kayserilioglu](https://github.com/paracycle) - Major performance optimizations including integer-scaled AAN DCT, fixed-point color space conversion, and YJIT-targeted improvements.
+- [Keith R. Bennett](https://github.com/keithrbennett) - Coverage testing and adding SimpleCov to the project.
 
 ## License
 
