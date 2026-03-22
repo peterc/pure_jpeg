@@ -172,6 +172,59 @@ class TestDecode < Minitest::Test
     assert_valid_pixel(image2[512, 512])
   end
 
+  def test_image_pixel_setter
+    source = gradient_source(16, 16)
+    data = PureJPEG.encode(source, quality: 95).to_bytes
+    image = PureJPEG.read(data)
+
+    new_pixel = PureJPEG::Source::Pixel.new(42, 100, 200)
+    image[5, 5] = new_pixel
+
+    result = image[5, 5]
+    assert_equal 42, result.r
+    assert_equal 100, result.g
+    assert_equal 200, result.b
+  end
+
+  def test_chunky_png_source_with_fake_image
+    # Quack like ChunkyPNG::Image without requiring the gem
+    fake_image = Struct.new(:width, :height, :pixels).new(
+      2, 2,
+      [
+        (255 << 24) | (0 << 16) | (0 << 8) | 255,   # red
+        (0 << 24) | (255 << 16) | (0 << 8) | 255,   # green
+        (0 << 24) | (0 << 16) | (255 << 8) | 255,   # blue
+        (128 << 24) | (128 << 16) | (128 << 8) | 255 # gray
+      ]
+    )
+
+    source = PureJPEG::Source::ChunkyPNGSource.new(fake_image)
+    assert_equal 2, source.width
+    assert_equal 2, source.height
+
+    pixel = source[0, 0]
+    assert_equal 255, pixel.r
+    assert_equal 0, pixel.g
+    assert_equal 0, pixel.b
+
+    pixel = source[1, 0]
+    assert_equal 0, pixel.r
+    assert_equal 255, pixel.g
+    assert_equal 0, pixel.b
+  end
+
+  def test_from_chunky_png_convenience_method
+    fake_image = Struct.new(:width, :height, :pixels).new(
+      8, 8,
+      Array.new(64) { (128 << 24) | (128 << 16) | (128 << 8) | 255 }
+    )
+
+    encoder = PureJPEG.from_chunky_png(fake_image, quality: 75)
+    data = encoder.to_bytes
+    assert data.start_with?("\xFF\xD8".b)
+    assert data.end_with?("\xFF\xD9".b)
+  end
+
   # --- Malformed input tests ---
 
   def test_garbage_data_raises_decode_error

@@ -63,6 +63,33 @@ class TestEncode < Minitest::Test
     assert_equal standard_image.packed_pixels, optimized_image.packed_pixels
   end
 
+  def test_invalid_luminance_table_raises_argument_error
+    source = gradient_source(8, 8)
+
+    # Wrong length
+    assert_raises(ArgumentError) do
+      PureJPEG.encode(source, luminance_table: Array.new(32, 10))
+    end
+
+    # Value out of range
+    assert_raises(ArgumentError) do
+      PureJPEG.encode(source, luminance_table: Array.new(64, 0))
+    end
+
+    # Not an array
+    assert_raises(ArgumentError) do
+      PureJPEG.encode(source, luminance_table: "not a table")
+    end
+  end
+
+  def test_invalid_chrominance_table_raises_argument_error
+    source = gradient_source(8, 8)
+
+    assert_raises(ArgumentError) do
+      PureJPEG.encode(source, chrominance_table: Array.new(64, 256))
+    end
+  end
+
   def test_optimized_huffman_can_reduce_grayscale_output_size
     source = PureJPEG::Source::RawSource.new(128, 128) do |x, y|
       value = (((Math.sin(x * 0.12) + Math.cos(y * 0.08) + 2) / 4) * 255).round
