@@ -31,7 +31,7 @@ class TestIntegration < Minitest::Test
   end
 
   def test_decode_jpeg_and_read_pixels
-    path = File.expand_path("../examples/a.jpg", __dir__)
+    path = fixture_path("a.jpg")
     image = PureJPEG.read(path)
 
     assert_equal 1024, image.width
@@ -45,7 +45,7 @@ class TestIntegration < Minitest::Test
   end
 
   def test_decode_progressive_jpeg
-    path = File.expand_path("../examples/a-progressive.jpg", __dir__)
+    path = fixture_path("a-progressive.jpg")
     image = PureJPEG.read(path)
 
     assert_equal 1024, image.width
@@ -54,7 +54,7 @@ class TestIntegration < Minitest::Test
   end
 
   def test_decode_from_bytes
-    path = File.expand_path("../examples/a.jpg", __dir__)
+    path = fixture_path("a.jpg")
     bytes = File.binread(path)
     image = PureJPEG.read(bytes)
 
@@ -94,7 +94,7 @@ class TestIntegration < Minitest::Test
   end
 
   def test_decode_and_re_encode_at_lower_quality
-    path = File.expand_path("../examples/a.jpg", __dir__)
+    path = fixture_path("a.jpg")
     original = PureJPEG.read(path)
 
     smaller = PureJPEG.encode(original, quality: 30).to_bytes

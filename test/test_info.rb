@@ -18,7 +18,7 @@ class TestInfo < Minitest::Test
   end
 
   def test_info_from_progressive_file
-    path = File.expand_path("../examples/a-progressive.jpg", __dir__)
+    path = fixture_path("a-progressive.jpg")
 
     info = PureJPEG.info(path)
 

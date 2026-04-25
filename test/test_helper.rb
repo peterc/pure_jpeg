@@ -11,6 +11,10 @@ require "minitest/autorun"
 require_relative "../lib/pure_jpeg"
 
 module TestHelper
+  def fixture_path(filename)
+    File.expand_path("fixtures/#{filename}", __dir__)
+  end
+
   def gradient_source(width = 64, height = 64)
     PureJPEG::Source::RawSource.new(width, height) do |x, y|
       r = width > 1 ? ((x / (width - 1).to_f) * 255).round : 128

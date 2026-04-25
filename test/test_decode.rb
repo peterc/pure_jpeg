@@ -105,7 +105,7 @@ class TestDecode < Minitest::Test
   end
 
   def test_decode_external_jpeg
-    path = File.expand_path("../examples/a.jpg", __dir__)
+    path = fixture_path("a.jpg")
     image = PureJPEG.read(path)
 
     assert_equal 1024, image.width
@@ -130,7 +130,7 @@ class TestDecode < Minitest::Test
   end
 
   def test_re_encode_external_jpeg
-    path = File.expand_path("../examples/a.jpg", __dir__)
+    path = fixture_path("a.jpg")
     image = PureJPEG.read(path)
 
     re_encoded = PureJPEG.encode(image, quality: 75).to_bytes
@@ -147,7 +147,7 @@ class TestDecode < Minitest::Test
   # --- Progressive JPEG tests ---
 
   def test_decode_progressive_jpeg
-    path = File.expand_path("../examples/a-progressive.jpg", __dir__)
+    path = fixture_path("a-progressive.jpg")
     image = PureJPEG.read(path)
 
     assert_equal 1024, image.width
@@ -159,7 +159,7 @@ class TestDecode < Minitest::Test
   end
 
   def test_re_encode_progressive_jpeg
-    path = File.expand_path("../examples/a-progressive.jpg", __dir__)
+    path = fixture_path("a-progressive.jpg")
     image = PureJPEG.read(path)
 
     re_encoded = PureJPEG.encode(image, quality: 75).to_bytes
@@ -359,7 +359,66 @@ class TestDecode < Minitest::Test
     assert_match(/missing AC Huffman table 2/, error.message)
   end
 
+  def test_decode_fixture_with_444_chroma_sampling
+    data = File.binread(fixture_path("subsampling_444.jpg"))
+
+    assert_equal [[1, 1, 1, 0], [2, 1, 1, 1], [3, 1, 1, 1]], sof0_components(data)
+
+    image = PureJPEG.read(data)
+    assert_equal 31, image.width
+    assert_equal 23, image.height
+    assert_fixture_colors(image)
+  end
+
+  def test_decode_fixture_with_422_chroma_sampling
+    data = File.binread(fixture_path("subsampling_422.jpg"))
+
+    assert_equal [[1, 2, 1, 0], [2, 1, 1, 1], [3, 1, 1, 1]], sof0_components(data)
+
+    image = PureJPEG.read(data)
+    assert_equal 31, image.width
+    assert_equal 23, image.height
+    assert_fixture_colors(image)
+  end
+
+  def test_decode_fixture_with_420_chroma_sampling
+    data = File.binread(fixture_path("subsampling_420.jpg"))
+
+    assert_equal [[1, 2, 2, 0], [2, 1, 1, 1], [3, 1, 1, 1]], sof0_components(data)
+
+    image = PureJPEG.read(data)
+    assert_equal 31, image.width
+    assert_equal 23, image.height
+    assert_fixture_colors(image)
+  end
+
   private
+
+  def sof0_components(data)
+    sof_pos = data.index("\xFF\xC0".b)
+    refute_nil sof_pos, "Should find SOF0 marker"
+
+    num_components = data.getbyte(sof_pos + 9)
+    Array.new(num_components) do |i|
+      offset = sof_pos + 10 + (i * 3)
+      sampling = data.getbyte(offset + 1)
+      [data.getbyte(offset), sampling >> 4, sampling & 0x0F, data.getbyte(offset + 2)]
+    end
+  end
+
+  def assert_fixture_colors(image)
+    assert_rgb_near image[3, 3], 255, 0, 0
+    assert_rgb_near image[27, 3], 0, 255, 0
+    assert_rgb_near image[3, 19], 0, 0, 255
+    assert_rgb_near image[27, 19], 255, 255, 0
+    assert_rgb_near image[15, 11], 0, 255, 255
+  end
+
+  def assert_rgb_near(pixel, r, g, b)
+    assert_in_delta r, pixel.r, 12
+    assert_in_delta g, pixel.g, 12
+    assert_in_delta b, pixel.b, 12
+  end
 
   def reorder_sof_components(data, *order)
     bytes = data.dup
