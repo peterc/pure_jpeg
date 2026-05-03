@@ -101,10 +101,9 @@ module PureJPEG
     ICC_PROFILE_SIG = "ICC_PROFILE\0".b
 
     def parse_app2
-      length = read_u16
-      end_pos = @pos + length - 2
+      end_pos = read_segment_end
 
-      if length >= 16 && @data[@pos, 12] == ICC_PROFILE_SIG
+      if (end_pos - @pos) >= 14 && @data[@pos, 12] == ICC_PROFILE_SIG
         @pos += 12
         seq_no = read_byte
         _total = read_byte
@@ -121,18 +120,18 @@ module PureJPEG
     end
 
     def skip_segment
-      length = read_u16
-      @pos += length - 2
+      @pos = read_segment_end
     end
 
     def parse_dqt
-      length = read_u16
-      end_pos = @pos + length - 2
+      end_pos = read_segment_end
 
       while @pos < end_pos
         info = read_byte
         precision = (info >> 4) & 0x0F  # 0 = 8-bit, 1 = 16-bit
         table_id = info & 0x0F
+        bytes_per_value = precision == 0 ? 1 : 2
+        ensure_remaining_in_segment!(end_pos, 64 * bytes_per_value, "DQT")
 
         zigzag_table = Array.new(64)
         64.times do |i|
@@ -146,16 +145,17 @@ module PureJPEG
     end
 
     def parse_dht
-      length = read_u16
-      end_pos = @pos + length - 2
+      end_pos = read_segment_end
 
       while @pos < end_pos
+        ensure_remaining_in_segment!(end_pos, 17, "DHT")
         info = read_byte
         table_class = (info >> 4) & 0x0F  # 0 = DC, 1 = AC
         table_id = info & 0x0F
 
         bits = Array.new(16) { read_byte }
         total = bits.sum
+        ensure_remaining_in_segment!(end_pos, total, "DHT")
         values = Array.new(total) { read_byte }
 
         @huffman_tables[[table_class, table_id]] = { bits: bits, values: values }
@@ -163,11 +163,13 @@ module PureJPEG
     end
 
     def parse_sof0
-      read_u16 # length
+      end_pos = read_segment_end
+      ensure_remaining_in_segment!(end_pos, 6, "SOF")
       read_byte # precision (always 8 for baseline)
       @height = read_u16
       @width = read_u16
       num_components = read_byte
+      ensure_remaining_in_segment!(end_pos, num_components * 3, "SOF")
 
       @components = Array.new(num_components) do
         id = read_byte
@@ -177,11 +179,14 @@ module PureJPEG
         qt_id = read_byte
         Component.new(id, h, v, qt_id)
       end
+      @pos = end_pos
     end
 
     def parse_sos
-      read_u16 # length
+      end_pos = read_segment_end
+      ensure_remaining_in_segment!(end_pos, 1, "SOS")
       num_components = read_byte
+      ensure_remaining_in_segment!(end_pos, num_components * 2 + 3, "SOS")
 
       components = Array.new(num_components) do
         id = read_byte
@@ -196,12 +201,33 @@ module PureJPEG
       ahl = read_byte # successive approximation
       ah = (ahl >> 4) & 0x0F
       al = ahl & 0x0F
+      @pos = end_pos
       Scan.new(components, ss, se, ah, al, nil)
     end
 
     def parse_dri
-      read_u16 # length
+      end_pos = read_segment_end
+      ensure_remaining_in_segment!(end_pos, 2, "DRI")
       @restart_interval = read_u16
+      @pos = end_pos
+    end
+
+    def read_segment_end
+      length = read_u16
+      raise PureJPEG::DecodeError, "Invalid JPEG segment length: #{length}" if length < 2
+
+      end_pos = @pos + length - 2
+      if end_pos > @data.bytesize
+        raise PureJPEG::DecodeError, "JPEG segment length exceeds available data"
+      end
+
+      end_pos
+    end
+
+    def ensure_remaining_in_segment!(end_pos, byte_count, segment_name)
+      return if @pos + byte_count <= end_pos
+
+      raise PureJPEG::DecodeError, "Truncated #{segment_name} segment"
     end
 
     # Extract entropy-coded scan data (everything from current position to EOI marker).

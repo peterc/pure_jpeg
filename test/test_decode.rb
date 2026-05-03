@@ -267,6 +267,38 @@ class TestDecode < Minitest::Test
     assert_raises(PureJPEG::DecodeError) { PureJPEG.read("".b) }
   end
 
+  def test_segment_length_smaller_than_length_field_raises_decode_error
+    data = "\xFF\xD8\xFF\xE0\x00\x01\xFF\xD9".b
+
+    error = assert_raises(PureJPEG::DecodeError) { PureJPEG.read(data) }
+    assert_equal "Invalid JPEG segment length: 1", error.message
+  end
+
+  def test_segment_length_beyond_file_raises_decode_error
+    data = "\xFF\xD8\xFF\xE0\x00\x10abc".b
+
+    error = assert_raises(PureJPEG::DecodeError) { PureJPEG.read(data) }
+    assert_equal "JPEG segment length exceeds available data", error.message
+  end
+
+  def test_truncated_dqt_segment_raises_decode_error
+    source = gradient_source(8, 8)
+    data = PureJPEG.encode(source, quality: 85).to_bytes
+    patched = patch_segment_length(data, "\xFF\xDB".b, 6)
+
+    error = assert_raises(PureJPEG::DecodeError) { PureJPEG.read(patched) }
+    assert_equal "Truncated DQT segment", error.message
+  end
+
+  def test_truncated_sof_segment_raises_decode_error
+    source = gradient_source(8, 8)
+    data = PureJPEG.encode(source, quality: 85).to_bytes
+    patched = patch_segment_length(data, "\xFF\xC0".b, 8)
+
+    error = assert_raises(PureJPEG::DecodeError) { PureJPEG.read(patched) }
+    assert_equal "Truncated SOF segment", error.message
+  end
+
   # --- 16-bit quantization table test ---
 
   def test_decode_16bit_quantization_table
@@ -475,6 +507,14 @@ class TestDecode < Minitest::Test
 
     table_selector_pos = sos_pos + 6
     bytes.setbyte(table_selector_pos, (dc_id << 4) | ac_id)
+    bytes
+  end
+
+  def patch_segment_length(data, marker, length)
+    bytes = data.dup
+    marker_pos = bytes.index(marker)
+    refute_nil marker_pos, "Should find marker #{marker.inspect}"
+    bytes[marker_pos + 2, 2] = [length].pack("n")
     bytes
   end
 
