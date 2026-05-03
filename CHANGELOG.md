@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.3
+
+New features:
+
+- `PureJPEG.from_chunky_png` accepts `background: [r, g, b]` to composite transparent PNG pixels before JPEG encoding
+
+Fixes:
+
+- Invalid `quality` and `chroma_quality` values now raise clear `ArgumentError`s
+- `Image#[]` and `Image#[]=` now raise `IndexError` for out-of-bounds coordinates
+- Hardened JFIF segment length validation for malformed JPEG input
+
 ## 0.3.2
 
 Performance:

@@ -50,10 +50,12 @@ module PureJPEG
   # and passes it to {.encode}.
   #
   # @param image [ChunkyPNG::Image] the source image
+  # @param background [Array<Integer>, nil] optional [r, g, b] background
+  #   color to composite transparent pixels against before encoding
   # @param opts [Hash] encoding options passed to {Encoder#initialize}
   # @return [Encoder]
-  def self.from_chunky_png(image, **opts)
-    source = Source::ChunkyPNGSource.new(image)
+  def self.from_chunky_png(image, background: nil, **opts)
+    source = Source::ChunkyPNGSource.new(image, background: background)
     Encoder.new(source, **opts)
   end
 

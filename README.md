@@ -39,6 +39,13 @@ image = ChunkyPNG::Image.from_file("photo.png")
 PureJPEG.from_chunky_png(image, quality: 80).write("photo.jpg")
 ```
 
+If you want transparent pixels composited against a solid color instead of
+using the PNG's hidden RGB values, pass an RGB background:
+
+```ruby
+PureJPEG.from_chunky_png(image, background: [255, 255, 255], quality: 80).write("photo.jpg")
+```
+
 ### From any pixel source
 
 PureJPEG accepts any object that responds to `width`, `height`, and `[x, y]` (returning an object with `.r`, `.g`, `.b` in 0-255):
@@ -99,7 +106,7 @@ Here's a quick example of sort of the "old digital camera" effect I was looking 
 </tr>
 </table>
 
-And here's what happens when you convert a PNG with transparency — JPEG doesn't support alpha, so the hidden RGB data behind transparent pixels bleeds through:
+And here's what happens when you convert a PNG with transparency without a `background:` — JPEG doesn't support alpha, so the hidden RGB data behind transparent pixels bleeds through:
 
 <table>
 <tr>
@@ -112,7 +119,7 @@ And here's what happens when you convert a PNG with transparency — JPEG doesn'
 </tr>
 </table>
 
-I consider this a feature but you may consider it a deficiency and that a default background of white should be applied. This may be something I'll add if anyone wants it!
+Pass `background: [255, 255, 255]` to composite transparent pixels over white, or any other `[r, g, b]` color you prefer.
 
 Note that each stage of the JPEG pipeline is a separate module, so individual components (DCT, quantization, Huffman coding) can be replaced or extended independently which is kinda my plan here as I made this to play around with effects.
 

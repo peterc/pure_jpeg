@@ -232,6 +232,34 @@ class TestDecode < Minitest::Test
     assert_equal 0, pixel.b
   end
 
+  def test_chunky_png_source_can_composite_transparency_against_background
+    fake_image = Struct.new(:width, :height, :pixels).new(
+      3, 1,
+      [
+        (255 << 24) | (0 << 16) | (0 << 8) | 255,
+        (255 << 24) | (0 << 16) | (0 << 8) | 128,
+        (255 << 24) | (0 << 16) | (0 << 8) | 0
+      ]
+    )
+
+    source = PureJPEG::Source::ChunkyPNGSource.new(fake_image, background: [0, 0, 255])
+
+    assert_equal [255, 0, 0], rgb(source[0, 0])
+    assert_equal [128, 0, 127], rgb(source[1, 0])
+    assert_equal [0, 0, 255], rgb(source[2, 0])
+  end
+
+  def test_chunky_png_source_rejects_invalid_background
+    fake_image = Struct.new(:width, :height, :pixels).new(1, 1, [0])
+
+    [false, "white", [255, 255], [255, 255, 256], [255, 255, 1.5]].each do |background|
+      error = assert_raises(ArgumentError) do
+        PureJPEG::Source::ChunkyPNGSource.new(fake_image, background: background)
+      end
+      assert_equal "background must be an [r, g, b] array of integers between 0 and 255", error.message
+    end
+  end
+
   def test_from_chunky_png_convenience_method
     fake_image = Struct.new(:width, :height, :pixels).new(
       8, 8,
@@ -242,6 +270,18 @@ class TestDecode < Minitest::Test
     data = encoder.to_bytes
     assert data.start_with?("\xFF\xD8".b)
     assert data.end_with?("\xFF\xD9".b)
+  end
+
+  def test_from_chunky_png_accepts_background
+    fake_image = Struct.new(:width, :height, :pixels).new(
+      8, 8,
+      Array.new(64) { (0 << 24) | (0 << 16) | (0 << 8) | 0 }
+    )
+
+    encoder = PureJPEG.from_chunky_png(fake_image, background: [255, 255, 255], quality: 95)
+    image = PureJPEG.read(encoder.to_bytes)
+
+    assert_rgb_near image[0, 0], 255, 255, 255
   end
 
   # --- Malformed input tests ---
@@ -469,6 +509,10 @@ class TestDecode < Minitest::Test
     assert_in_delta r, pixel.r, 12
     assert_in_delta g, pixel.g, 12
     assert_in_delta b, pixel.b, 12
+  end
+
+  def rgb(pixel)
+    [pixel.r, pixel.g, pixel.b]
   end
 
   def reorder_sof_components(data, *order)
