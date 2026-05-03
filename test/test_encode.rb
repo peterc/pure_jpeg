@@ -45,6 +45,28 @@ class TestEncode < Minitest::Test
     assert high.bytesize > low.bytesize, "Higher quality should produce larger output"
   end
 
+  def test_invalid_quality_raises_argument_error
+    source = gradient_source(8, 8)
+
+    [0, 101, "85", nil].each do |quality|
+      error = assert_raises(ArgumentError) do
+        PureJPEG.encode(source, quality: quality)
+      end
+      assert_equal "quality must be an integer between 1 and 100", error.message
+    end
+  end
+
+  def test_invalid_chroma_quality_raises_argument_error
+    source = gradient_source(8, 8)
+
+    [0, 101, "85"].each do |chroma_quality|
+      error = assert_raises(ArgumentError) do
+        PureJPEG.encode(source, chroma_quality: chroma_quality)
+      end
+      assert_equal "chroma_quality must be an integer between 1 and 100", error.message
+    end
+  end
+
   def test_optimized_huffman_can_reduce_color_output_size
     source = PureJPEG::Source::RawSource.new(128, 128) do |x, y|
       r = ((Math.sin(x * 0.1) + 1) * 127).round

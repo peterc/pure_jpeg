@@ -42,6 +42,9 @@ module PureJPEG
                    luminance_table: nil, chrominance_table: nil,
                    quantization_modifier: nil, scramble_quantization: false,
                    optimize_huffman: false)
+      validate_quality!(quality, "quality")
+      validate_quality!(chroma_quality, "chroma_quality") if chroma_quality
+
       @source = source
       @quality = quality
       @grayscale = grayscale
@@ -90,6 +93,12 @@ module PureJPEG
       modified = @quantization_modifier.call(table, channel)
       validate_qtable!(modified, "quantization_modifier result for #{channel}")
       modified
+    end
+
+    def validate_quality!(value, name)
+      unless value.is_a?(Integer) && value.between?(1, 100)
+        raise ArgumentError, "#{name} must be an integer between 1 and 100"
+      end
     end
 
     def validate_qtable!(table, name)

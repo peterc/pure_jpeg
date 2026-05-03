@@ -38,6 +38,7 @@ module PureJPEG
     # @param y [Integer] row (0-based)
     # @return [Source::Pixel] pixel with +.r+, +.g+, +.b+ in 0-255
     def [](x, y)
+      validate_coordinates!(x, y)
       color = @packed_pixels[y * @width + x]
       Source::Pixel.new((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF)
     end
@@ -49,6 +50,7 @@ module PureJPEG
     # @param pixel [Source::Pixel] replacement pixel
     # @return [Source::Pixel]
     def []=(x, y, pixel)
+      validate_coordinates!(x, y)
       @packed_pixels[y * @width + x] = (pixel.r << 16) | (pixel.g << 8) | pixel.b
       pixel
     end
@@ -83,6 +85,14 @@ module PureJPEG
           yield x, y, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF
           i += 1
         end
+      end
+    end
+
+    private
+
+    def validate_coordinates!(x, y)
+      unless x.is_a?(Integer) && y.is_a?(Integer) && x >= 0 && y >= 0 && x < @width && y < @height
+        raise IndexError, "Pixel coordinate out of bounds: #{x.inspect}, #{y.inspect}"
       end
     end
   end

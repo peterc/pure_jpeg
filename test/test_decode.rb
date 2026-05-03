@@ -186,6 +186,25 @@ class TestDecode < Minitest::Test
     assert_equal 200, result.b
   end
 
+  def test_image_pixel_getter_rejects_out_of_bounds_coordinates
+    image = PureJPEG::Image.new(2, 2, [0x112233, 0x445566, 0x778899, 0xaabbcc])
+
+    [[-1, 0], [0, -1], [2, 0], [0, 2], [1.5, 0], [0, "1"]].each do |x, y|
+      error = assert_raises(IndexError) { image[x, y] }
+      assert_equal "Pixel coordinate out of bounds: #{x.inspect}, #{y.inspect}", error.message
+    end
+  end
+
+  def test_image_pixel_setter_rejects_out_of_bounds_coordinates
+    image = PureJPEG::Image.new(2, 2, [0x112233, 0x445566, 0x778899, 0xaabbcc])
+    pixel = PureJPEG::Source::Pixel.new(1, 2, 3)
+
+    [[-1, 0], [0, -1], [2, 0], [0, 2], [1.5, 0], [0, "1"]].each do |x, y|
+      error = assert_raises(IndexError) { image[x, y] = pixel }
+      assert_equal "Pixel coordinate out of bounds: #{x.inspect}, #{y.inspect}", error.message
+    end
+  end
+
   def test_chunky_png_source_with_fake_image
     # Quack like ChunkyPNG::Image without requiring the gem
     fake_image = Struct.new(:width, :height, :pixels).new(
