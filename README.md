@@ -208,15 +208,6 @@ On a 1024x1024 image (Apple M5, 5 runs after warmup):
 
 The encoder and decoder use an integer-scaled AAN (Arai-Agui-Nakajima) DCT with fixed-point arithmetic throughout — no Float operations in the hot path. Color space conversion uses fixed-point integer math, and pixel data is stored as packed integers to avoid per-pixel object allocation. TruffleRuby's Graal JIT compiler can optimize these tight integer loops particularly well, resulting in 2-3x faster performance once warmed up.
 
-## Some useful `rake` tasks
-
-```
-bundle install
-rake test        # run the test suite
-rake benchmark   # benchmark encoding and decoding (5 runs after warmup)
-rake profile     # CPU profile with StackProf (requires the stackprof gem)
-```
-
 ## Example scripts
 
 The `examples/` directory contains ready-to-run scripts. All accept JPEG or PNG input (PNG requires the `chunky_png` gem).
@@ -255,6 +246,27 @@ ruby examples/chromacrush.rb INPUT.(jpg|png) [OUTPUT.jpg] [luma_quality] [chroma
 
 ```
 ruby examples/loopy.rb INPUT.jpg [quality] [iterations]
+```
+
+## Some useful `rake` tasks
+
+```
+bundle install
+rake test        # run the test suite
+rake benchmark   # basic benchmark of encoding and decoding (5 runs after warmup)
+rake profile     # CPU profile with StackProf (requires the stackprof gem)
+```
+
+## Full benchmark script
+
+`benchmark/run.rb` is a more thorough benchmark that exercises the encode and decode paths in several ways. It auto-enables YJIT, warms up before measuring, and reports object allocations, throughput (iterations/second via `benchmark-ips`), best-of-N wall-clock times, and a sustained mixed workload across encode (q85, q95 optimized, grayscale) and decode (baseline and progressive).
+
+```
+ruby benchmark/run.rb                  # standard run
+ruby benchmark/run.rb --quick          # single-shot wall-clock + allocations
+ruby benchmark/run.rb --full           # longer run, includes YJIT runtime stats
+ruby benchmark/run.rb --profile        # CPU profile with Vernier (writes JSON to /tmp)
+ruby benchmark/run.rb --profile-alloc  # retained-object profile with Vernier
 ```
 
 ## AI Disclosure
