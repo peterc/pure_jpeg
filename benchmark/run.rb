@@ -14,12 +14,14 @@
 
 require "bundler/inline"
 
+profile_mode = ARGV.include?("--profile") || ARGV.include?("--profile-alloc")
+
 gemfile(true, quiet: true) do
   source "https://rubygems.org"
   gem "benchmark"
   gem "benchmark-ips"
   gem "chunky_png", "~> 1.4"
-  gem "vernier"
+  gem "vernier" if profile_mode
 end
 
 require_relative "../lib/pure_jpeg"
@@ -143,8 +145,15 @@ def measure_allocations
   before = GC.stat(:total_allocated_objects)
   yield
   after = GC.stat(:total_allocated_objects)
-  GC.enable
   after - before
+rescue ArgumentError, NotImplementedError
+  nil
+ensure
+  GC.enable
+end
+
+def format_allocations(count)
+  count.nil? ? "N/A" : "#{count} objects"
 end
 
 def wall_clock_samples(samples)
@@ -168,9 +177,9 @@ if mode == :quick
   puts
 
   puts "=== Quick Object Allocations ==="
-  puts "Encode q85:        #{measure_allocations { PureJPEG.encode(source, quality: 85).to_bytes }} objects"
-  puts "Decode baseline:   #{measure_allocations { PureJPEG.read(jpeg_bytes) }} objects"
-  puts "Decode progressive: #{measure_allocations { PureJPEG.read(prog_bytes) }} objects" if prog_bytes
+  puts "Encode q85:        #{format_allocations(measure_allocations { PureJPEG.encode(source, quality: 85).to_bytes })}"
+  puts "Decode baseline:   #{format_allocations(measure_allocations { PureJPEG.read(jpeg_bytes) })}"
+  puts "Decode progressive: #{format_allocations(measure_allocations { PureJPEG.read(prog_bytes) })}" if prog_bytes
   puts
   puts "Done."
   exit
@@ -178,17 +187,17 @@ end
 
 puts "=== Object Allocations ==="
 encode_allocs = measure_allocations { PureJPEG.encode(source, quality: 85).to_bytes }
-puts "Encode (1024x1024):             #{encode_allocs} objects"
+puts "Encode (1024x1024):             #{format_allocations(encode_allocs)}"
 
 encode_opt_allocs = measure_allocations { PureJPEG.encode(source, quality: 95, optimize_huffman: true).to_bytes }
-puts "Encode optimized (1024x1024):   #{encode_opt_allocs} objects"
+puts "Encode optimized (1024x1024):   #{format_allocations(encode_opt_allocs)}"
 
 decode_allocs = measure_allocations { PureJPEG.read(jpeg_bytes) }
-puts "Decode baseline (1024x1024):    #{decode_allocs} objects"
+puts "Decode baseline (1024x1024):    #{format_allocations(decode_allocs)}"
 
 if prog_bytes
   prog_allocs = measure_allocations { PureJPEG.read(prog_bytes) }
-  puts "Decode progressive (1024x1024): #{prog_allocs} objects"
+  puts "Decode progressive (1024x1024): #{format_allocations(prog_allocs)}"
 end
 puts
 
