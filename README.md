@@ -23,6 +23,15 @@ gem "pure_jpeg"
 gem install pure_jpeg
 ```
 
+> [!NOTE]
+> Using [Spinel](https://github.com/matz/spinel)? Add PureJPEG from your Spin project directory:
+>
+> ```sh
+> spin add pure_jpeg --git https://github.com/peterc/pure_jpeg
+> ```
+>
+> Then use `require "pure_jpeg"` in your code as usual.
+
 There are no runtime dependencies. [ChunkyPNG](https://github.com/wvanbergen/chunky_png) is optional (though quite useful) if you want to use `from_chunky_png`.
 
 `examples/` contains some useful example scripts for basic JPEG to PNG and PNG to JPEG conversion if you want to do some quick tests without writing code.
