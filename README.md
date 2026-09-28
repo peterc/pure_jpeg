@@ -205,15 +205,17 @@ Possible future improvements: ICC profile rendering/conversion.
 
 ## Performance
 
-On a 1024x1024 image (Apple M5, 5 runs after warmup):
+On the bundled 1024x1024 images (Apple M5, median of 15 runs after 20 seconds of warmup per operation):
 
-| Operation | CRuby 4.0.2 (YJIT) | TruffleRuby 33.0.1 |
-|-----------|---------------------|---------------------|
-| Encode (color, q85) | ~0.16s | ~0.08s |
-| Decode (baseline) | ~0.14s | ~0.05s |
-| Decode (progressive) | ~0.18s | ~0.09s |
+| Operation | CRuby 4.0.2 (YJIT) | TruffleRuby 34.0.1 | JRuby 9.4.14.0 |
+|-----------|-------------------|-------------------|---------------|
+| Encode (color, q85) | ~0.131s | ~0.088s | ~0.577s |
+| Decode (baseline) | ~0.112s | ~0.027s | ~0.554s |
+| Decode (progressive) | ~0.140s | ~0.037s | ~0.617s |
 
-The encoder and decoder use an integer-scaled AAN (Arai-Agui-Nakajima) DCT with fixed-point arithmetic throughout — no Float operations in the hot path. Color space conversion uses fixed-point integer math, and pixel data is stored as packed integers to avoid per-pixel object allocation. TruffleRuby's Graal JIT compiler can optimize these tight integer loops particularly well, resulting in 2-3x faster performance once warmed up.
+Inputs were loaded before timing, and encoded output was returned in memory; file I/O and PNG loading are excluded. Runtimes were benchmarked sequentially. JRuby used its default JIT on OpenJDK 21.0.10. Results vary with image content, garbage collection, and JIT warmup.
+
+The encoder and decoder use an integer-scaled AAN (Arai-Agui-Nakajima) DCT with fixed-point arithmetic throughout — no Float operations in the hot path. Color space conversion uses fixed-point integer math, and pixel data is stored as packed integers to avoid per-pixel object allocation. TruffleRuby's Graal JIT compiler can optimize these tight integer loops particularly well once warmed up.
 
 ## Example scripts
 
