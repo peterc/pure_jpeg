@@ -312,7 +312,7 @@ module PureJPEG
     end
 
     def prog_dc_first(reader, dc_tab, prev_dc, coeff_buf, offset, al)
-      cat = dc_tab.decode(reader)
+      cat = dc_tab.decode_symbol(reader)
       diff = reader.receive_extend(cat)
       dc_val = prev_dc + diff
       coeff_buf[offset] = dc_val << al
@@ -328,7 +328,7 @@ module PureJPEG
 
       k = ss
       while k <= se
-        symbol = ac_tab.decode(reader)
+        symbol = ac_tab.decode_symbol(reader)
         run = (symbol >> 4) & 0x0F
         size = symbol & 0x0F
 
@@ -364,7 +364,7 @@ module PureJPEG
 
       k = ss
       while k <= se
-        symbol = ac_tab.decode(reader)
+        symbol = ac_tab.decode_symbol(reader)
         r = (symbol >> 4) & 0x0F
         s = symbol & 0x0F
 
@@ -417,7 +417,7 @@ module PureJPEG
 
     def decode_block(reader, dc_tab, ac_tab, prev_dc, comp_id, out)
       # DC coefficient
-      dc_cat = dc_tab.decode(reader)
+      dc_cat = dc_tab.decode_symbol(reader)
       dc_diff = reader.receive_extend(dc_cat)
       dc_val = prev_dc[comp_id] + dc_diff
       prev_dc[comp_id] = dc_val
@@ -426,7 +426,7 @@ module PureJPEG
       # AC coefficients
       i = 1
       while i < 64
-        symbol = ac_tab.decode(reader)
+        symbol = ac_tab.decode_symbol(reader)
         if symbol == 0x00 # EOB
           while i < 64
             out[i] = 0

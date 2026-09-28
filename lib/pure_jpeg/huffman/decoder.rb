@@ -25,7 +25,7 @@ module PureJPEG
       end
 
       # Decode one Huffman symbol from the bit reader.
-      def decode(reader)
+      def decode_symbol(reader)
         code = 0
         1.upto(16) do |len|
           code = (code << 1) | reader.read_bit

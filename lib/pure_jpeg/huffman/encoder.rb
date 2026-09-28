@@ -50,6 +50,7 @@ module PureJPEG
         end
 
         yield 0x00, 0 if last_nonzero < 63
+        nil
       end
 
       def self.each_ac_symbol(zigzag)
@@ -85,7 +86,7 @@ module PureJPEG
       end
 
       def encode_ac(zigzag, writer)
-        self.class.each_ac_item(zigzag) do |symbol, value|
+        PureJPEG::Huffman::Encoder.each_ac_item(zigzag) do |symbol, value|
           code, length = @ac_table[symbol]
           writer.write_bits(code, length)
           next if symbol == 0x00 || symbol == 0xF0
