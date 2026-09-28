@@ -58,5 +58,33 @@ module PureJPEG
       64.times { |i| out[i] = block[i] * table[i] }
       out
     end
+
+    # Quantize raster-order coefficients directly into zigzag order.
+    def self.quantize_zigzag!(block, table, out)
+      order = Zigzag::ORDER
+      i = 0
+      while i < 64
+        j = order[i]
+        v = block[j]; t = table[j]
+        out[i] = if v >= 0
+                   (v + (t >> 1)) / t
+                 else
+                   -((-v + (t >> 1)) / t)
+                 end
+        i += 1
+      end
+      out
+    end
+
+    # Dequantize zigzag coefficients directly into raster order. The offset
+    # allows progressive decoding to read from its full coefficient buffer.
+    def self.dequantize_zigzag!(block, table, out, offset = 0)
+      order = Zigzag::ORDER
+      64.times do |i|
+        j = order[i]
+        out[j] = block[offset + i] * table[j]
+      end
+      out
+    end
   end
 end

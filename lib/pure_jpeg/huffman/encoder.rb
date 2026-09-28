@@ -6,14 +6,7 @@ module PureJPEG
       # Return the Huffman category (bit length) for a value.
       # Avoids Array allocation compared to the combined category_and_bits.
       def self.category(value)
-        return 0 if value == 0
-        v = value.abs
-        cat = 0
-        while v > 0
-          cat += 1
-          v >>= 1
-        end
-        cat
+        value.abs.bit_length
       end
 
       # Return the extra bits to encode for a value with the given category.
@@ -91,7 +84,7 @@ module PureJPEG
           writer.write_bits(code, length)
           next if symbol == 0x00 || symbol == 0xF0
 
-          cat = self.class.category(value)
+          cat = symbol & 0x0F
           writer.write_bits(self.class.value_bits(value, cat), cat)
         end
       end

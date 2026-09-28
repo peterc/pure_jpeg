@@ -27,11 +27,13 @@ module PureJPEG
       # Decode one Huffman symbol from the bit reader.
       def decode_symbol(reader)
         code = 0
-        1.upto(16) do |len|
+        len = 1
+        while len <= 16
           code = (code << 1) | reader.read_bit
           if @max_code[len] >= 0 && code <= @max_code[len]
             return @values[@val_ptr[len] + code - @min_code[len]]
           end
+          len += 1
         end
         raise PureJPEG::DecodeError, "Invalid Huffman code"
       end

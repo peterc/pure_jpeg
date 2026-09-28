@@ -146,11 +146,9 @@ module PureJPEG
                              lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values)
       else
         chr_qtable = build_chr_qtable
-        y_data, cb_data, cr_data = extract_ycbcr(width, height)
+        y_data, cb_sub, cr_sub = extract_ycbcr420(width, height)
         sub_w = (width + 1) / 2
         sub_h = (height + 1) / 2
-        cb_sub = downsample(cb_data, width, height, sub_w, sub_h)
-        cr_sub = downsample(cr_data, width, height, sub_w, sub_h)
 
         lum_dc_bits, lum_dc_values, lum_ac_bits, lum_ac_values,
           chr_dc_bits, chr_dc_values, chr_ac_bits, chr_ac_values =
@@ -215,13 +213,12 @@ module PureJPEG
       padded_h = (height + 7) & ~7
 
       block = Array.new(64, 0)
-      qbuf  = Array.new(64, 0)
       zbuf  = Array.new(64, 0)
 
       (0...padded_h).step(8) do |by|
         (0...padded_w).step(8) do |bx|
           extract_block_into(y_data, width, height, bx, by, block)
-          yield transform_block(block, qbuf, zbuf, qtable)
+          yield transform_block(block, zbuf, qtable)
         end
       end
     end
@@ -285,28 +282,27 @@ module PureJPEG
       mcu_h = (height + 15) & ~15
 
       block = Array.new(64, 0)
-      qbuf  = Array.new(64, 0)
       zbuf  = Array.new(64, 0)
 
       (0...mcu_h).step(16) do |my|
         (0...mcu_w).step(16) do |mx|
           extract_block_into(y_data, width, height, mx, my, block)
-          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my, block)
-          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx, my + 8, block)
-          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(y_data, width, height, mx + 8, my + 8, block)
-          yield :y, transform_block(block, qbuf, zbuf, lum_qt)
+          yield :y, transform_block(block, zbuf, lum_qt)
 
           extract_block_into(cb_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          yield :cb, transform_block(block, qbuf, zbuf, chr_qt)
+          yield :cb, transform_block(block, zbuf, chr_qt)
 
           extract_block_into(cr_sub, sub_w, sub_h, mx >> 1, my >> 1, block)
-          yield :cr, transform_block(block, qbuf, zbuf, chr_qt)
+          yield :cr, transform_block(block, zbuf, chr_qt)
         end
       end
     end
@@ -331,10 +327,9 @@ module PureJPEG
 
     # --- Shared block pipeline (all buffers pre-allocated) ---
 
-    def transform_block(block, qbuf, zbuf, qtable)
+    def transform_block(block, zbuf, qtable)
       DCT.forward!(block)
-      Quantization.quantize!(block, qtable, qbuf)
-      Zigzag.reorder!(qbuf, zbuf)
+      Quantization.quantize_zigzag!(block, qtable, zbuf)
       zbuf
     end
 
@@ -392,61 +387,65 @@ module PureJPEG
       luminance
     end
 
-    def extract_ycbcr(width, height)
-      size = width * height
-      y_data  = Array.new(size)
-      cb_data = Array.new(size)
-      cr_data = Array.new(size)
+    # Convert RGB in raster order, downsampling chroma after every two rows.
+    # Keeping only two full-resolution chroma rows avoids two image-sized arrays.
+    def extract_ycbcr420(width, height)
+      y_data = Array.new(width * height)
+      sub_w = (width + 1) / 2
+      sub_h = (height + 1) / 2
+      cb_sub = Array.new(sub_w * sub_h)
+      cr_sub = Array.new(sub_w * sub_h)
+      cb_rows = Array.new(width * 2)
+      cr_rows = Array.new(width * 2)
 
       if source.respond_to?(:packed_pixels)
         packed = source.packed_pixels
         r_shift, g_shift, b_shift = packed_shifts
-        i = 0
-        size.times do
-          color = packed[i]
-          r = (color >> r_shift) & 0xFF
-          g = (color >> g_shift) & 0xFF
-          b = (color >> b_shift) & 0xFF
-          y_data[i]  = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
-          cb_data[i] = clamp255((FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16)
-          cr_data[i] = clamp255((FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16)
-          i += 1
-        end
-      else
-        height.times do |py|
-          row = py * width
+      end
+
+      height.times do |py|
+        row = py * width
+        chroma_row = (py & 1) * width
+        if packed
+          width.times do |px|
+            color = packed[row + px]
+            r = (color >> r_shift) & 0xFF
+            g = (color >> g_shift) & 0xFF
+            b = (color >> b_shift) & 0xFF
+            y_data[row + px] = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
+            cb_rows[chroma_row + px] = clamp255((FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16)
+            cr_rows[chroma_row + px] = clamp255((FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16)
+          end
+        else
           width.times do |px|
             pixel = source[px, py]
             r = pixel.r; g = pixel.g; b = pixel.b
-            i = row + px
-            y_data[i]  = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
-            cb_data[i] = clamp255((FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16)
-            cr_data[i] = clamp255((FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16)
+            y_data[row + px] = clamp255((FP_Y_R * r + FP_Y_G * g + FP_Y_B * b + FP_HALF) >> 16)
+            cb_rows[chroma_row + px] = clamp255((FP_CB_R * r + FP_CB_G * g + FP_CB_B * b + FP_128 + FP_HALF) >> 16)
+            cr_rows[chroma_row + px] = clamp255((FP_CR_R * r + FP_CR_G * g + FP_CR_B * b + FP_128 + FP_HALF) >> 16)
           end
         end
-      end
 
-      [y_data, cb_data, cr_data]
-    end
-
-    def downsample(data, src_w, src_h, dst_w, dst_h)
-      out = Array.new(dst_w * dst_h)
-      max_x = src_w - 1
-      max_y = src_h - 1
-      dst_h.times do |dy|
-        sy = dy << 1
-        y1 = sy < max_y ? sy + 1 : max_y
-        row0 = sy * src_w
-        row1 = y1 * src_w
-        dst_row = dy * dst_w
-        dst_w.times do |dx|
-          sx = dx << 1
-          x1 = sx < max_x ? sx + 1 : max_x
-          out[dst_row + dx] = ((data[row0 + sx] + data[row0 + x1] +
-                                data[row1 + sx] + data[row1 + x1]) >> 2)
+        if py.odd? || py == height - 1
+          # For odd image heights, use row zero twice at the bottom edge.
+          downsample_chroma_rows(cb_rows, cr_rows, width, chroma_row,
+                                 cb_sub, cr_sub, sub_w, (py >> 1) * sub_w)
         end
       end
-      out
+
+      [y_data, cb_sub, cr_sub]
+    end
+
+    def downsample_chroma_rows(cb_rows, cr_rows, width, row1, cb_sub, cr_sub, sub_w, dst_row)
+      max_x = width - 1
+      sub_w.times do |dx|
+        sx = dx << 1
+        x1 = sx < max_x ? sx + 1 : max_x
+        cb_sub[dst_row + dx] = (cb_rows[sx] + cb_rows[x1] +
+                                cb_rows[row1 + sx] + cb_rows[row1 + x1]) >> 2
+        cr_sub[dst_row + dx] = (cr_rows[sx] + cr_rows[x1] +
+                                cr_rows[row1 + sx] + cr_rows[row1 + x1]) >> 2
+      end
     end
 
     # Extract an 8x8 block into a pre-allocated array, level-shifted by -128.

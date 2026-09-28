@@ -78,8 +78,12 @@ module PureJPEG
 
       # Reusable buffers
       zigzag = Array.new(64, 0)
-      raster = Array.new(64, 0)
       dequant = Array.new(64, 0)
+
+      scan_components = jfif.scan_components.map do |sc|
+        comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables)
+        [sc, comp, dc_tab, ac_tab, fetch_quant_table!(jfif, comp), channels[comp.id]]
+      end
 
       mcus_y.times do |mcu_row|
         mcus_x.times do |mcu_col|
@@ -89,19 +93,14 @@ module PureJPEG
             prev_dc.clear
           end
 
-          jfif.scan_components.each do |sc|
-            comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables)
-            qt = fetch_quant_table!(jfif, comp)
-            ch = channels[comp.id]
-
+          scan_components.each do |sc, comp, dc_tab, ac_tab, qt, ch|
             comp.v_sampling.times do |bv|
               comp.h_sampling.times do |bh|
                 # Decode one 8x8 block
                 decode_block(reader, dc_tab, ac_tab, prev_dc, sc.id, zigzag)
 
                 # Inverse pipeline: unzigzag -> dequantize -> IDCT -> level shift
-                Zigzag.unreorder!(zigzag, raster)
-                Quantization.dequantize!(raster, qt, dequant)
+                Quantization.dequantize_zigzag!(zigzag, qt, dequant)
                 DCT.inverse!(dequant)
 
                 # Write block into channel buffer
@@ -191,7 +190,7 @@ module PureJPEG
         end
       end
 
-      # Reconstruct: unzigzag, dequantize, IDCT, write to channel buffers
+      # Reconstruct: unzigzag/dequantize, IDCT, write to channel buffers
       padded_w = mcus_x * mcu_px_w
       padded_h = mcus_y * mcu_px_h
       channels = {}
@@ -201,8 +200,6 @@ module PureJPEG
         channels[c.id] = { data: Array.new(ch_w * ch_h, 0), width: ch_w, height: ch_h }
       end
 
-      zigzag = Array.new(64, 0)
-      raster = Array.new(64, 0)
       dequant = Array.new(64, 0)
 
       jfif.components.each do |c|
@@ -214,10 +211,7 @@ module PureJPEG
         by_count.times do |block_y|
           bx_count.times do |block_x|
             offset = (block_y * bx_count + block_x) * 64
-            64.times { |i| zigzag[i] = coeff_buf[offset + i] }
-
-            Zigzag.unreorder!(zigzag, raster)
-            Quantization.dequantize!(raster, qt, dequant)
+            Quantization.dequantize_zigzag!(coeff_buf, qt, dequant, offset)
             DCT.inverse!(dequant)
             write_block(dequant, ch[:data], ch[:width], block_x * 8, block_y * 8)
           end
@@ -279,6 +273,11 @@ module PureJPEG
       prev_dc = Hash.new(0)
       mcu_count = 0
 
+      scan_components = scan.components.map do |sc|
+        comp, dc_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: false)
+        [sc, comp, dc_tab, coeffs[comp.id], comp_blocks[comp.id][0]]
+      end
+
       mcus_y.times do |mcu_row|
         mcus_x.times do |mcu_col|
           if restart_interval > 0 && mcu_count > 0 && (mcu_count % restart_interval) == 0
@@ -286,11 +285,7 @@ module PureJPEG
             prev_dc.clear
           end
 
-          scan.components.each do |sc|
-            comp, dc_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: false)
-            coeff_buf = coeffs[comp.id]
-            bx_count = comp_blocks[comp.id][0]
-
+          scan_components.each do |sc, comp, dc_tab, coeff_buf, bx_count|
             comp.v_sampling.times do |bv|
               comp.h_sampling.times do |bh|
                 block_x = mcu_col * comp.h_sampling + bh
