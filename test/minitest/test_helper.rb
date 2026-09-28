@@ -8,4 +8,4 @@ rescue LoadError
 end
 
 require "minitest/autorun"
-require_relative "shared_helper"
+require_relative "../support/shared_helper"

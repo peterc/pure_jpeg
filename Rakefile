@@ -1,8 +1,8 @@
 require "rake/testtask"
 
 Rake::TestTask.new(:test) do |t|
-  t.libs << "test"
-  t.test_files = FileList["test/test_*.rb"]
+  t.libs << "test/minitest"
+  t.test_files = FileList["test/minitest/test_*.rb"]
 end
 
 desc "Benchmark encoding and decoding (5 runs each after warmup)"

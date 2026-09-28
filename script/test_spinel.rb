@@ -12,13 +12,20 @@ ROOT = File.expand_path("..", __dir__)
 COMPILER = ENV.fetch("SPINEL", "spinel")
 # Load assertions and helpers without Minitest autorun or coverage instrumentation.
 require_relative "../test/support/spinel_test"
-require_relative "../test/shared_helper"
+require_relative "../test/support/shared_helper"
 
-files = ARGV.empty? ? ["test/test_raw_source.rb"] : ARGV
-files = files.map { |file| File.expand_path(file, ROOT) }
+files = ARGV.empty? ? ["test/minitest/test_raw_source.rb"] : ARGV
+files = files.map do |file|
+  # Keep the original test/test_*.rb arguments working after the layout change.
+  path = File.expand_path(file, ROOT)
+  if !File.exist?(path) && File.dirname(path) == File.join(ROOT, "test")
+    path = File.join(ROOT, "test/minitest", File.basename(path))
+  end
+  path
+end
 # Mark the normal helper loaded for host-side discovery only. Generated tests
 # explicitly load the adapter/shared helper instead.
-$LOADED_FEATURES << File.join(ROOT, "test", "test_helper.rb")
+$LOADED_FEATURES << File.join(ROOT, "test", "minitest", "test_helper.rb")
 files.each { |file| require file }
 cases = ObjectSpace.each_object(Class).select { |klass| klass < Minitest::Test }.flat_map do |klass|
   klass.instance_methods.grep(/^test_/).filter_map do |method|
@@ -63,7 +70,7 @@ cases.each do |klass, method, source|
   helper_require = /^require_relative ["']test_helper["']$/
   abort "Expected one test_helper require in #{source}" unless test_source.scan(helper_require).length == 1
   adapter = Pathname.new(File.join(ROOT, "test/support/spinel_test.rb")).relative_path_from(Pathname.new(build))
-  shared = Pathname.new(File.join(ROOT, "test/shared_helper.rb")).relative_path_from(Pathname.new(build))
+  shared = Pathname.new(File.join(ROOT, "test/support/shared_helper.rb")).relative_path_from(Pathname.new(build))
   body = test_source.sub(helper_require, "require_relative #{adapter.to_s.dump}\nrequire_relative #{shared.to_s.dump}")
   File.write(program, <<~CODE)
     #{body}

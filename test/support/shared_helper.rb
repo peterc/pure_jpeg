@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "../lib/pure_jpeg"
+require_relative "../../lib/pure_jpeg"
 
 module TestHelper
   def fixture_path(filename)
-    File.expand_path("fixtures/#{filename}", __dir__)
+    File.expand_path("../fixtures/#{filename}", __dir__)
   end
 
   def gradient_source(width = 64, height = 64)

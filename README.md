@@ -266,6 +266,19 @@ rake benchmark   # basic benchmark of encoding and decoding (5 runs after warmup
 rake profile     # CPU profile with StackProf (requires the stackprof gem)
 ```
 
+The Minitest suite lives in `test/minitest/`; `rake` and `rake test` run it
+with SimpleCov as before. To run one file:
+
+```sh
+bundle exec rake test TEST=test/minitest/test_raw_source.rb
+```
+
+With Spinel and Spin installed, `spin test` runs the standalone package checks
+in `test/*.rb`, comparing their output with CRuby. These cover color/grayscale
+round trips, metadata, and invalid input; they supplement the full Minitest
+suite. See [test/SPINEL.md](test/SPINEL.md) for details and the existing
+`rake test:spinel` runner.
+
 ## Full benchmark script
 
 `benchmark/run.rb` is a more thorough benchmark that exercises the encode and decode paths in several ways. It auto-enables YJIT, warms up before measuring, and reports object allocations, throughput (iterations/second via `benchmark-ips`), best-of-N wall-clock times, and a sustained mixed workload across encode (q85, q95 optimized, grayscale) and decode (baseline and progressive).
