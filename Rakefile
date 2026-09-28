@@ -72,3 +72,9 @@ task :profile do
 end
 
 task default: :test
+
+# The existing RawSource cases, compiled individually with a small assertion adapter.
+desc "Run the Spinel test proof of concept (set SPINEL to the compiler path)"
+task :"test:spinel" do
+  ruby "script/test_spinel.rb"
+end
