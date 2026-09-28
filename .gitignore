@@ -7,3 +7,5 @@ tmp/
 vendor/bundle/
 .DS_Store
 coverage/
+build/
+spin.lock
