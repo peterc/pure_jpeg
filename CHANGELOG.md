@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.4.0
+
+Performance:
+
+- Faster Huffman coding and decoding, with scan references resolved once per scan
+- Combined quantization and zigzag passes, including direct reconstruction from progressive coefficient buffers
+- Color encoding downsamples chroma two rows at a time instead of allocating full-resolution chroma images
+- Block-based `RawSource` construction avoids allocating pixels that would immediately be replaced
+- Measured encode/decode times reduced by roughly 12–28% on Ruby 4.0.2 with YJIT; baseline decode allocations fell from 76,994 to 114 on the bundled 1024x1024 benchmark
+- Encoding array storage allocated for that image fell from 29.4 MB to 12.6 MB, with encoded bytes and decoded pixels preserved in equivalence checks
+
+Compatibility and testing:
+
+- Experimental Spinel compatibility, tested at revision `7f08abd9`, with benchmarks and a `rake test:spinel` proof-of-concept runner
+- Spinel currently passes seven of the eight selected RawSource tests; the remaining test fails because `respond_to?` is unavailable on its pixel struct. See `test/SPINEL.md` for details
+- Added regression tests for quantization rounding, progressive coefficient offsets, and chroma downsampling edges
+- Updated performance comparisons for CRuby, TruffleRuby, JRuby, and Spinel
+
 ## 0.3.3
 
 New features:
