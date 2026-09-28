@@ -6,7 +6,7 @@
 
 Convert PNG or other pixel data to JPEG. Or the other way! Implements baseline JPEG encoding (DCT, Huffman, 4:2:0 chroma subsampling) and decodes both baseline and progressive JPEGs. Exposes a variety of encoding options to adjust parts of the JPEG pipeline not normally available (I needed this to recreate the JPEG compression styles of older digital cameras - don't ask..)
 
-It works on CRuby 3.0+, TruffleRuby 33.0, and JRuby 10.0. There's *almost* 100% test coverage - I need to find some "broken" JPEGs to do the rest (hit me up if you have any sources..)
+It works on CRuby 3.0+, TruffleRuby 33.0, JRuby 10.0, and [Spinel](https://github.com/matz/spinel) (tested at `7f08abd9`). There's *almost* 100% test coverage - I need to find some "broken" JPEGs to do the rest (hit me up if you have any sources..)
 
 > [!NOTE]
 > Rubyists might find the [AI Disclosure](#ai-disclosure) section below of interest.
@@ -207,13 +207,13 @@ Possible future improvements: ICC profile rendering/conversion.
 
 On the bundled 1024x1024 images (Apple M5, median of 15 runs after 20 seconds of warmup per operation):
 
-| Operation | CRuby 4.0.2 (YJIT) | TruffleRuby 34.0.1 | JRuby 9.4.14.0 |
-|-----------|-------------------|-------------------|---------------|
-| Encode (color, q85) | ~0.131s | ~0.088s | ~0.577s |
-| Decode (baseline) | ~0.112s | ~0.027s | ~0.554s |
-| Decode (progressive) | ~0.140s | ~0.037s | ~0.617s |
+| Operation | CRuby 4.0.2 (YJIT) | TruffleRuby 34.0.1 | JRuby 9.4.14.0 | Spinel (`7f08abd9`) |
+|-----------|-------------------|-------------------|---------------|--------------------|
+| Encode (color, q85) | ~0.131s | ~0.088s | ~0.577s | ~0.104s |
+| Decode (baseline) | ~0.112s | ~0.027s | ~0.554s | ~0.078s |
+| Decode (progressive) | ~0.140s | ~0.037s | ~0.617s | ~0.092s |
 
-Inputs were loaded before timing, and encoded output was returned in memory; file I/O and PNG loading are excluded. Runtimes were benchmarked sequentially. JRuby used its default JIT on OpenJDK 21.0.10. Results vary with image content, garbage collection, and JIT warmup.
+Inputs were loaded before timing, and encoded output was returned in memory; file I/O and PNG loading are excluded. Runtimes were benchmarked sequentially. JRuby used its default JIT on OpenJDK 21.0.10. Spinel was measured separately with the same inputs and timing protocol, using a portable harness with PNG pixels preloaded; its encoded JPEG and decoded pixels matched CRuby byte-for-byte. Results vary with image content, garbage collection, and JIT warmup.
 
 The encoder and decoder use an integer-scaled AAN (Arai-Agui-Nakajima) DCT with fixed-point arithmetic throughout — no Float operations in the hot path. Color space conversion uses fixed-point integer math, and pixel data is stored as packed integers to avoid per-pixel object allocation. TruffleRuby's Graal JIT compiler can optimize these tight integer loops particularly well once warmed up.
 
