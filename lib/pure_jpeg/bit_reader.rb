@@ -35,6 +35,26 @@ module PureJPEG
       @buffer = 0
     end
 
+    # Consume exactly the restart expected at an MCU boundary. Marker fill
+    # bytes are allowed; entropy bytes and out-of-sequence restarts are not.
+    def read_restart(expected)
+      reset
+      unless @data.getbyte(@pos) == 0xFF
+        raise DecodeError, "Missing JPEG restart marker"
+      end
+      @pos += 1 while @pos < @length && @data.getbyte(@pos) == 0xFF
+      unless @data.getbyte(@pos) == 0xD0 + expected
+        raise DecodeError, "Unexpected JPEG restart marker (expected RST#{expected})"
+      end
+      @pos += 1
+    end
+
+    def finish_scan!
+      # Remaining bits in the last byte are padding, but whole unread bytes
+      # indicate extra entropy data or an unexpected trailing restart marker.
+      raise DecodeError, "Extra data after JPEG scan" unless @pos == @length
+    end
+
     # Read additional bits and sign-extend per JPEG spec (receive/extend).
     def receive_extend(size)
       return 0 if size == 0
@@ -56,10 +76,7 @@ module PureJPEG
         raise PureJPEG::DecodeError, "Unexpected end of scan data" if @pos >= @length
         next_byte = @data.getbyte(@pos)
         @pos += 1
-        # 0xFF 0x00 is a stuffed 0xFF byte
-        # Skip restart markers (0xD0-0xD7)
-        return fill_buffer if next_byte != 0x00 && next_byte >= 0xD0 && next_byte <= 0xD7
-        # For 0x00, the byte is 0xFF (stuffing removed)
+        raise DecodeError, "Unexpected marker in JPEG entropy data" unless next_byte == 0x00
       end
       @buffer = byte
       @bits_in_buffer = 8

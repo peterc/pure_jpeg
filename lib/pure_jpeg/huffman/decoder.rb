@@ -4,6 +4,16 @@ module PureJPEG
   module Huffman
     class DecodeTable
       def initialize(bits, values)
+        unless bits.length == 16 && bits.all? { |n| n.is_a?(Integer) && n.between?(0, 255) } &&
+               values.length.between?(1, 256) && bits.sum == values.length
+          raise DecodeError, "Invalid JPEG Huffman table lengths"
+        end
+        available = 1
+        bits.each do |count|
+          available = available * 2 - count
+          # JPEG reserves the all-ones code for entropy padding.
+          raise DecodeError, "Oversubscribed JPEG Huffman table" if available <= 0
+        end
         @min_code = Array.new(17, 0)
         @max_code = Array.new(17, -1)
         @val_ptr = Array.new(17, 0)

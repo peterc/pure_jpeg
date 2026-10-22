@@ -3,19 +3,24 @@
 module PureJPEG
   class JFIFReader
     attr_reader :width, :height, :components, :quant_tables, :huffman_tables,
-                :restart_interval, :progressive, :scans, :icc_profile
+                :restart_interval, :progressive, :scans, :icc_profile,
+                :precision, :adobe_transform, :component_quant_tables
 
     Component = Struct.new(:id, :h_sampling, :v_sampling, :qt_id)
     ScanComponent = Struct.new(:id, :dc_table_id, :ac_table_id)
-    Scan = Struct.new(:components, :spectral_start, :spectral_end, :successive_high, :successive_low, :data, :huffman_tables)
+    Scan = Struct.new(:components, :spectral_start, :spectral_end, :successive_high, :successive_low, :data, :huffman_tables) do
+      attr_accessor :restart_interval
+    end
 
-    def initialize(data, stop_after_frame: false)
+    def initialize(data, stop_after_frame: false, metadata_only: false)
       @data = data.b
       @stop_after_frame = stop_after_frame
+      @metadata_only = metadata_only
       @pos = 0
       @quant_tables = {}
       @huffman_tables = {}
       @components = []
+      @component_quant_tables = {}
       @restart_interval = 0
       @progressive = false
       @scans = []
@@ -38,16 +43,20 @@ module PureJPEG
       expect_marker(0xD8) # SOI
 
       loop do
+        # Header-only input is useful for metadata queries, even without SOS.
+        return if @metadata_only && @width && @pos == @data.bytesize
         marker = read_marker
         case marker
         when 0xE2 # APP2 (may contain ICC profile)
           parse_app2
-        when 0xE0, 0xE1, 0xE3..0xEF # APP0, APP1, APP3-APP15
+        when 0xEE # Adobe APP14
+          parse_app14
+        when 0xE0, 0xE1, 0xE3..0xED, 0xEF # Other application markers
           skip_segment
         when 0xDB # DQT
-          parse_dqt
+          @metadata_only ? skip_segment : parse_dqt
         when 0xC4 # DHT
-          parse_dht
+          @metadata_only ? skip_segment : parse_dht
         when 0xC0 # SOF0 (baseline)
           parse_sof0
           return if @stop_after_frame
@@ -56,17 +65,30 @@ module PureJPEG
           @progressive = true
           return if @stop_after_frame
         when 0xDA # SOS
+          return if @metadata_only
           scan = parse_sos
           scan.data = extract_scan_data
           scan.huffman_tables = @huffman_tables.dup
+          scan.restart_interval = @restart_interval
+          # A component keeps the quantizer selected by its first scan, even
+          # if another scan later redefines that table ID for other components.
+          scan.components.each do |sc|
+            comp = @components.find { |c| c.id == sc.id }
+            if comp && !@component_quant_tables.key?(comp.id)
+              @component_quant_tables[comp.id] = @quant_tables[comp.qt_id]
+            end
+          end
           @scans << scan
-          return unless @progressive
         when 0xFE # COM (comment)
           skip_segment
         when 0xDD # DRI (restart interval)
           parse_dri
         when 0xD9 # EOI
           return
+        when 0xC1, 0xC3, 0xC5..0xCB, 0xCD..0xCF
+          raise DecodeError, "Unsupported JPEG frame marker: 0x#{marker.to_s(16)}"
+        when 0xD0..0xD8, 0x00, 0x01
+          raise DecodeError, "Unexpected JPEG marker: 0x#{marker.to_s(16)}"
         else
           skip_segment
         end
@@ -100,13 +122,24 @@ module PureJPEG
 
     ICC_PROFILE_SIG = "ICC_PROFILE\0".b
 
+    def parse_app14
+      end_pos = read_segment_end
+      if end_pos - @pos >= 12 && @data[@pos, 5] == "Adobe"
+        @adobe_transform = @data.getbyte(@pos + 11)
+      end
+      @pos = end_pos
+    end
+
     def parse_app2
       end_pos = read_segment_end
 
       if (end_pos - @pos) >= 14 && @data[@pos, 12] == ICC_PROFILE_SIG
         @pos += 12
         seq_no = read_byte
-        _total = read_byte
+        total = read_byte
+        @icc_invalid = true if total == 0 || seq_no == 0 || seq_no > total ||
+                               (@icc_total && @icc_total != total) || @icc_chunks.key?(seq_no)
+        @icc_total = total
         @icc_chunks[seq_no] = @data[@pos, end_pos - @pos]
       end
 
@@ -115,6 +148,7 @@ module PureJPEG
 
     def assemble_icc_profile
       return if @icc_chunks.empty?
+      return if @icc_invalid || @icc_chunks.length != @icc_total
 
       @icc_profile = @icc_chunks.sort_by(&:first).map(&:last).join.b
     end
@@ -130,6 +164,9 @@ module PureJPEG
         info = read_byte
         precision = (info >> 4) & 0x0F  # 0 = 8-bit, 1 = 16-bit
         table_id = info & 0x0F
+        unless precision <= 1 && table_id <= 3
+          raise DecodeError, "Invalid JPEG quantization table definition"
+        end
         bytes_per_value = precision == 0 ? 1 : 2
         ensure_remaining_in_segment!(end_pos, 64 * bytes_per_value, "DQT")
 
@@ -137,6 +174,7 @@ module PureJPEG
         64.times do |i|
           zigzag_table[i] = precision == 0 ? read_byte : read_u16
         end
+        raise DecodeError, "Zero JPEG quantization value" if zigzag_table.include?(0)
         # DQT stores values in zigzag order; convert to raster order
         table = Array.new(64)
         64.times { |i| table[Zigzag::ORDER[i]] = zigzag_table[i] }
@@ -152,20 +190,27 @@ module PureJPEG
         info = read_byte
         table_class = (info >> 4) & 0x0F  # 0 = DC, 1 = AC
         table_id = info & 0x0F
+        unless table_class <= 1 && table_id <= 3
+          raise DecodeError, "Invalid JPEG Huffman table definition"
+        end
 
         bits = Array.new(16) { read_byte }
         total = bits.sum
         ensure_remaining_in_segment!(end_pos, total, "DHT")
         values = Array.new(total) { read_byte }
+        if values.any? { |value| table_class == 0 ? value > 11 : (value & 15) > 10 }
+          raise DecodeError, "Invalid JPEG Huffman symbol"
+        end
 
         @huffman_tables[[table_class, table_id]] = { bits: bits, values: values }
       end
     end
 
     def parse_sof0
+      raise DecodeError, "Multiple JPEG frame headers are unsupported" if @width
       end_pos = read_segment_end
       ensure_remaining_in_segment!(end_pos, 6, "SOF")
-      read_byte # precision (always 8 for baseline)
+      @precision = read_byte
       @height = read_u16
       @width = read_u16
       num_components = read_byte
@@ -178,6 +223,13 @@ module PureJPEG
         v = sampling & 0x0F
         qt_id = read_byte
         Component.new(id, h, v, qt_id)
+      end
+      raise DecodeError, "JPEG frame has no components" if @components.empty?
+      if @components.map(&:id).uniq.length != @components.length
+        raise DecodeError, "Duplicate JPEG component id"
+      end
+      unless @components.all? { |c| c.h_sampling.between?(1, 4) && c.v_sampling.between?(1, 4) }
+        raise DecodeError, "Invalid JPEG sampling factors"
       end
       @pos = end_pos
     end
@@ -234,19 +286,23 @@ module PureJPEG
     def extract_scan_data
       start = @pos
       len = @data.bytesize
-      # Scan forward looking for a marker that isn't a stuffing byte or restart
-      while @pos < len - 1
+      # Preserve the first FF of a marker's fill run for read_marker. Stuffed
+      # bytes and restarts belong to the entropy stream, segment markers do not.
+      while @pos < len
         found = @data.index("\xFF".b, @pos)
-        break unless found && found < len - 1
-        @pos = found
-        next_byte = @data.getbyte(@pos + 1)
-        # 0x00 is byte stuffing, 0xD0-0xD7 are restart markers, 0xFF is padding — all part of scan data
-        if next_byte != 0x00 && !(next_byte >= 0xD0 && next_byte <= 0xD7) && next_byte != 0xFF
-          break
+        raise DecodeError, "Unexpected end of JPEG scan" unless found
+        marker_pos = found + 1
+        marker_pos += 1 while marker_pos < len && @data.getbyte(marker_pos) == 0xFF
+        raise DecodeError, "Unexpected end of JPEG scan" if marker_pos == len
+        code = @data.getbyte(marker_pos)
+        if code == 0x00 || code.between?(0xD0, 0xD7)
+          @pos = marker_pos + 1
+        else
+          @pos = found
+          return @data[start...found]
         end
-        @pos += 2
       end
-      @data[start...@pos]
+      raise DecodeError, "Unexpected end of JPEG scan"
     end
   end
 end

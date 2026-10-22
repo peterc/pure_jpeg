@@ -21,10 +21,9 @@ require_relative "pure_jpeg/image"
 require_relative "pure_jpeg/encoder"
 require_relative "pure_jpeg/decoder"
 
-  # Pure Ruby JPEG encoder and decoder with no native dependencies.
-  #
-  # Supports baseline DCT (SOF0) with 8-bit precision, grayscale and YCbCr
-  # color (4:2:0 chroma subsampling), and standard Huffman tables (Annex K).
+# Pure Ruby JPEG encoder and decoder with no native dependencies.
+# Encodes baseline DCT (SOF0), and decodes baseline and progressive (SOF2)
+# 8-bit grayscale and YCbCr JPEGs.
 module PureJPEG
   # Raised when decoding invalid or unsupported JPEG data.
   class DecodeError < StandardError; end
@@ -70,15 +69,15 @@ module PureJPEG
   # Read JPEG dimensions and basic frame metadata without decoding scan data.
   #
   # @param path_or_data [String] a file path or raw JPEG bytes
-  # @return [Info] image metadata parsed from the frame header
+  # @return [Info] frame metadata and complete ICC profile from headers before SOS
   def self.info(path_or_data)
-    data = if path_or_data.is_a?(String) && !path_or_data.start_with?("\xFF\xD8".b) && File.exist?(path_or_data)
+    data = if path_or_data.is_a?(String) && !path_or_data.b.include?("\0") && !path_or_data.b.start_with?("\xFF\xD8".b) && File.exist?(path_or_data)
              File.binread(path_or_data)
            else
              path_or_data.b
            end
 
-    jfif = JFIFReader.new(data, stop_after_frame: true)
+    jfif = JFIFReader.new(data, metadata_only: true)
     raise DecodeError, "JPEG frame header not found" unless jfif.width && jfif.height
 
     Info.new(

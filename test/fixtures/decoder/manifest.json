@@ -1,0 +1,116 @@
+{
+  "edge-420": {
+    "width": 17,
+    "height": 17,
+    "rgb_sha256": "1acf2ce3b5b3de513d130fb588f9090796caa7f4fae5fa7236a715904cd9a56e",
+    "supported": true
+  },
+  "restart-420": {
+    "width": 32,
+    "height": 32,
+    "rgb_sha256": "c01c118773462222619980c40a4a925ceaff4a6b5714cae2c60e36ae5dae5bb5",
+    "supported": true
+  },
+  "edge-422": {
+    "width": 17,
+    "height": 17,
+    "rgb_sha256": "c24ef5eb7345421b3f54b63b5898a7da95ee752824699baf7598c2b3dd42a8d9",
+    "supported": true
+  },
+  "restart-422": {
+    "width": 32,
+    "height": 32,
+    "rgb_sha256": "79055253ca26ec3d6afabca7491eafe6078f165a9672897b1f0e5d745418f40d",
+    "supported": true
+  },
+  "edge-444": {
+    "width": 17,
+    "height": 17,
+    "rgb_sha256": "0754ab715a41e71eebf546f66518b2fe58e3446f22d133818c42de82bb55da9c",
+    "supported": true
+  },
+  "restart-444": {
+    "width": 32,
+    "height": 32,
+    "rgb_sha256": "7d32e0a833a864a9c38573288195adf174a1a11f9e68a7fcc92532bf6adf569e",
+    "supported": true
+  },
+  "edge-440": {
+    "width": 17,
+    "height": 17,
+    "rgb_sha256": "b703580097b2681f18a50f45bff0c50aea9fa3acc79287e161a0476f3c4bb520",
+    "supported": true
+  },
+  "restart-440": {
+    "width": 32,
+    "height": 32,
+    "rgb_sha256": "939beecc09f0b926b12a7ce49347132ce1ef8dbb1a5a2bbecbf0f02fe8599d2e",
+    "supported": true
+  },
+  "edge-411": {
+    "width": 17,
+    "height": 17,
+    "rgb_sha256": "2e13c163fa7c127182a5dfbe54449abda904663192a921486239ba550ced2e22",
+    "supported": true
+  },
+  "restart-411": {
+    "width": 32,
+    "height": 32,
+    "rgb_sha256": "01784a7a07e53bf4319c8fed3f11b87fa92423f3aa60448ae4b0505f04f0fdf7",
+    "supported": true
+  },
+  "edge-gray": {
+    "width": 17,
+    "height": 17,
+    "rgb_sha256": "ab8771e4aea9fde2789c849d79b7e27f9a720cfda4c8c51d5d1a485f81202180",
+    "supported": true
+  },
+  "restart-gray": {
+    "width": 32,
+    "height": 32,
+    "rgb_sha256": "8ed8feb39b43c9e70d55b154f5d34bc2eb9a1f85ead654a49769d6fcc6cb1be2",
+    "supported": true
+  },
+  "tiny": {
+    "width": 1,
+    "height": 1,
+    "rgb_sha256": "709e80c88487a2411e1ee4dfb9f22a861492d20c4765150c0c794abd70f8147c",
+    "supported": true
+  },
+  "baseline-restart": {
+    "width": 32,
+    "height": 32,
+    "rgb_sha256": "c01c118773462222619980c40a4a925ceaff4a6b5714cae2c60e36ae5dae5bb5",
+    "supported": true
+  },
+  "luma-subsampled": {
+    "width": 32,
+    "height": 32,
+    "rgb_sha256": "0a2e43ed889d5a98e78b3c7d47495e84c1972dab38f6e600b26c56d5a7eff82c",
+    "supported": true
+  },
+  "rgb": {
+    "width": 16,
+    "height": 16,
+    "rgb_sha256": "d88bc791c450b7dce4a25058c26bad4bec436799e704c91caf9c2d01dd939320",
+    "supported": false
+  },
+  "sequential-multiscan": {
+    "width": 32,
+    "height": 32,
+    "rgb_sha256": "c01c118773462222619980c40a4a925ceaff4a6b5714cae2c60e36ae5dae5bb5",
+    "supported": true
+  },
+  "sequential-edge-restart": {
+    "width": 17,
+    "height": 23,
+    "rgb_sha256": "8ffbfa3899a5e72022058d98fda860e10e8c7a4ca1e5e957cf020766e1579b98",
+    "supported": true
+  },
+  "mixed-scan-restart": {
+    "width": 17,
+    "height": 17,
+    "rgb_sha256": "1acf2ce3b5b3de513d130fb588f9090796caa7f4fae5fa7236a715904cd9a56e",
+    "supported": true
+  }
+}

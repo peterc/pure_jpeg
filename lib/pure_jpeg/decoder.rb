@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 module PureJPEG
-  # Baseline JPEG decoder.
+  # Baseline and progressive JPEG decoder.
   #
-  # Decodes baseline DCT (SOF0) JPEGs with 1 or 3 components, any chroma
-  # subsampling factor, and restart markers.
+  # Decodes baseline (SOF0) and progressive (SOF2) 8-bit grayscale/YCbCr
+  # JPEGs, including separate component scans and restart markers.
   #
   # Use {PureJPEG.read} for a convenient entry point.
   class Decoder
@@ -13,7 +13,7 @@ module PureJPEG
     # @param path_or_data [String] a file path or raw JPEG bytes
     # @return [Image] decoded image with pixel access
     def self.decode(path_or_data)
-      data = if path_or_data.is_a?(String) && !path_or_data.start_with?("\xFF\xD8".b) && File.exist?(path_or_data)
+      data = if path_or_data.is_a?(String) && !path_or_data.b.include?("\0") && !path_or_data.b.start_with?("\xFF\xD8".b) && File.exist?(path_or_data)
                File.binread(path_or_data)
              else
                path_or_data.b
@@ -29,90 +29,74 @@ module PureJPEG
       jfif = JFIFReader.new(@data)
       @icc_profile = jfif.icc_profile
       validate_dimensions!(jfif.width, jfif.height)
+      validate_frame_and_scans!(jfif)
       return decode_progressive(jfif) if jfif.progressive
 
       width = jfif.width
       height = jfif.height
 
-      # Build Huffman decode tables
-      dc_tables = {}
-      ac_tables = {}
-      jfif.huffman_tables.each do |(table_class, table_id), info|
-        table = Huffman::DecodeTable.new(info[:bits], info[:values])
-        if table_class == 0
-          dc_tables[table_id] = table
-        else
-          ac_tables[table_id] = table
-        end
-      end
-
-      # Map component IDs to their info
       comp_info = {}
       jfif.components.each { |c| comp_info[c.id] = c }
-
-      # Determine max sampling factors
       max_h = jfif.components.map(&:h_sampling).max
       max_v = jfif.components.map(&:v_sampling).max
-
-      # MCU dimensions in pixels
       mcu_px_w = max_h * 8
       mcu_px_h = max_v * 8
       mcus_x = (width + mcu_px_w - 1) / mcu_px_w
       mcus_y = (height + mcu_px_h - 1) / mcu_px_h
 
-      # Allocate channel buffers (full padded size)
-      padded_w = mcus_x * mcu_px_w
-      padded_h = mcus_y * mcu_px_h
       channels = {}
       jfif.components.each do |c|
-        ch_w = (padded_w * c.h_sampling) / max_h
-        ch_h = (padded_h * c.v_sampling) / max_v
+        ch_w = mcus_x * c.h_sampling * 8
+        ch_h = mcus_y * c.v_sampling * 8
         channels[c.id] = { data: Array.new(ch_w * ch_h, 0), width: ch_w, height: ch_h }
       end
-
-      # Decode scan data
-      reader = BitReader.new(jfif.scan_data)
-      prev_dc = Hash.new(0)
-      restart_interval = jfif.restart_interval
-      mcu_count = 0
-
-      # Reusable buffers
       zigzag = Array.new(64, 0)
       dequant = Array.new(64, 0)
 
-      scan_components = jfif.scan_components.map do |sc|
-        comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables)
-        [sc, comp, dc_tab, ac_tab, fetch_quant_table!(jfif, comp), channels[comp.id]]
-      end
+      jfif.scans.each do |scan|
+        dc_tables, ac_tables = build_decode_tables(scan)
+        reader = BitReader.new(scan.data)
+        prev_dc = Hash.new(0)
+        restart_interval = scan.restart_interval
+        mcu_count = 0
+        interleaved = scan.components.length > 1
+        scan_components = scan.components.map do |sc|
+          comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables)
+          [sc, comp, dc_tab, ac_tab, fetch_quant_table!(jfif, comp), channels[comp.id]]
+        end
+        if interleaved
+          scan_width = mcus_x
+          scan_height = mcus_y
+        else
+          comp = scan_components[0][1]
+          scan_width = (width * comp.h_sampling + mcu_px_w - 1) / mcu_px_w
+          scan_height = (height * comp.v_sampling + mcu_px_h - 1) / mcu_px_h
+        end
 
-      mcus_y.times do |mcu_row|
-        mcus_x.times do |mcu_col|
-          # Handle restart interval
-          if restart_interval > 0 && mcu_count > 0 && (mcu_count % restart_interval) == 0
-            reader.reset
-            prev_dc.clear
-          end
-
-          scan_components.each do |sc, comp, dc_tab, ac_tab, qt, ch|
-            comp.v_sampling.times do |bv|
-              comp.h_sampling.times do |bh|
-                # Decode one 8x8 block
-                decode_block(reader, dc_tab, ac_tab, prev_dc, sc.id, zigzag)
-
-                # Inverse pipeline: unzigzag -> dequantize -> IDCT -> level shift
-                Quantization.dequantize_zigzag!(zigzag, qt, dequant)
-                DCT.inverse!(dequant)
-
-                # Write block into channel buffer
-                bx = (mcu_col * comp.h_sampling + bh) * 8
-                by = (mcu_row * comp.v_sampling + bv) * 8
-                write_block(dequant, ch[:data], ch[:width], bx, by)
+        scan_height.times do |mcu_row|
+          scan_width.times do |mcu_col|
+            if restart_interval > 0 && mcu_count > 0 && (mcu_count % restart_interval) == 0
+              reader.read_restart((mcu_count / restart_interval - 1) % 8)
+              prev_dc.clear
+            end
+            scan_components.each do |sc, comp, dc_tab, ac_tab, qt, ch|
+              block_rows = interleaved ? comp.v_sampling : 1
+              block_cols = interleaved ? comp.h_sampling : 1
+              block_rows.times do |bv|
+                block_cols.times do |bh|
+                  decode_block(reader, dc_tab, ac_tab, prev_dc, sc.id, zigzag)
+                  Quantization.dequantize_zigzag!(zigzag, qt, dequant)
+                  DCT.inverse!(dequant)
+                  bx = (mcu_col * block_cols + bh) * 8
+                  by = (mcu_row * block_rows + bv) * 8
+                  write_block(dequant, ch[:data], ch[:width], bx, by)
+                end
               end
             end
+            mcu_count += 1
           end
-
-          mcu_count += 1
         end
+        reader.finish_scan!
       end
 
       # Assemble pixels
@@ -128,7 +112,81 @@ module PureJPEG
 
     private
 
+    def build_decode_tables(scan)
+      dc_tables = {}
+      ac_tables = {}
+      scan.huffman_tables.each do |(table_class, table_id), info|
+        table = Huffman::DecodeTable.new(info[:bits], info[:values])
+        (table_class == 0 ? dc_tables : ac_tables)[table_id] = table
+      end
+      [dc_tables, ac_tables]
+    end
+
+    def validate_frame_and_scans!(jfif)
+      unless jfif.precision == 8
+        raise DecodeError, "Unsupported JPEG precision: #{jfif.precision}"
+      end
+      count = jfif.components.length
+      unless count == 1 || count == 3
+        raise DecodeError, "Unsupported number of components: #{count}"
+      end
+      ids = jfif.components.map(&:id)
+      if count == 3 && (jfif.adobe_transform == 0 || ids.sort == [66, 71, 82])
+        raise DecodeError, "RGB JPEG decoding is unsupported"
+      end
+      if jfif.adobe_transform && ![0, 1].include?(jfif.adobe_transform)
+        raise DecodeError, "Unsupported Adobe color transform: #{jfif.adobe_transform}"
+      end
+      raise DecodeError, "JPEG scan data not found" if jfif.scans.empty?
+
+      progression = {}
+      ids.each { |id| progression[id] = Array.new(64) }
+      jfif.scans.each do |scan|
+        scan_ids = scan.components.map(&:id)
+        if scan_ids.empty? || scan_ids.uniq.length != scan_ids.length
+          raise DecodeError, "Invalid JPEG scan components"
+        end
+        scan_ids.each do |id|
+          raise DecodeError, "Scan references unknown component id #{id}" unless progression.key?(id)
+        end
+        if scan_ids.length > 1
+          blocks = jfif.components.select { |c| scan_ids.include?(c.id) }.sum { |c| c.h_sampling * c.v_sampling }
+          raise DecodeError, "Too many blocks in JPEG MCU" if blocks > 10
+        end
+
+        ss = scan.spectral_start
+        se = scan.spectral_end
+        ah = scan.successive_high
+        al = scan.successive_low
+        if jfif.progressive
+          valid = ss <= se && se <= 63 && ah <= 13 && al <= 13 &&
+                  (ss == 0 ? se == 0 : scan_ids.length == 1) &&
+                  (ah == 0 || al == ah - 1)
+          raise DecodeError, "Invalid progressive scan parameters" unless valid
+        elsif ss != 0 || se != 63 || ah != 0 || al != 0
+          raise DecodeError, "Invalid baseline scan parameters"
+        end
+        scan_ids.each do |id|
+          state = progression[id]
+          if ss > 0 && state[0].nil?
+            raise DecodeError, "Progressive AC scan precedes DC scan"
+          end
+          ss.upto(se) do |k|
+            unless ah == 0 ? state[k].nil? : state[k] == ah
+              raise DecodeError, "Invalid JPEG scan progression"
+            end
+            state[k] = al
+          end
+        end
+      end
+      if progression.values.any? { |state| state[0].nil? }
+        raise DecodeError, "JPEG scan omits a frame component"
+      end
+      jfif.components.each { |c| fetch_quant_table!(jfif, c) }
+    end
+
     def validate_dimensions!(width, height)
+      raise DecodeError, "JPEG frame header not found" unless width && height
       raise DecodeError, "Invalid image dimensions: #{width}x#{height}" if width <= 0 || height <= 0
       raise DecodeError, "Image too large: #{width}x#{height} (max #{MAX_DIMENSION}x#{MAX_DIMENSION})" if width > MAX_DIMENSION || height > MAX_DIMENSION
     end
@@ -157,12 +215,15 @@ module PureJPEG
         bx = mcus_x * c.h_sampling
         by = mcus_y * c.v_sampling
         coeffs[c.id] = Array.new(bx * by * 64, 0)
-        comp_blocks[c.id] = [bx, by]
+        actual_bx = (width * c.h_sampling + mcu_px_w - 1) / mcu_px_w
+        actual_by = (height * c.v_sampling + mcu_px_h - 1) / mcu_px_h
+        # Interleaved scans include MCU padding; single-component scans do not.
+        # Keep the storage stride separate from the actual scan dimensions.
+        comp_blocks[c.id] = [bx, by, actual_bx, actual_by]
       end
 
-      restart_interval = jfif.restart_interval
-
       jfif.scans.each do |scan|
+        restart_interval = scan.restart_interval
         # Build Huffman tables from this scan's snapshot (tables change between scans)
         dc_tables = {}
         ac_tables = {}
@@ -188,6 +249,7 @@ module PureJPEG
           prog_scan_interleaved(reader, scan, comp_info, dc_tables, ac_tables,
                                 coeffs, comp_blocks, mcus_x, mcus_y, restart_interval, ss, se, ah, al)
         end
+        reader.finish_scan!
       end
 
       # Reconstruct: unzigzag/dequantize, IDCT, write to channel buffers
@@ -231,18 +293,20 @@ module PureJPEG
     def prog_scan_non_interleaved(reader, scan, comp_info, dc_tables, ac_tables,
                                   coeffs, comp_blocks, restart_interval, ss, se, ah, al)
       sc = scan.components[0]
-      comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: ss > 0)
+      comp, dc_tab, ac_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables,
+                                                    require_dc: ss == 0 && ah == 0, require_ac: ss > 0)
       coeff_buf = coeffs[comp.id]
-      bx_count, by_count = comp_blocks[comp.id]
+      bx_count, _by_count, actual_bx, actual_by = comp_blocks[comp.id]
 
       prev_dc = 0
       eobrun = 0
       mcu_count = 0
 
-      by_count.times do |block_y|
-        bx_count.times do |block_x|
+      actual_by.times do |block_y|
+        actual_bx.times do |block_x|
           if restart_interval > 0 && mcu_count > 0 && (mcu_count % restart_interval) == 0
-            reader.reset
+            raise DecodeError, "Progressive EOB run crosses restart boundary" if eobrun > 0
+            reader.read_restart((mcu_count / restart_interval - 1) % 8)
             prev_dc = 0
             eobrun = 0
           end
@@ -266,6 +330,7 @@ module PureJPEG
           mcu_count += 1
         end
       end
+      raise DecodeError, "Progressive EOB run exceeds scan" if eobrun > 0
     end
 
     def prog_scan_interleaved(reader, scan, comp_info, dc_tables, ac_tables,
@@ -274,14 +339,15 @@ module PureJPEG
       mcu_count = 0
 
       scan_components = scan.components.map do |sc|
-        comp, dc_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables, require_ac: false)
+        comp, dc_tab = resolve_scan_references!(sc, comp_info, dc_tables, ac_tables,
+                                              require_dc: ah == 0, require_ac: false)
         [sc, comp, dc_tab, coeffs[comp.id], comp_blocks[comp.id][0]]
       end
 
       mcus_y.times do |mcu_row|
         mcus_x.times do |mcu_col|
           if restart_interval > 0 && mcu_count > 0 && (mcu_count % restart_interval) == 0
-            reader.reset
+            reader.read_restart((mcu_count / restart_interval - 1) % 8)
             prev_dc.clear
           end
 
@@ -330,6 +396,7 @@ module PureJPEG
         if size == 0
           if run == 15
             k += 16
+            raise DecodeError, "AC run exceeds spectral band" if k > se + 1
           else
             # EOBn
             eobrun = (1 << run)
@@ -338,6 +405,7 @@ module PureJPEG
           end
         else
           k += run
+          raise DecodeError, "AC run exceeds spectral band" if k > se
           coeff_buf[offset + k] = reader.receive_extend(size) << al
           k += 1
         end
@@ -367,6 +435,7 @@ module PureJPEG
         # (the value bits come before refinement bits in the bitstream)
         new_value = nil
         if s != 0
+          raise DecodeError, "Invalid progressive AC refinement symbol" unless s == 1
           new_value = reader.receive_extend(s) << al
         elsif r != 15
           # EOBn: refine remaining nonzero coefficients in this block
@@ -393,7 +462,8 @@ module PureJPEG
         end
 
         # Place new coefficient at the target zero position
-        if new_value && k <= se
+        raise DecodeError, "AC refinement run exceeds spectral band" if k > se
+        if new_value
           coeff_buf[offset + k] = new_value
         end
         k += 1
@@ -429,6 +499,7 @@ module PureJPEG
           end
           break
         elsif symbol == 0xF0 # ZRL (16 zeros)
+          raise DecodeError, "AC run exceeds block" if i + 16 > 64
           16.times do
             out[i] = 0
             i += 1
@@ -436,6 +507,8 @@ module PureJPEG
         else
           run = (symbol >> 4) & 0x0F
           size = symbol & 0x0F
+          raise DecodeError, "Invalid baseline AC symbol" if size == 0
+          raise DecodeError, "AC run exceeds block" if i + run >= 64
           run.times do
             out[i] = 0
             i += 1
@@ -464,12 +537,14 @@ module PureJPEG
       end
     end
 
-    def resolve_scan_references!(scan_component, comp_info, dc_tables, ac_tables, require_ac: true)
+    def resolve_scan_references!(scan_component, comp_info, dc_tables, ac_tables, require_dc: true, require_ac: true)
       comp = comp_info[scan_component.id]
       raise DecodeError, "Scan references unknown component id #{scan_component.id}" unless comp
 
       dc_tab = dc_tables[scan_component.dc_table_id]
-      raise DecodeError, "Component #{scan_component.id} references missing DC Huffman table #{scan_component.dc_table_id}" unless dc_tab
+      if require_dc && !dc_tab
+        raise DecodeError, "Component #{scan_component.id} references missing DC Huffman table #{scan_component.dc_table_id}"
+      end
 
       if require_ac
         ac_tab = ac_tables[scan_component.ac_table_id]
@@ -480,7 +555,7 @@ module PureJPEG
     end
 
     def fetch_quant_table!(jfif, comp)
-      qt = jfif.quant_tables[comp.qt_id]
+      qt = jfif.component_quant_tables[comp.id]
       raise DecodeError, "Component #{comp.id} references missing quantization table #{comp.qt_id}" unless qt
 
       qt
@@ -521,6 +596,8 @@ module PureJPEG
       cb_data = cb_ch[:data]
       cr_data = cr_ch[:data]
       y_stride = y_ch[:width]
+      y_h = y_comp.h_sampling
+      y_v = y_comp.v_sampling
       cb_stride = cb_ch[:width]
       cr_stride = cr_ch[:width]
       cb_h = cb_comp.h_sampling
@@ -532,14 +609,14 @@ module PureJPEG
 
       height.times do |py|
         dst_row = py * width
-        y_row = py * y_stride
+        y_row = ((py * y_v) / max_v) * y_stride
 
         # Chroma coordinates (nearest-neighbor upsampling)
         cb_row = ((py * cb_v) / max_v) * cb_stride
         cr_row = ((py * cr_v) / max_v) * cr_stride
 
         width.times do |px|
-          lum = y_data[y_row + px]
+          lum = y_data[y_row + (px * y_h) / max_h]
 
           cb_x = (px * cb_h) / max_h
           cr_x = (px * cr_h) / max_h
