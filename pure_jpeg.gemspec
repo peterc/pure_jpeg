@@ -6,8 +6,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["Peter Cooper"]
   spec.email   = ["git@peterc.org"]
   spec.summary = "Pure Ruby JPEG encoder and decoder"
-  spec.description = "A pure Ruby baseline JPEG encoder and decoder with no native dependencies."
-  spec.license = "MIT"
+  spec.description = "A pure Ruby baseline JPEG encoder and baseline/progressive JPEG decoder with no native dependencies."
+  spec.licenses = ["MIT", "IJG"]
   spec.homepage = "https://github.com/peterc/pure_jpeg"
 
   spec.metadata = {
@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 3.0.0"
 
-  spec.files = Dir["lib/**/*.rb", "LICENSE", "README.md", "CHANGELOG.md"]
+  spec.files = Dir["lib/**/*.rb", "LICENSE", "LICENSE-IJG", "README.md", "CHANGELOG.md", "CREATIVE.md"]
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "chunky_png", "~> 1.4"

@@ -3,6 +3,7 @@ name: Ruby
 on:
   workflow_dispatch:
   push:
+    branches: [ "main" ]
     tags: [ "v*" ]
   pull_request:
     branches: [ "main" ]
@@ -26,3 +27,5 @@ jobs:
         bundler-cache: true
     - name: Run tests
       run: bundle exec rake
+    - name: Test installed gem
+      run: ruby script/test_installed_gem.rb

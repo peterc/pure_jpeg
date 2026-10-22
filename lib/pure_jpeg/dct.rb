@@ -2,8 +2,10 @@
 
 module PureJPEG
   # Integer-scaled DCT based on the IJG (Independent JPEG Group) reference
-  # implementation (jfdctint.c / jidctint.c). Uses the Arai-Agui-Nakajima
-  # factorization with 13-bit fixed-point constants.
+  # implementation (jfdctint.c / jidctint.c). Uses the Loeffler-based accurate
+  # integer factorization with 13-bit fixed-point constants. The upstream
+  # copyright and distribution terms are included in LICENSE-IJG; adaptation
+  # details are recorded in LICENSE.
   #
   # All arithmetic is pure Integer (additions, shifts, multiplies) — no Float
   # operations. This is ~3x faster than the matrix-multiply float DCT under

@@ -19,3 +19,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+The integer DCT implementation in lib/pure_jpeg/dct.rb is adapted from the
+Independent JPEG Group's jfdctint.c and jidctint.c. Its upstream copyright,
+disclaimer, and distribution terms are included in LICENSE-IJG. PureJPEG's
+adaptation ports the transforms to Ruby arrays, removes the C integration
+and scaled-output variants, and normalizes forward coefficients before
+quantization. The IJG-derived portions remain subject to those terms.

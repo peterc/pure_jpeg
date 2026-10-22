@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+Fixes:
+
+- Decode progressive images correctly when component edges require padded blocks
+- Preserve each scan's restart interval and each component's original quantization table
+- Decode baseline images with separate component scans and handle subsampled luminance
+- Handle JPEG marker fill bytes correctly between scans and at restart boundaries
+- Validate restart markers without recursion; reject malformed frame/scan parameters,
+  invalid Huffman tables, excessive coefficient runs, and incomplete scan data with `DecodeError`
+- Reject unsupported precision and RGB/Adobe color transforms explicitly
+- Read ICC headers after the frame header in `PureJPEG.info`; ignore incomplete or
+  inconsistent multipart profiles instead of returning partial profile bytes
+- Treat binary garbage containing null bytes as data rather than a filesystem path
+
+Testing and packaging:
+
+- Add small libjpeg-turbo fixtures with trusted decoded-pixel hashes and malformed-input regressions
+- Keep all existing tests, public API signatures, source-adapter behavior, and encoder output unchanged
+- Run CI on pushes to `main` and smoke-test the built, installed gem without development dependencies
+- Include creative-options documentation and IJG notices in the gem; correct the DCT algorithm attribution
+
 ## 0.4.0
 
 Performance:
