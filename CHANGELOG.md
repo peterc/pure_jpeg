@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.1
 
 Fixes:
 
@@ -14,10 +14,13 @@ Fixes:
 - Read ICC headers after the frame header in `PureJPEG.info`; ignore incomplete or
   inconsistent multipart profiles instead of returning partial profile bytes
 - Treat binary garbage containing null bytes as data rather than a filesystem path
+- Avoid a Spinel compiler bug in conditional hash assignment during decoding
 
 Testing and packaging:
 
 - Add small libjpeg-turbo fixtures with trusted decoded-pixel hashes and malformed-input regressions
+- Add Spinel pixel-parity checks for the decoder fixes; all four package checks and
+  all eight selected RawSource tests pass on Spinel revision `2406a5649`
 - Keep all existing tests, public API signatures, source-adapter behavior, and encoder output unchanged
 - Run CI on pushes to `main` and smoke-test the built, installed gem without development dependencies
 - Include creative-options documentation and IJG notices in the gem; correct the DCT algorithm attribution
