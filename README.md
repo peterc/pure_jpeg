@@ -152,6 +152,23 @@ pixel.b  # => 97
 image = PureJPEG.read(jpeg_bytes)
 ```
 
+### Decode size limit
+
+Decoding defaults to a maximum of **8,000,000 pixels** (`width * height`).
+Larger images raise `PureJPEG::DecodeError` as soon as their dimensions are read,
+before scan data is collected or image buffers are allocated. Set a positive
+integer `max_pixels:` to lower or raise the limit for an individual decode:
+
+```ruby
+image = PureJPEG.read("photo.jpg", max_pixels: 20_000_000)
+image = PureJPEG.read(jpeg_bytes, max_pixels: 1_000_000)
+```
+
+`PureJPEG::Decoder.decode` and `PureJPEG::Decoder.new` accept the same option.
+The 8192-pixel limit on each axis still applies. Raising `max_pixels:` permits
+higher memory use; the pixel limit is not a hard process-memory limit.
+`PureJPEG.info` can inspect larger images without decoding their pixels.
+
 ### Read dimensions and metadata only
 
 ```ruby
@@ -214,9 +231,11 @@ Decoding:
 - Restart markers (DRI/RST)
 - Separate component scans in baseline JPEGs
 
-Encoding and decoding allow dimensions up to 8192 pixels on each axis. The
-decoder allocates whole-image buffers; this dimension limit is not a memory
-budget. `PureJPEG.info` can inspect dimensions without allocating pixel buffers.
+Encoding and decoding allow dimensions up to 8192 pixels on each axis. Decoding
+also limits image area to 8,000,000 pixels by default, configurable with
+`max_pixels:`. The decoder allocates whole-image buffers; the pixel limit is
+not a hard memory budget. `PureJPEG.info` can inspect dimensions without
+allocating pixel buffers and does not apply the decode pixel limit.
 Invalid or unsupported JPEG data raises `PureJPEG::DecodeError`.
 
 Not supported: arithmetic coding, 12-bit precision, RGB/CMYK JPEG color spaces,

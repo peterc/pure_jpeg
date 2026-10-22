@@ -12,10 +12,11 @@ module PureJPEG
       attr_accessor :restart_interval
     end
 
-    def initialize(data, stop_after_frame: false, metadata_only: false)
+    def initialize(data, stop_after_frame: false, metadata_only: false, max_pixels: nil)
       @data = data.b
       @stop_after_frame = stop_after_frame
       @metadata_only = metadata_only
+      @max_pixels = max_pixels
       @pos = 0
       @quant_tables = {}
       @huffman_tables = {}
@@ -213,6 +214,10 @@ module PureJPEG
       @precision = read_byte
       @height = read_u16
       @width = read_u16
+      # Reject oversized decodes before collecting scans or allocating image buffers.
+      if @max_pixels && @width * @height > @max_pixels
+        raise DecodeError, "Image too large: #{@width}x#{@height} (max #{@max_pixels} pixels)"
+      end
       num_components = read_byte
       ensure_remaining_in_segment!(end_pos, num_components * 3, "SOF")
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Limit decoding to 8,000,000 pixels by default, rejecting oversized frames before
+  collecting scan data or allocating image buffers. Configure each decode with
+  `max_pixels:` on `PureJPEG.read`, `Decoder.decode`, or `Decoder.new`.
+- Keep metadata-only `PureJPEG.info` available for images above the decode limit.
+
 ## 0.4.1
 
 This is a robustness and compatibility release. It makes decoding more reliable

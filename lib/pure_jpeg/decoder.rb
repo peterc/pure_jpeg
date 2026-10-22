@@ -11,22 +11,27 @@ module PureJPEG
     # Decode a JPEG from a file path or binary string.
     #
     # @param path_or_data [String] a file path or raw JPEG bytes
+    # @param max_pixels [Integer] positive maximum image area
     # @return [Image] decoded image with pixel access
-    def self.decode(path_or_data)
+    def self.decode(path_or_data, max_pixels: MAX_PIXELS)
       data = if path_or_data.is_a?(String) && !path_or_data.b.include?("\0") && !path_or_data.b.start_with?("\xFF\xD8".b) && File.exist?(path_or_data)
                File.binread(path_or_data)
              else
                path_or_data.b
              end
-      new(data).decode
+      new(data, max_pixels: max_pixels).decode
     end
 
-    def initialize(data)
+    def initialize(data, max_pixels: MAX_PIXELS)
+      unless max_pixels.is_a?(Integer) && max_pixels > 0
+        raise ArgumentError, "max_pixels must be a positive Integer"
+      end
       @data = data
+      @max_pixels = max_pixels
     end
 
     def decode
-      jfif = JFIFReader.new(@data)
+      jfif = JFIFReader.new(@data, max_pixels: @max_pixels)
       @icc_profile = jfif.icc_profile
       validate_dimensions!(jfif.width, jfif.height)
       validate_frame_and_scans!(jfif)

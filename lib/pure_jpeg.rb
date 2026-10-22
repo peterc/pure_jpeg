@@ -31,6 +31,9 @@ module PureJPEG
   # Maximum image dimension (width or height) allowed for encoding and decoding.
   MAX_DIMENSION = 8192
 
+  # Default maximum decoded image area. Override per read with +max_pixels:+.
+  MAX_PIXELS = 8_000_000
+
   # Encode a pixel source as a JPEG.
   #
   # @param source [#width, #height, #[]] any object responding to +width+,
@@ -61,9 +64,10 @@ module PureJPEG
   # Decode a JPEG from a file path or binary string.
   #
   # @param path_or_data [String] a file path or raw JPEG bytes
+  # @param max_pixels [Integer] positive maximum image area (default: 8,000,000)
   # @return [Image] decoded image with pixel access
-  def self.read(path_or_data)
-    Decoder.decode(path_or_data)
+  def self.read(path_or_data, max_pixels: MAX_PIXELS)
+    Decoder.decode(path_or_data, max_pixels: max_pixels)
   end
 
   # Read JPEG dimensions and basic frame metadata without decoding scan data.
