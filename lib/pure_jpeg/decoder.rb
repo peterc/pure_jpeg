@@ -117,7 +117,11 @@ module PureJPEG
       ac_tables = {}
       scan.huffman_tables.each do |(table_class, table_id), info|
         table = Huffman::DecodeTable.new(info[:bits], info[:values])
-        (table_class == 0 ? dc_tables : ac_tables)[table_id] = table
+        if table_class == 0
+          dc_tables[table_id] = table
+        else
+          ac_tables[table_id] = table
+        end
       end
       [dc_tables, ac_tables]
     end

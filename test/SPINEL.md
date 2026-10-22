@@ -19,6 +19,9 @@ program's output with a fresh CRuby run.
 - `metadata.rb`: baseline/grayscale metadata, header-only input, and metadata
   from the progressive JPEG fixture.
 - `invalid_input.rb`: invalid JPEG data, a missing frame, and invalid quality.
+- `decoder_regressions.rb`: full decoded-pixel parity for 18 external JPEGs,
+  including progressive, restart, separate/mixed scan, and unusual sampling
+  cases; marker fill, late quantization tables, and unsupported RGB input.
 
 The full Minitest suite lives in `test/minitest/` so Spin does not try to
 compile Minitest or its helper files. `rake` and `rake test` still run that
@@ -26,9 +29,19 @@ suite with SimpleCov. Individual files can be selected with, for example,
 `bundle exec rake test TEST=test/minitest/test_raw_source.rb`.
 Shared fixtures remain in `test/fixtures/`.
 
-Validated on macOS ARM64 with Spinel `b3cf642`: all three package checks
-pass. The relocated Minitest suite passes all 103 tests and 6,302,248
-assertions with Ruby 4.0.2, retaining 98.1% line coverage.
+Validated on macOS ARM64 with Spinel `2026.09.12+12162` (`2406a5649`):
+all four package checks pass. These checks compare against fresh CRuby
+output; they do not compile the full Minitest suite.
+
+Keep the compiler, runtime headers, and native package objects from the same
+build. For a source checkout, run `make` with a supported host Ruby before
+testing; rebuilding only the compiler can leave stale native package objects.
+
+This Spinel revision miscompiles assignment through a ternary hash receiver:
+`(condition ? hash_a : hash_b)[key] = value` can raise a hash-key type error.
+The decoder uses equivalent explicit `if`/`else` assignments. The public API
+and existing test expectations are unchanged.
+Upstream report: [spinel#9971](https://github.com/matz/spinel/issues/9971).
 
 ## Existing test runner proof of concept
 
@@ -77,7 +90,15 @@ Validated with Spinel `2026.09.12+1839` (`7f08abd9`) on macOS ARM64. This runner
 checks existing assertions; it does not by itself prove byte-for-byte parity
 for values that a test never prints or compares.
 
-## First run
+## Current result
+
+With Spinel `2026.09.12+12162` (`2406a5649`) on macOS ARM64, all eight
+RawSource tests pass, including `test_pixel_responds_to_rgb`. None of the
+existing test methods or expectations were changed. The full Minitest suite
+also passes on CRuby 4.0.2, JRuby 9.4.14.0, and TruffleRuby 34.0.1:
+122 tests, 6,302,337 assertions, no failures, errors, or skips.
+
+## Historical first runs
 
 On the compiler revision above: 7 pass, 1 fails. The failure is
 `TestRawSource#test_pixel_responds_to_rgb`: Spinel raises
