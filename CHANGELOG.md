@@ -2,6 +2,10 @@
 
 ## 0.4.1
 
+This is a robustness and compatibility release. It makes decoding more reliable
+across valid JPEG variants, improves handling of malformed input, and strengthens
+Spinel support while preserving the existing public API and encoder output.
+
 Fixes:
 
 - Decode progressive images correctly when component edges require padded blocks

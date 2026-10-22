@@ -34,12 +34,13 @@ class TestAPICompatibility < Minitest::Test
       end
     end
     assert_equal 400, hashes.length
-    # The released encoder already differs between CRuby and JRuby/TruffleRuby
-    # for some option combinations. Preserve each engine's v0.4.0 bytes.
-    expected = if RUBY_ENGINE == "jruby" || RUBY_ENGINE == "truffleruby"
-                 "9b556ce569cb8dd6daa9282c3675e72bedafd20ebcb54b66a67f6c1543105ebb"
-               else
+    # Captured from unchanged v0.4.0 on each platform: macOS CRuby differs
+    # from Linux CRuby and JRuby/TruffleRuby for some option combinations.
+    # Preserve the platform's existing bytes, not another platform's output.
+    expected = if RUBY_ENGINE == "ruby" && RUBY_PLATFORM.include?("darwin")
                  "f7f2232ee301eb1158632af6c2168087e85f0b81054f80d8b6d816f321956ea2"
+               else
+                 "9b556ce569cb8dd6daa9282c3675e72bedafd20ebcb54b66a67f6c1543105ebb"
                end
     assert_equal expected, Digest::SHA256.hexdigest(hashes.join)
   end
