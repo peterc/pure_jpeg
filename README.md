@@ -248,17 +248,34 @@ Possible future improvements: ICC profile rendering/conversion.
 
 ## Performance
 
-On the bundled 1024x1024 images (Apple M5, median of 15 runs after 20 seconds of warmup per operation):
+PureJPEG 0.5.0 on an Apple M5 with 32 GiB of RAM (macOS 27.2.1). The tables use CRuby with YJIT, TruffleRuby native, JRuby with its default JIT on OpenJDK 21.0.10, and an ahead-of-time Spinel build.
 
-| Operation | CRuby 4.0.2 (YJIT) | TruffleRuby 34.0.1 | JRuby 9.4.14.0 | Spinel (`7f08abd9`) |
-|-----------|-------------------|-------------------|---------------|--------------------|
-| Encode (color, q85) | ~0.131s | ~0.088s | ~0.577s | ~0.104s |
-| Decode (baseline) | ~0.112s | ~0.027s | ~0.554s | ~0.078s |
-| Decode (progressive) | ~0.140s | ~0.037s | ~0.617s | ~0.092s |
+### Time per image (ms)
 
-Inputs were loaded before timing, and encoded output was returned in memory; file I/O and PNG loading are excluded. Runtimes were benchmarked sequentially. JRuby used its default JIT on OpenJDK 21.0.10. Spinel was measured separately with the same inputs and timing protocol, using a portable harness with PNG pixels preloaded; its encoded JPEG and decoded pixels matched CRuby byte-for-byte. Results vary with image content, garbage collection, and JIT warmup.
+Each cell is the median of 15 calls after 20 seconds of warmup for that operation. Inputs were already in memory and the runtimes ran sequentially. All four produced identical JPEG bytes for the encode and identical pixels for each decode.
 
-The encoder and decoder use the IJG accurate integer DCT, based on the Loeffler factorization, with fixed-point arithmetic throughout — no Float operations in the hot path. Color space conversion uses fixed-point integer math, and pixel data is stored as packed integers to avoid per-pixel object allocation. TruffleRuby's Graal JIT compiler can optimize these tight integer loops particularly well once warmed up.
+| Bundled 1024×1024 image | CRuby 4.0.10 | TruffleRuby 40.0.0 | JRuby 10.1.3.0 | Spinel `4a7a5c8a9` |
+|---|---:|---:|---:|---:|
+| Encode color, quality 85 | 133 | 49 | 976 | 114 |
+| Decode baseline | 117 | 26 | 635 | 39 |
+| Decode progressive | 140 | 25 | 1956 | 55 |
+
+The JRuby progressive result repeated at 1963 ms in a fresh JVM. PureJPEG 0.4.1 took 3530 ms on that same JRuby 10.1.3.0 and JDK combination.
+
+### Peak process memory (MiB)
+
+Each cell is the median peak RSS from three fresh processes, each doing the operation once. This includes runtime startup, input loading, the codec's working memory and its output. Heap sizing and JIT activity can move these numbers around. For example, TruffleRuby's three encode runs ranged from 540 to 749 MiB.
+
+| Operation | CRuby 4.0.10 | TruffleRuby 40.0.0 | JRuby 10.1.3.0 | Spinel `4a7a5c8a9` |
+|---|---:|---:|---:|---:|
+| Encode color, quality 85, 1024×1024 | 46 | 584 | 1108 | 44 |
+| Decode baseline, 1024×1024 | 29 | 373 | 717 | 12 |
+| Decode progressive, 1024×1024 | 30 | 410 | 754 | 12 |
+| Decode progressive 4:4:4, 3264×2448 | 84 | 731 | 1809 | 67 |
+
+The last row uses a flat-color JPEG just under the default 8-million-pixel limit. The benchmark harness includes commands for reproducing the measurements on your machine. [Benchmark harness](benchmark/runtime_comparison.rb)
+
+The encoder and decoder use the IJG accurate integer DCT and fixed-point color conversion. Decoded pixels are stored as packed RGB integers.
 
 ## Example scripts
 
