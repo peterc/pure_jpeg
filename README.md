@@ -261,7 +261,7 @@ Each cell is the median of 15 calls after 20 seconds of warmup for that operatio
 | Decode progressive | 140 | 25 | 1956 | 55 |
 
 > [!NOTE]
-> I am looking into the JRuby numbers above as they are a huge regression on JRuby 9 and do not seem realistic to me.
+> I am looking into the JRuby numbers above as they are a huge regression on JRuby 9 and do not seem realistic to me. UPDATE: This might be a JRuby regression as `-Xfixnum.compact=false` fixes it and brings JRuby down to ~427ms for the decode progressive.
 
 ### Peak process memory (MB)
 
