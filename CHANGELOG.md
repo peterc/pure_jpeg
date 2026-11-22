@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0
+## 0.5.0 (The big memory usage reduction release)
 
 Big release for memory usage! An 8 megapixel JPEG was using nearly half a gig to decode 😂 The progressive decoder was hanging on to every block's DCT coefficients while it put together the full image, but it can now finish a row of blocks and reuse that space for the next row. Baseline JPEGs get the same treatment.
 
