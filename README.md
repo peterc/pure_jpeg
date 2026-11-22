@@ -263,9 +263,9 @@ Each cell is the median of 15 calls after 20 seconds of warmup for that operatio
 > [!NOTE]
 > I am looking into the JRuby numbers above as they are a huge regression on JRuby 9 and do not seem realistic to me.
 
-### Peak process memory (MiB)
+### Peak process memory (MB)
 
-Each cell is the median peak RSS from three fresh processes, each doing the operation once. This includes runtime startup, input loading, the codec's working memory and its output. Heap sizing and JIT activity can move these numbers around. For example, TruffleRuby's three encode runs ranged from 540 to 749 MiB.
+Each cell is the median peak RSS from three fresh processes, each doing the operation once. This includes runtime startup, input loading, the codec's working memory and its output. Heap sizing and JIT activity can move these numbers around. For example, TruffleRuby's three encode runs ranged from 540 to 749 MB.
 
 | Operation | CRuby 4.0.10 | TruffleRuby 40.0.0 | JRuby 10.1.3.0 | Spinel `4a7a5c8a9` |
 |---|---:|---:|---:|---:|
