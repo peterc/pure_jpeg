@@ -260,7 +260,8 @@ Each cell is the median of 15 calls after 20 seconds of warmup for that operatio
 | Decode baseline | 117 | 26 | 635 | 39 |
 | Decode progressive | 140 | 25 | 1956 | 55 |
 
-The JRuby progressive result repeated at 1963 ms in a fresh JVM. PureJPEG 0.4.1 took 3530 ms on that same JRuby 10.1.3.0 and JDK combination.
+> [!NOTE]
+> I am looking into the JRuby numbers above as they are a huge regression on JRuby 9 and do not seem realistic to me.
 
 ### Peak process memory (MiB)
 
