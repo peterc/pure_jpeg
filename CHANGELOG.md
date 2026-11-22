@@ -2,23 +2,17 @@
 
 ## 0.5.0
 
-Baseline and progressive decodes now build the final RGB image one MCU row
-at a time. On a 3264×2448 flat-color progressive 4:4:4 JPEG, peak process
-memory fell from 448 to 84 MiB on CRuby 4.0.2 with YJIT and from 560 to
-66 MiB on Spinel (`2406a5649`).
+An 8 megapixel JPEG was taking nearly half a gig to decode. That was a bit much, especially given that the test image was one solid color! The progressive decoder used to hang on to every block's DCT coefficients while it put together the RGB image. It can now finish a row of blocks and reuse that space for the next row. Baseline JPEGs get the same treatment.
 
-### Upgrading from 0.4.1
+Peak memory for that 3264×2448 progressive 4:4:4 JPEG went from 448 to 84 MiB on CRuby 4.0.2 with YJIT, and from 560 to 66 MiB on Spinel (`2406a5649`). To try one of your own, run `ruby benchmark/decode_memory.rb photo.jpg` in the checkout.
 
-Decoding now defaults to a maximum of 8,000,000
-pixels. Larger images raise `PureJPEG::DecodeError` when the frame header is
-read. To decode a 4000×3000 photo, use
-`PureJPEG.read("photo.jpg", max_pixels: 12_000_000)`. `Decoder.decode` and
-`Decoder.new` accept the same option. The per-axis limit is 8192 pixels.
+One thing to watch when upgrading from 0.4.1. The default decode limit is now 8,000,000 pixels, so a 4000×3000 photo will raise `PureJPEG::DecodeError`. If you meant to read a photo that big, pass the limit on that call.
 
-- `PureJPEG.info(path)` reads headers incrementally through the first scan
-  marker and can inspect images above the decode pixel limit.
-- Measure peak resident memory on your own images with
-  `ruby benchmark/decode_memory.rb photo.jpg` from the repository checkout.
+```ruby
+PureJPEG.read("photo.jpg", max_pixels: 12_000_000)
+```
+
+`Decoder.new` and `Decoder.decode` take `max_pixels:` too. The 8192-pixel limit on width and height still applies. If all you need is the size, `PureJPEG.info(path)` works above the pixel limit and now stops reading the file when it reaches the first scan marker.
 
 ## 0.4.1
 
