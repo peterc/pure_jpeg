@@ -2,17 +2,15 @@
 
 ## 0.5.0
 
-An 8 megapixel JPEG was taking nearly half a gig to decode. That was a bit much, especially given that the test image was one solid color! The progressive decoder used to hang on to every block's DCT coefficients while it put together the RGB image. It can now finish a row of blocks and reuse that space for the next row. Baseline JPEGs get the same treatment.
+Big release for memory usage! An 8 megapixel JPEG was using nearly half a gig to decode 😂 The progressive decoder was hanging on to every block's DCT coefficients while it put together the full image, but it can now finish a row of blocks and reuse that space for the next row. Baseline JPEGs get the same treatment.
 
-Peak memory for that 3264×2448 progressive 4:4:4 JPEG went from 448 to 84 MiB on CRuby 4.0.2 with YJIT, and from 560 to 66 MiB on Spinel (`2406a5649`). To try one of your own, run `ruby benchmark/decode_memory.rb photo.jpg` in the checkout.
-
-One thing to watch when upgrading from 0.4.1. The default decode limit is now 8,000,000 pixels, so a 4000×3000 photo will raise `PureJPEG::DecodeError`. If you meant to read a photo that big, pass the limit on that call.
+One thing to watch when upgrading from 0.4.1. The default decode limit is now 8,000,000 pixels, so a 4000×3000 photo will raise `PureJPEG::DecodeError`. If you meant to read a photo that big, pass the limit on that call, as so:
 
 ```ruby
 PureJPEG.read("photo.jpg", max_pixels: 12_000_000)
 ```
 
-`Decoder.new` and `Decoder.decode` take `max_pixels:` too. The 8192-pixel limit on width and height still applies. If all you need is the size, `PureJPEG.info(path)` works above the pixel limit and now stops reading the file when it reaches the first scan marker.
+`Decoder.new` and `Decoder.decode` take `max_pixels:` as well. A 8192 pixel limit on width and height still applies. If all you need is the size, `PureJPEG.info(path)` works above the pixel limit and now stops reading the file when it reaches the first scan marker.
 
 ## 0.4.1
 
