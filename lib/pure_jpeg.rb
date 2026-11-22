@@ -75,13 +75,12 @@ module PureJPEG
   # @param path_or_data [String] a file path or raw JPEG bytes
   # @return [Info] frame metadata and complete ICC profile from headers before SOS
   def self.info(path_or_data)
-    data = if path_or_data.is_a?(String) && !path_or_data.b.include?("\0") && !path_or_data.b.start_with?("\xFF\xD8".b) && File.exist?(path_or_data)
-             File.binread(path_or_data)
+    jfif = if path_or_data.is_a?(String) && !path_or_data.b.start_with?("\xFF\xD8".b) && !path_or_data.b.include?("\0") && File.exist?(path_or_data)
+             File.open(path_or_data, "rb") { |file| JFIFReader.new(file, metadata_only: true) }
            else
-             path_or_data.b
+             JFIFReader.new(path_or_data.b, metadata_only: true)
            end
 
-    jfif = JFIFReader.new(data, metadata_only: true)
     raise DecodeError, "JPEG frame header not found" unless jfif.width && jfif.height
 
     Info.new(

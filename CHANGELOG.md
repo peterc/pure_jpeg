@@ -6,6 +6,8 @@
   collecting scan data or allocating image buffers. Configure each decode with
   `max_pixels:` on `PureJPEG.read`, `Decoder.decode`, or `Decoder.new`.
 - Keep metadata-only `PureJPEG.info` available for images above the decode limit.
+- Read file headers incrementally in `PureJPEG.info(path)`, stopping at the
+  first scan marker.
 
 ## 0.4.1
 

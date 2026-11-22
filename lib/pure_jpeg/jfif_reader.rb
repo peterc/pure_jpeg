@@ -13,7 +13,12 @@ module PureJPEG
     end
 
     def initialize(data, stop_after_frame: false, metadata_only: false, max_pixels: nil)
-      @data = data.b
+      if metadata_only && !data.is_a?(String)
+        @header_io = data
+        @data = "".b
+      else
+        @data = data.b
+      end
       @stop_after_frame = stop_after_frame
       @metadata_only = metadata_only
       @max_pixels = max_pixels
@@ -45,8 +50,8 @@ module PureJPEG
 
       loop do
         # Header-only input is useful for metadata queries, even without SOS.
-        return if @metadata_only && @width && @pos == @data.bytesize
-        marker = read_marker
+        marker = read_marker(@metadata_only && @width)
+        return if marker.nil?
         case marker
         when 0xE2 # APP2 (may contain ICC profile)
           parse_app2
@@ -96,19 +101,26 @@ module PureJPEG
       end
     end
 
-    def read_byte
-      raise PureJPEG::DecodeError, "Unexpected end of JPEG data" if @pos >= @data.bytesize
-      byte = @data.getbyte(@pos)
-      @pos += 1
-      byte
+    def read_byte(allow_eof = false)
+      if @pos < @data.bytesize
+        byte = @data.getbyte(@pos)
+        @pos += 1
+        return byte
+      end
+      if @header_io
+        byte = @header_io.read(1)&.getbyte(0)
+        return byte if byte
+      end
+      raise PureJPEG::DecodeError, "Unexpected end of JPEG data" unless allow_eof
     end
 
     def read_u16
       (read_byte << 8) | read_byte
     end
 
-    def read_marker
-      byte = read_byte
+    def read_marker(allow_eof = false)
+      byte = read_byte(allow_eof)
+      return if byte.nil?
       raise PureJPEG::DecodeError, "Expected 0xFF, got 0x#{byte.to_s(16)}" unless byte == 0xFF
       # Skip padding 0xFF bytes
       code = read_byte
@@ -273,6 +285,12 @@ module PureJPEG
       length = read_u16
       raise PureJPEG::DecodeError, "Invalid JPEG segment length: #{length}" if length < 2
 
+      # File metadata queries buffer one segment at a time. Its parser uses
+      # the same offsets and truncation checks as it does for in-memory data.
+      if @header_io
+        @data = @header_io.read(length - 2) || "".b
+        @pos = 0
+      end
       end_pos = @pos + length - 2
       if end_pos > @data.bytesize
         raise PureJPEG::DecodeError, "JPEG segment length exceeds available data"
