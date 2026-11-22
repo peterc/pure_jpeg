@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         ruby-version: ['3.0', '3.4', '4.0.1', 'head', 'jruby-10.0.4.0', 'truffleruby-33.0.1']
