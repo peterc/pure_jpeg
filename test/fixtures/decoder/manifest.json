@@ -77,6 +77,12 @@
     "rgb_sha256": "709e80c88487a2411e1ee4dfb9f22a861492d20c4765150c0c794abd70f8147c",
     "supported": true
   },
+  "progressive-cross-row-restart": {
+    "width": 37,
+    "height": 73,
+    "rgb_sha256": "d9b73607b950b5a2b822820d4b2b8acc6ea27634f20dc0d8ed44ec4c816caeee",
+    "supported": true
+  },
   "baseline-restart": {
     "width": 32,
     "height": 32,

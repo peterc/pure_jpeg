@@ -233,9 +233,10 @@ Decoding:
 
 Encoding and decoding allow dimensions up to 8192 pixels on each axis. Decoding
 also limits image area to 8,000,000 pixels by default, configurable with
-`max_pixels:`. The decoder allocates whole-image buffers; the pixel limit is
-not a hard memory budget. `PureJPEG.info` can inspect dimensions without
-allocating pixel buffers and does not apply the decode pixel limit.
+`max_pixels:`. The decoder keeps the compressed scans and the final packed
+RGB image in memory. It reuses one MCU row of sample and coefficient buffers
+across the image, including for progressive JPEGs. `PureJPEG.info` can inspect
+dimensions without allocating pixel buffers and does not apply the decode pixel limit.
 Invalid or unsupported JPEG data raises `PureJPEG::DecodeError`.
 
 Not supported: arithmetic coding, 12-bit precision, RGB/CMYK JPEG color spaces,
@@ -331,6 +332,14 @@ ruby benchmark/run.rb --quick          # single-shot wall-clock + allocations
 ruby benchmark/run.rb --full           # longer run, includes YJIT runtime stats
 ruby benchmark/run.rb --profile        # CPU profile with Vernier (writes JSON to /tmp)
 ruby benchmark/run.rb --profile-alloc  # retained-object profile with Vernier
+```
+
+To measure decoder peak resident memory on macOS or Linux with GNU time,
+run the following command. Each JPEG gets a fresh Ruby process. Omit the
+paths to measure the bundled baseline and progressive images.
+
+```sh
+ruby benchmark/decode_memory.rb photo.jpg progressive.jpg
 ```
 
 ## AI Disclosure

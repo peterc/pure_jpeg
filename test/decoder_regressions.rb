@@ -8,7 +8,7 @@ require "pure_jpeg"
 names = [
   "edge-420", "restart-420", "edge-422", "restart-422",
   "edge-444", "restart-444", "edge-440", "restart-440",
-  "edge-411", "restart-411", "edge-gray", "restart-gray", "tiny",
+  "edge-411", "restart-411", "edge-gray", "restart-gray", "tiny", "progressive-cross-row-restart",
   "baseline-restart", "luma-subsampled", "sequential-multiscan",
   "sequential-edge-restart", "mixed-scan-restart"
 ]

@@ -8,6 +8,9 @@
 - Keep metadata-only `PureJPEG.info` available for images above the decode limit.
 - Read file headers incrementally in `PureJPEG.info(path)`, stopping at the
   first scan marker.
+- Reduce baseline and progressive decoder peak memory by reconstructing one
+  MCU row at a time into the final packed RGB image. Measure peak RSS with
+  `ruby benchmark/decode_memory.rb`.
 
 ## 0.4.1
 

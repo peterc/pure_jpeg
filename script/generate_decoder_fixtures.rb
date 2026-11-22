@@ -42,6 +42,9 @@ Dir.mktmpdir("pure-jpeg-fixtures") do |dir|
     make.call("restart-#{sampling}", 32, 32, options + ["-progressive", "-restart", "1"])
   end
   make.call("tiny", 1, 1, ["-progressive"])
+  # Three interleaved MCUs per row, five non-interleaved luma blocks per row.
+  # A seven-MCU restart interval falls on different boundaries in each scan.
+  make.call("progressive-cross-row-restart", 37, 73, ["-progressive", "-restart", "7B"])
   make.call("baseline-restart", 32, 32, ["-restart", "2B"])
   make.call("luma-subsampled", 32, 32, ["-sample", "1x1,2x2,1x1"])
   make.call("rgb", 16, 16, ["-rgb"], false)

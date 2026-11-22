@@ -19,7 +19,7 @@ program's output with a fresh CRuby run.
 - `metadata.rb`: baseline/grayscale metadata, header-only input, and metadata
   from the progressive JPEG fixture.
 - `invalid_input.rb`: invalid JPEG data, a missing frame, and invalid quality.
-- `decoder_regressions.rb`: full decoded-pixel parity for 18 external JPEGs,
+- `decoder_regressions.rb`: full decoded-pixel parity for 19 external JPEGs,
   including progressive, restart, separate/mixed scan, and unusual sampling
   cases; marker fill, late quantization tables, and unsupported RGB input.
 
