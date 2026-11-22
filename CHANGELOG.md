@@ -1,16 +1,24 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
-- Limit decoding to 8,000,000 pixels by default, rejecting oversized frames before
-  collecting scan data or allocating image buffers. Configure each decode with
-  `max_pixels:` on `PureJPEG.read`, `Decoder.decode`, or `Decoder.new`.
-- Keep metadata-only `PureJPEG.info` available for images above the decode limit.
-- Read file headers incrementally in `PureJPEG.info(path)`, stopping at the
-  first scan marker.
-- Reduce baseline and progressive decoder peak memory by reconstructing one
-  MCU row at a time into the final packed RGB image. Measure peak RSS with
-  `ruby benchmark/decode_memory.rb`.
+Baseline and progressive decodes now build the final RGB image one MCU row
+at a time. On a 3264×2448 flat-color progressive 4:4:4 JPEG, peak process
+memory fell from 448 to 84 MiB on CRuby 4.0.2 with YJIT and from 560 to
+66 MiB on Spinel (`2406a5649`).
+
+### Upgrading from 0.4.1
+
+Decoding now defaults to a maximum of 8,000,000
+pixels. Larger images raise `PureJPEG::DecodeError` when the frame header is
+read. To decode a 4000×3000 photo, use
+`PureJPEG.read("photo.jpg", max_pixels: 12_000_000)`. `Decoder.decode` and
+`Decoder.new` accept the same option. The per-axis limit is 8192 pixels.
+
+- `PureJPEG.info(path)` reads headers incrementally through the first scan
+  marker and can inspect images above the decode pixel limit.
+- Measure peak resident memory on your own images with
+  `ruby benchmark/decode_memory.rb photo.jpg` from the repository checkout.
 
 ## 0.4.1
 

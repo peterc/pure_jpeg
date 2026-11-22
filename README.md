@@ -154,7 +154,7 @@ image = PureJPEG.read(jpeg_bytes)
 
 ### Decode size limit
 
-Decoding defaults to a maximum of **8,000,000 pixels** (`width * height`).
+Starting in 0.5.0, decoding defaults to a maximum of **8,000,000 pixels** (`width * height`).
 Larger images raise `PureJPEG::DecodeError` as soon as their dimensions are read,
 before scan data is collected or image buffers are allocated. Set a positive
 integer `max_pixels:` to lower or raise the limit for an individual decode:
